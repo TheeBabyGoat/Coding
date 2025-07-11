@@ -36,11 +36,19 @@ uniform float4 sunsetColor <
     string source = "wf_sunset_color";
 >;
 
-static const float3 moonDirection = float3(-0.3377, 0.2663, -0.9028);
-static const float moonRadius = 0.9;
-static const float moonPower = 100.0;
-static const float moonHdr = 0.5;
-static const float sunHdr = 0.562500;
+static const float DAY_DAWN_START = 5.0 / 24.0;
+static const float DAY_DAWN_END = 6.0 / 24.0;
+static const float DAY_DUSK_START = 18.0 / 24.0;
+static const float DAY_DUSK_END = 19.0 / 24.0;
+static const float NIGHT_DAWN_START = 4.0 / 24.0;
+static const float NIGHT_DAWN_END = 5.0 / 24.0;
+static const float NIGHT_DUSK_START = 19.0 / 24.0;
+static const float NIGHT_DUSK_END = 20.0 / 24.0;
+static const float3 MOON_DIRECTION = float3(-0.3377, 0.2663, -0.9028);
+static const float MOON_RADIUS = 0.9;
+static const float MOON_POWER = 100.0;
+static const float SUN_HDR = 0.562500;
+static const float MOON_HDR = SUN_HDR;
 
 
 int getWeatherPreset(int weatherType)
@@ -103,7 +111,7 @@ float3 getSunDirection()
 
 float3 getMoonDirection()
 {
-    return moonDirection;
+    return MOON_DIRECTION;
 }
 
 float3 getSunBaseColor()
@@ -152,7 +160,7 @@ float4 getSunLight(float3 viewDir, float3 sunDir, float zenith)
     sunOutput.rgb *= sunColor.rgb;
     sunOutput.rgb += pow(sunOutput.rgb, 4.0);
     
-    return sunOutput * sunHdr * sunColor.w;
+    return sunOutput * SUN_HDR * sunColor.w;
 }
 
 float4 getMoonLight(float3 viewDir, float3 moonDir)
@@ -161,14 +169,14 @@ float4 getMoonLight(float3 viewDir, float3 moonDir)
     
     float moonSq = moon * moon;
         
-    float mie = moonRadius;
+    float mie = MOON_RADIUS;
     float miePhaseSqrPlusOne = (mie * mie) + 1.0;
     float miePhaseTimesTwo = mie * 2.0;
-    float mieConstantTimesScatter = moonPower * 0.000005;
+    float mieConstantTimesScatter = MOON_POWER * 0.000005;
         
     moon = (1.0 + moonSq) / pow((miePhaseSqrPlusOne - (miePhaseTimesTwo * moon)), 1.5) * mieConstantTimesScatter;
     
-    return float4(normalize(moonColor.rgb) * 3.0 * moonHdr, saturate(moon));
+    return float4(normalize(moonColor.rgb) * 3.0 * MOON_HDR, saturate(moon));
 }
 
 float3 getSkyColor(float3 viewDir, float sunAmount, float moonAmount)
@@ -193,7 +201,7 @@ float3 getSkyColor(float3 viewDir, float sunAmount, float moonAmount)
     
     float sunDot = dot(viewDir, sunDir);
     
-    sky += sunsetColor.rgb * sunDot * sunHdr;
+    sky += sunsetColor.rgb * sunDot * SUN_HDR;
     
     if (moonAmount > 0.0)
     {

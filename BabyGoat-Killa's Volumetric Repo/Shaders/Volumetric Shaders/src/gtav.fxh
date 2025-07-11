@@ -66,10 +66,18 @@ uniform float3 moonDir <
     string source = "moon_dir";
 >;
 
-static const float2 SunRotation = float2(-90.0, 33.0);
-static const float moonRadius = 0.9;
-static const float moonPower = 100.0;
-static const float moonHdr = 0.5;
+static const float DAY_DAWN_START = 5.0 / 24.0;
+static const float DAY_DAWN_END = 6.0 / 24.0;
+static const float DAY_DUSK_START = 20.75 / 24.0;
+static const float DAY_DUSK_END = 21.75 / 24.0;
+static const float NIGHT_DAWN_START = 4.0 / 24.0;
+static const float NIGHT_DAWN_END = 5.0 / 24.0;
+static const float NIGHT_DUSK_START = 21.75 / 24.0;
+static const float NIGHT_DUSK_END = 22.25 / 24.0;
+static const float2 SUN_ROTATION = float2(-90.0, 33.0);
+static const float MOON_RADIUS = 0.9;
+static const float MOON_POWER = 100.0;
+static const float MOON_HDR = 0.562500;
 
 
 int getWeatherPreset(int weatherType)
@@ -163,7 +171,7 @@ float3 getSunDirection()
 {
     float altitude = TAU * -getSunAltitude();
     
-    return mul(mul(normalize(float3(0.0, sin(altitude), -cos(altitude))), rotateZ(SunRotation.y * INV_RAD)), rotateY(SunRotation.x * INV_RAD));
+    return mul(mul(normalize(float3(0.0, sin(altitude), -cos(altitude))), rotateZ(SUN_ROTATION.y * INV_RAD)), rotateY(SUN_ROTATION.x * INV_RAD));
 }
 
 float3 getMoonDirection()
@@ -187,14 +195,14 @@ float4 getMoonLight(float3 viewDir, float3 moonDir)
     
     float moonSq = moon * moon;
         
-    float mie = moonRadius;
+    float mie = MOON_RADIUS;
     float miePhaseSqrPlusOne = (mie * mie) + 1.0;
     float miePhaseTimesTwo = mie * 2.0;
-    float mieConstantTimesScatter = moonPower * 0.000005;
+    float mieConstantTimesScatter = MOON_POWER * 0.000005;
         
     moon = (1.0 + moonSq) / pow((miePhaseSqrPlusOne - (miePhaseTimesTwo * moon)), 1.5) * mieConstantTimesScatter;
     
-    return float4(normalize(moonColor.rgb) * 3.0 * moonHdr, saturate(moon));
+    return float4(normalize(moonColor.rgb) * 3.0 * MOON_HDR, saturate(moon));
 }
 
 float3 getSkyColor(float3 viewDir, float sunAmount, float moonAmount)
