@@ -1146,21 +1146,27 @@ float nightTimeAmount()
 {
     float time = inputTimeOfDay;
     
-    if (time < 0.2 || time > 0.8)
+    if (time <= NIGHT_DAWN_END)
     {
-        return 1.0;
-    }
-    else if (time > 0.2 && time < 0.25)
-    {
-        return 1.0 - smoothstep(0.2, 0.25, time);
-    }
-    else if (time > 0.25 && time < 0.75)
-    {
-        return 0.0;
+        return saturate(1.0 - smoothstep(NIGHT_DAWN_START, NIGHT_DAWN_END, time));
     }
     else
     {
-        return smoothstep(0.75, 0.8, time);
+        return saturate(smoothstep(NIGHT_DUSK_START, NIGHT_DUSK_END, time));
+    }
+}
+
+float dayTimeAmount()
+{
+    float time = inputTimeOfDay;
+    
+    if (time <= DAY_DAWN_END)
+    {
+        return saturate(smoothstep(DAY_DAWN_START, DAY_DAWN_END, time));
+    }
+    else
+    {
+        return saturate(1.0 - smoothstep(DAY_DUSK_START, DAY_DUSK_END, time));
     }
 }
 
@@ -1316,12 +1322,16 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     const float skyAbsorption = 0.3 * cloudAbsorption;
     const float3 sunBaseColor = getSunBaseColor();
     const float3 moonBaseColor = getMoonBaseColor();
+    const float dayAmount = dayTimeAmount();
+    const float nightAmount = nightTimeAmount();
+    const bool doDayLighting = dayAmount > 0.0;
+    const bool doNightLighting = nightAmount > 0.0;
     
     Ray ray = cameraRay(uv);
     float3 sunDirection = getSunDirection();
     float3 moonDirection = getMoonDirection();
     
-    float3 sky = getSkyColor(ray.direction, depth < range ? 0.0 : 1.0, nightTimeAmount());
+    float3 sky = getSkyColor(ray.direction, dayAmount * (depth < range ? 0.0 : 1.0), nightAmount);
 
     float enter = (height - ray.origin.y) / ray.direction.y;
     float exit = (height + thickness - ray.origin.y) / ray.direction.y;
@@ -1350,8 +1360,8 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float moonCosTheta = dot(ray.direction, moonDirection);
     float sunPhase = phase(cloudForwardScatter, sunCosTheta);
     float moonPhase = phase(cloudForwardScatter, moonCosTheta);
-    float3 sunLightBase = (cloudSunLightPower * sunPhase).xxx;
-    float3 moonLightBase = (cloudMoonLightPower * moonPhase).xxx;
+    float3 sunLightBase = doDayLighting ? (cloudSunLightPower * sunPhase).xxx : 0.0;
+    float3 moonLightBase = doNightLighting ? (cloudMoonLightPower * moonPhase).xxx : 0.0;
     float3 skyLightBase = cloudSkyLightPower.xxx;
     
     float auroraVisibility = auroraAmount();
@@ -1396,12 +1406,12 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
 
         if (density > cloudThreshold && !(auroraVisibility > 0.0 && pos.y > bottomLayer.top))
         {
-            float sunTransmittance = cloudLightMarch(pos, layer, sunDirection, lightStepSize, sunAbsorption, layerAltitude, altitudeDensity);
-            float moonTransmittance = cloudLightMarch(pos, layer, moonDirection, lightStepSize, moonAbsorption, layerAltitude, altitudeDensity);
+            float sunTransmittance = doDayLighting ? cloudLightMarch(pos, layer, sunDirection, lightStepSize, sunAbsorption, layerAltitude, altitudeDensity) : 1.0;
+            float moonTransmittance = doNightLighting ? cloudLightMarch(pos, layer, moonDirection, lightStepSize, moonAbsorption, layerAltitude, altitudeDensity) : 1.0;
             float skyTransmittance = cloudLightMarch(pos, layer, float3(0.0, 1.0, 0.0), lightStepSize, skyAbsorption, layerAltitude, altitudeDensity);
 
-            float3 sunContribution = sunBaseColor * sunLightBase * layer.sunLightPower * altitudeLighting * (sunTransmittance + cloudAmbientAmount * layer.ambientAmount);
-            float3 moonContribution = moonBaseColor * moonLightBase * altitudeLighting * (moonTransmittance + cloudAmbientAmount * layer.ambientAmount);
+            float3 sunContribution = dayAmount * sunBaseColor * sunLightBase * layer.sunLightPower * altitudeLighting * (sunTransmittance + cloudAmbientAmount * layer.ambientAmount);
+            float3 moonContribution = nightAmount * moonBaseColor * moonLightBase * altitudeLighting * (moonTransmittance + cloudAmbientAmount * layer.ambientAmount);
             float3 skyContribution = sky * skyLightBase * layer.skyLightPower * (skyTransmittance + cloudAmbientAmount * layer.ambientAmount);
        
             float3 contribution = sunContribution + moonContribution + skyContribution;
@@ -1714,6 +1724,11 @@ float4 PS_Debug(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
 
 float4 PS_DebugSky(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
 {
+    if (uv.y < 0.125)
+    {
+        return float4(uv.x > 0.5 ? dayTimeAmount().xxx : nightTimeAmount().xxx, 1.0);
+    }
+    
     return uv.x < 0.5 ? float4(getSkyColor(worldDirection(uv), 1.0, nightTimeAmount()), 1.0) : tex2D(ReShade::BackBuffer, uv);
 }
 
