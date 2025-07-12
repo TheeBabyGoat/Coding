@@ -534,57 +534,6 @@ uniform float2 auroraRemap <
 
 #include "weathers.fxh"
 
-// Undefine original macros from weathers.fxh to redefine them here with day/night logic
-#undef CLOUD_BOTTOM_LAYER
-#undef CLOUD_TOP_LAYER
-
-#define CLOUD_BOTTOM_LAYER(PRESET, IS_NIGHT_FACTOR) \
-params.scale = lerp(PRESET##BottomScale_DAY, PRESET##BottomScale_NIGHT, IS_NIGHT_FACTOR); \
-params.detailScale = lerp(PRESET##BottomDetailScale_DAY, PRESET##BottomDetailScale_NIGHT, IS_NIGHT_FACTOR); \
-params.stretch = lerp(PRESET##BottomStretch_DAY, PRESET##BottomStretch_NIGHT, IS_NIGHT_FACTOR); \
-params.baseCurl = lerp(PRESET##BottomBaseCurl_DAY, PRESET##BottomBaseCurl_NIGHT, IS_NIGHT_FACTOR); \
-params.detailCurl = lerp(PRESET##BottomDetailCurl_DAY, PRESET##BottomDetailCurl_NIGHT, IS_NIGHT_FACTOR); \
-params.baseCurlScale = lerp(PRESET##BottomBaseCurlScale_DAY, PRESET##BottomBaseCurlScale_NIGHT, IS_NIGHT_FACTOR); \
-params.detailCurlScale = lerp(PRESET##BottomDetailCurlScale_DAY, PRESET##BottomDetailCurlScale_NIGHT, IS_NIGHT_FACTOR); \
-params.smoothness = lerp(PRESET##BottomSmoothness_DAY, PRESET##BottomSmoothness_NIGHT, IS_NIGHT_FACTOR); \
-params.softness = lerp(PRESET##BottomSoftness_DAY, PRESET##BottomSoftness_NIGHT, IS_NIGHT_FACTOR); \
-params.bottom = lerp(PRESET##BottomBottom_DAY, PRESET##BottomBottom_NIGHT, IS_NIGHT_FACTOR); \
-params.top = lerp(PRESET##BottomTop_DAY, PRESET##BottomTop_NIGHT, IS_NIGHT_FACTOR); \
-params.cover = lerp(PRESET##BottomCover_DAY, PRESET##BottomCover_NIGHT, IS_NIGHT_FACTOR); \
-params.extinction = lerp(PRESET##BottomExtinction_DAY, PRESET##BottomExtinction_NIGHT, IS_NIGHT_FACTOR); \
-params.ambientAmount = lerp(PRESET##BottomAmbientAmount_DAY, PRESET##BottomAmbientAmount_NIGHT, IS_NIGHT_FACTOR); \
-params.absorption = lerp(PRESET##BottomAbsorption_DAY, PRESET##BottomAbsorption_NIGHT, IS_NIGHT_FACTOR); \
-params.luminance = lerp(PRESET##BottomLuminance_DAY, PRESET##BottomLuminance_NIGHT, IS_NIGHT_FACTOR); \
-params.sunLightPower = lerp(PRESET##BottomSunLightPower_DAY, PRESET##BottomSunLightPower_NIGHT, IS_NIGHT_FACTOR); \
-params.skyLightPower = lerp(PRESET##BottomSkyLightPower_DAY, PRESET##BottomSkyLightPower_NIGHT, IS_NIGHT_FACTOR); \
-params.bottomDensity = lerp(PRESET##BottomBottomDensity_DAY, PRESET##BottomBottomDensity_NIGHT, IS_NIGHT_FACTOR); \
-params.middleDensity = lerp(PRESET##BottomMiddleDensity_DAY, PRESET##BottomMiddleDensity_NIGHT, IS_NIGHT_FACTOR); \
-params.topDensity = lerp(PRESET##BottomTopDensity_DAY, PRESET##BottomTopDensity_NIGHT, IS_NIGHT_FACTOR);
-
-#define CLOUD_TOP_LAYER(PRESET, IS_NIGHT_FACTOR) \
-params.scale = lerp(PRESET##TopScale_DAY, PRESET##TopScale_NIGHT, IS_NIGHT_FACTOR); \
-params.detailScale = lerp(PRESET##TopDetailScale_DAY, PRESET##TopDetailScale_NIGHT, IS_NIGHT_FACTOR); \
-params.stretch = lerp(PRESET##TopStretch_DAY, PRESET##TopStretch_NIGHT, IS_NIGHT_FACTOR); \
-params.baseCurl = lerp(PRESET##TopBaseCurl_DAY, PRESET##TopBaseCurl_NIGHT, IS_NIGHT_FACTOR); \
-params.detailCurl = lerp(PRESET##TopDetailCurl_DAY, PRESET##TopDetailCurl_NIGHT, IS_NIGHT_FACTOR); \
-params.baseCurlScale = lerp(PRESET##TopBaseCurlScale_DAY, PRESET##TopBaseCurlScale_NIGHT, IS_NIGHT_FACTOR); \
-params.detailCurlScale = lerp(PRESET##TopDetailCurlScale_DAY, PRESET##TopDetailCurlScale_NIGHT, IS_NIGHT_FACTOR); \
-params.smoothness = lerp(PRESET##TopSmoothness_DAY, PRESET##TopSmoothness_NIGHT, IS_NIGHT_FACTOR); \
-params.softness = lerp(PRESET##TopSoftness_DAY, PRESET##TopSoftness_NIGHT, IS_NIGHT_FACTOR); \
-params.bottom = lerp(PRESET##TopBottom_DAY, PRESET##TopBottom_NIGHT, IS_NIGHT_FACTOR); \
-params.top = lerp(PRESET##TopTop_DAY, PRESET##TopTop_NIGHT, IS_NIGHT_FACTOR); \
-params.cover = lerp(PRESET##TopCover_DAY, PRESET##TopCover_NIGHT, IS_NIGHT_FACTOR); \
-params.extinction = lerp(PRESET##TopExtinction_DAY, PRESET##TopExtinction_NIGHT, IS_NIGHT_FACTOR); \
-params.ambientAmount = lerp(PRESET##TopAmbientAmount_DAY, PRESET##TopAmbientAmount_NIGHT, IS_NIGHT_FACTOR); \
-params.absorption = lerp(PRESET##TopAbsorption_DAY, PRESET##TopAbsorption_NIGHT, IS_NIGHT_FACTOR); \
-params.luminance = lerp(PRESET##TopLuminance_DAY, PRESET##TopLuminance_NIGHT, IS_NIGHT_FACTOR); \
-params.sunLightPower = lerp(PRESET##TopSunLightPower_DAY, PRESET##TopSunLightPower_NIGHT, IS_NIGHT_FACTOR); \
-params.skyLightPower = lerp(PRESET##TopSkyLightPower_DAY, PRESET##TopSkyLightPower_NIGHT, IS_NIGHT_FACTOR); \
-params.bottomDensity = lerp(PRESET##TopBottomDensity_DAY, PRESET##TopBottomDensity_NIGHT, IS_NIGHT_FACTOR); \
-params.middleDensity = lerp(PRESET##TopMiddleDensity_DAY, PRESET##TopMiddleDensity_NIGHT, IS_NIGHT_FACTOR); \
-params.topDensity = lerp(PRESET##TopTopDensity_DAY, PRESET##TopTopDensity_NIGHT, IS_NIGHT_FACTOR);
-
-
 /**
  * Textures & samplers
  **/
@@ -813,87 +762,155 @@ Ray cameraRay(float2 uv)
     return ray;
 }
 
-
-float nightTimeAmount()
-{
-    float time = inputTimeOfDay;
-    
-    if (time <= NIGHT_DAWN_END)
-    {
-        return saturate(1.0 - smoothstep(NIGHT_DAWN_START, NIGHT_DAWN_END, time));
-    }
-    else
-    {
-        return saturate(smoothstep(NIGHT_DUSK_START, NIGHT_DUSK_END, time));
-    }
-}
-
-float dayTimeAmount()
-{
-    float time = inputTimeOfDay;
-    
-    if (time <= DAY_DAWN_END)
-    {
-        return saturate(smoothstep(DAY_DAWN_START, DAY_DAWN_END, time));
-    }
-    else
-    {
-        return saturate(1.0 - smoothstep(DAY_DUSK_START, DAY_DUSK_END, time));
-    }
-}
-
 LayerParameters getWeather(int weatherType, int layerIndex)
 {
     LayerParameters params;
     bool bottom = layerIndex == 0;
     
     int weatherPreset = getWeatherPreset(weatherType);
-    float isNightFactor = nightTimeAmount(); // 0.0 for full day, 1.0 for full night
     
     switch (weatherPreset)
     {
-        case 0: // Clear
-            if (bottom) { CLOUD_BOTTOM_LAYER(Clear, isNightFactor) } else { CLOUD_TOP_LAYER(Clear, isNightFactor) }
+        case 0:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(Clear)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(Clear)
+            }
             break;
-        case 1: // ExtraSunny
-            if (bottom) { CLOUD_BOTTOM_LAYER(ExtraSunny, isNightFactor) } else { CLOUD_TOP_LAYER(ExtraSunny, isNightFactor) }
+        case 1:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(ExtraSunny)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(ExtraSunny)
+            }
             break;
-        case 2: // Clouds
-            if (bottom) { CLOUD_BOTTOM_LAYER(Clouds, isNightFactor) } else { CLOUD_TOP_LAYER(Clouds, isNightFactor) }
+        case 2:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(Clouds)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(Clouds)
+            }
             break;
-        case 3: // Overcast
-            if (bottom) { CLOUD_BOTTOM_LAYER(Overcast, isNightFactor) } else { CLOUD_TOP_LAYER(Overcast, isNightFactor) }
+        case 3:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(Overcast)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(Overcast)
+            }
             break;
-        case 4: // Rain
-            if (bottom) { CLOUD_BOTTOM_LAYER(Rain, isNightFactor) } else { CLOUD_TOP_LAYER(Rain, isNightFactor) }
+        case 4:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(Rain)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(Rain)
+            }
             break;
-        case 5: // Clearing
-            if (bottom) { CLOUD_BOTTOM_LAYER(Clearing, isNightFactor) } else { CLOUD_TOP_LAYER(Clearing, isNightFactor) }
+        case 5:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(Clearing)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(Clearing)
+            }
             break;
-        case 6: // Thunder
-            if (bottom) { CLOUD_BOTTOM_LAYER(Thunder, isNightFactor) } else { CLOUD_TOP_LAYER(Thunder, isNightFactor) }
+        case 6:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(Thunder)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(Thunder)
+            }
             break;
-        case 7: // Smog
-            if (bottom) { CLOUD_BOTTOM_LAYER(Smog, isNightFactor) } else { CLOUD_TOP_LAYER(Smog, isNightFactor) }
+        case 7:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(Smog)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(Smog)
+            }
             break;
-        case 8: // Foggy
-            if (bottom) { CLOUD_BOTTOM_LAYER(Foggy, isNightFactor) } else { CLOUD_TOP_LAYER(Foggy, isNightFactor) }
+        case 8:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(Foggy)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(Foggy)
+            }
             break;
-        case 9: // Snow
-            if (bottom) { CLOUD_BOTTOM_LAYER(Snow, isNightFactor) } else { CLOUD_TOP_LAYER(Snow, isNightFactor) }
+        case 9:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(Snow)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(Snow)
+            }
             break;
-        case 10: // Blizzard
-            if (bottom) { CLOUD_BOTTOM_LAYER(Blizzard, isNightFactor) } else { CLOUD_TOP_LAYER(Blizzard, isNightFactor) }
+        case 10:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(Blizzard)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(Blizzard)
+            }
             break;
-        case 11: // SnowLight
-            if (bottom) { CLOUD_BOTTOM_LAYER(SnowLight, isNightFactor) } else { CLOUD_TOP_LAYER(SnowLight, isNightFactor) }
+        case 11:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(SnowLight)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(SnowLight)
+            }
             break;
-        case 12: // Halloween
-            if (bottom) { CLOUD_BOTTOM_LAYER(Halloween, isNightFactor) } else { CLOUD_TOP_LAYER(Halloween, isNightFactor) }
+        case 12:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(Halloween)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(Halloween)
+            }
             break;
         case -1:
-        default: // Fallback to Overcast
-            if (bottom) { CLOUD_BOTTOM_LAYER(Overcast, isNightFactor) } else { CLOUD_TOP_LAYER(Overcast, isNightFactor) }
+        default:
+            if (bottom)
+            {
+                CLOUD_BOTTOM_LAYER(Overcast)
+            }
+            else
+            {
+                CLOUD_TOP_LAYER(Overcast)
+            }
             break;
     }
     
@@ -1125,7 +1142,33 @@ float blueNoise(float2 uv)
     return tex2D(BlueNoiseSampler, uv).x * 2.0 - 1.0;
 }
 
+float nightTimeAmount()
+{
+    float time = inputTimeOfDay;
+    
+    if (time <= NIGHT_DAWN_END)
+    {
+        return saturate(1.0 - smoothstep(NIGHT_DAWN_START, NIGHT_DAWN_END, time));
+    }
+    else
+    {
+        return saturate(smoothstep(NIGHT_DUSK_START, NIGHT_DUSK_END, time));
+    }
+}
 
+float dayTimeAmount()
+{
+    float time = inputTimeOfDay;
+    
+    if (time <= DAY_DAWN_END)
+    {
+        return saturate(smoothstep(DAY_DAWN_START, DAY_DAWN_END, time));
+    }
+    else
+    {
+        return saturate(1.0 - smoothstep(DAY_DUSK_START, DAY_DUSK_END, time));
+    }
+}
 
 float auroraAmount()
 {
@@ -1289,6 +1332,10 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float3 moonDirection = getMoonDirection();
     
     float3 sky = getSkyColor(ray.direction, dayAmount * (depth < range ? 0.0 : 1.0), nightAmount);
+    // JULES: Ensure sky has a minimum brightness at night to prevent black clouds
+    if (nightAmount > 0.5) { // Ensure it's recognizably night
+        sky = max(sky, float3(0.05f, 0.05f, 0.05f)); // Clamp to a minimum dark grey
+    }
 
     float enter = (height - ray.origin.y) / ray.direction.y;
     float exit = (height + thickness - ray.origin.y) / ray.direction.y;

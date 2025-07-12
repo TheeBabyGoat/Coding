@@ -1,572 +1,1002 @@
 #pragma once
 
-#define CLOUD_LAYER_PRESET_DAYNIGHT(PRESET, \
-    BOTTOM_SCALE_D, BOTTOM_DETAIL_SCALE_D, BOTTOM_STRETCH_D, BOTTOM_BASE_CURL_D, BOTTOM_DETAIL_CURL_D, BOTTOM_BASE_CURL_SCALE_D, BOTTOM_DETAIL_CURL_SCALE_D, BOTTOM_SMOOTHNESS_D, BOTTOM_SOFTNESS_D, BOTTOM_BOTTOM_D, BOTTOM_TOP_D, BOTTOM_COVER_D, BOTTOM_EXTINCTION_D, BOTTOM_AMBIENT_D, BOTTOM_ABSORPTION_D, BOTTOM_LUMINANCE_D, BOTTOM_SUNLIGHT_POWER_D, BOTTOM_SKYLIGHT_POWER_D, BOTTOM_BOTTOM_DENSITY_D, BOTTOM_MIDDLE_DENSITY_D, BOTTOM_TOP_DENSITY_D, \
-    TOP_SCALE_D, TOP_DETAIL_SCALE_D, TOP_STRETCH_D, TOP_BASE_CURL_D, TOP_DETAIL_CURL_D, TOP_BASE_CURL_SCALE_D, TOP_DETAIL_CURL_SCALE_D, TOP_SMOOTHNESS_D, TOP_SOFTNESS_D, TOP_BOTTOM_D, TOP_TOP_D, TOP_COVER_D, TOP_EXTINCTION_D, TOP_AMBIENT_D, TOP_ABSORPTION_D, TOP_LUMINANCE_D, TOP_SUNLIGHT_POWER_D, TOP_SKYLIGHT_POWER_D, TOP_BOTTOM_DENSITY_D, TOP_MIDDLE_DENSITY_D, TOP_TOP_DENSITY_D, \
-    BOTTOM_SCALE_N, BOTTOM_DETAIL_SCALE_N, BOTTOM_STRETCH_N, BOTTOM_BASE_CURL_N, BOTTOM_DETAIL_CURL_N, BOTTOM_BASE_CURL_SCALE_N, BOTTOM_DETAIL_CURL_SCALE_N, BOTTOM_SMOOTHNESS_N, BOTTOM_SOFTNESS_N, BOTTOM_BOTTOM_N, BOTTOM_TOP_N, BOTTOM_COVER_N, BOTTOM_EXTINCTION_N, BOTTOM_AMBIENT_N, BOTTOM_ABSORPTION_N, BOTTOM_LUMINANCE_N, BOTTOM_SUNLIGHT_POWER_N, BOTTOM_SKYLIGHT_POWER_N, BOTTOM_BOTTOM_DENSITY_N, BOTTOM_MIDDLE_DENSITY_N, BOTTOM_TOP_DENSITY_N, \
-    TOP_SCALE_N, TOP_DETAIL_SCALE_N, TOP_STRETCH_N, TOP_BASE_CURL_N, TOP_DETAIL_CURL_N, TOP_BASE_CURL_SCALE_N, TOP_DETAIL_CURL_SCALE_N, TOP_SMOOTHNESS_N, TOP_SOFTNESS_N, TOP_BOTTOM_N, TOP_TOP_N, TOP_COVER_N, TOP_EXTINCTION_N, TOP_AMBIENT_N, TOP_ABSORPTION_N, TOP_LUMINANCE_N, TOP_SUNLIGHT_POWER_N, TOP_SKYLIGHT_POWER_N, TOP_BOTTOM_DENSITY_N, TOP_MIDDLE_DENSITY_N, TOP_TOP_DENSITY_N) \
-uniform float PRESET##BottomScale_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+#define CLOUD_LAYER_PRESET(PRESET, BOTTOM_SCALE, BOTTOM_DETAIL_SCALE, BOTTOM_STRETCH, BOTTOM_BASE_CURL, BOTTOM_DETAIL_CURL, BOTTOM_BASE_CURL_SCALE, BOTTOM_DETAIL_CURL_SCALE, BOTTOM_SMOOTHNESS, BOTTOM_SOFTNESS, BOTTOM_BOTTOM, BOTTOM_TOP, BOTTOM_COVER, BOTTOM_EXTINCTION, BOTTOM_AMBIENT, BOTTOM_ABSORPTION, BOTTOM_LUMINANCE, BOTTOM_SUNLIGHT_POWER, BOTTOM_SKYLIGHT_POWER, BOTTOM_BOTTOM_DENSITY, BOTTOM_MIDDLE_DENSITY, BOTTOM_TOP_DENSITY, TOP_SCALE, TOP_DETAIL_SCALE, TOP_STRETCH, TOP_BASE_CURL, TOP_DETAIL_CURL, TOP_BASE_CURL_SCALE, TOP_DETAIL_CURL_SCALE, TOP_SMOOTHNESS, TOP_SOFTNESS, TOP_BOTTOM, TOP_TOP, TOP_COVER, TOP_EXTINCTION, TOP_AMBIENT, TOP_ABSORPTION, TOP_LUMINANCE, TOP_SUNLIGHT_POWER, TOP_SKYLIGHT_POWER, TOP_BOTTOM_DENSITY, TOP_MIDDLE_DENSITY, TOP_TOP_DENSITY) \
+uniform float PRESET##BottomScale < \
+    string ui_category = #PRESET " Bottom Layer"; \
     bool ui_category_closed = true; \
     string ui_label = "Scale"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_SCALE_D; \
-uniform float PRESET##BottomDetailScale_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_SCALE; \
+uniform float PRESET##BottomDetailScale < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Detail Scale"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_DETAIL_SCALE_D; \
-uniform float PRESET##BottomStretch_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_DETAIL_SCALE; \
+uniform float PRESET##BottomStretch < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Stretch"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_STRETCH_D; \
-uniform float PRESET##BottomBaseCurl_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_STRETCH; \
+uniform float PRESET##BottomBaseCurl < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Base Curl"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_BASE_CURL_D; \
-uniform float PRESET##BottomDetailCurl_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_BASE_CURL; \
+uniform float PRESET##BottomDetailCurl < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Detail Curl"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_DETAIL_CURL_D; \
-uniform float PRESET##BottomBaseCurlScale_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_DETAIL_CURL; \
+uniform float PRESET##BottomBaseCurlScale < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Base Curl Scale"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_BASE_CURL_SCALE_D; \
-uniform float PRESET##BottomDetailCurlScale_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_BASE_CURL_SCALE; \
+uniform float PRESET##BottomDetailCurlScale < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Detail Curl Scale"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_DETAIL_CURL_SCALE_D; \
-uniform float PRESET##BottomSmoothness_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_DETAIL_CURL_SCALE; \
+uniform float PRESET##BottomSmoothness < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Smoothness"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_SMOOTHNESS_D; \
-uniform float PRESET##BottomSoftness_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_SMOOTHNESS; \
+uniform float PRESET##BottomSoftness < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Softness"; \
     string ui_type = "drag"; \
     float ui_min = -1.00; \
     float ui_max = 1.00; \
     float ui_step = 0.01; \
-> = BOTTOM_SOFTNESS_D; \
-uniform float PRESET##BottomBottom_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_SOFTNESS; \
+uniform float PRESET##BottomBottom < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Bottom Height"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 10000.00; \
     float ui_step = 1.0; \
-> = BOTTOM_BOTTOM_D; \
-uniform float PRESET##BottomTop_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_BOTTOM; \
+uniform float PRESET##BottomTop < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Top Height"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 10000.00; \
     float ui_step = 1.0; \
-> = BOTTOM_TOP_D; \
-uniform float PRESET##BottomCover_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_TOP; \
+uniform float PRESET##BottomCover < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Coverage"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_COVER_D; \
-uniform float PRESET##BottomExtinction_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_COVER; \
+uniform float PRESET##BottomExtinction < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Extinction"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_EXTINCTION_D; \
-uniform float PRESET##BottomAmbientAmount_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_EXTINCTION; \
+uniform float PRESET##BottomAmbientAmount < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Ambient Amount"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_AMBIENT_D; \
-uniform float PRESET##BottomAbsorption_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_AMBIENT; \
+uniform float PRESET##BottomAbsorption < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Absorption"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_ABSORPTION_D; \
-uniform float PRESET##BottomLuminance_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_ABSORPTION; \
+uniform float PRESET##BottomLuminance < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Luminance"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_LUMINANCE_D; \
-uniform float PRESET##BottomSunLightPower_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_LUMINANCE; \
+uniform float PRESET##BottomSunLightPower < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Sun Light Power"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_SUNLIGHT_POWER_D; \
-uniform float PRESET##BottomSkyLightPower_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_SUNLIGHT_POWER; \
+uniform float PRESET##BottomSkyLightPower < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Sky Light Power"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_SKYLIGHT_POWER_D; \
-uniform float PRESET##BottomBottomDensity_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_SKYLIGHT_POWER; \
+uniform float PRESET##BottomBottomDensity < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Bottom Density"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_BOTTOM_DENSITY_D; \
-uniform float PRESET##BottomMiddleDensity_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_BOTTOM_DENSITY; \
+uniform float PRESET##BottomMiddleDensity < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Middle Density"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_MIDDLE_DENSITY_D; \
-uniform float PRESET##BottomTopDensity_DAY < \
-    string ui_category = #PRESET " Bottom Layer - DAY"; \
+> = BOTTOM_MIDDLE_DENSITY; \
+uniform float PRESET##BottomTopDensity < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Top Density"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_TOP_DENSITY_D; \
-uniform float PRESET##TopScale_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = BOTTOM_TOP_DENSITY; \
+uniform float PRESET##TopScale < \
+    string ui_category = #PRESET " Top Layer"; \
     bool ui_category_closed = true; \
 	string ui_label = "Scale"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_SCALE_D; \
-uniform float PRESET##TopDetailScale_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_SCALE; \
+uniform float PRESET##TopDetailScale < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Detail Scale"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_DETAIL_SCALE_D; \
-uniform float PRESET##TopStretch_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_DETAIL_SCALE; \
+uniform float PRESET##TopStretch < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Stretch"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_STRETCH_D; \
-uniform float PRESET##TopBaseCurl_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_STRETCH; \
+uniform float PRESET##TopBaseCurl < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Base Curl"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_BASE_CURL_D; \
-uniform float PRESET##TopDetailCurl_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_BASE_CURL; \
+uniform float PRESET##TopDetailCurl < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Detail Curl"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_DETAIL_CURL_D; \
-uniform float PRESET##TopBaseCurlScale_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_DETAIL_CURL; \
+uniform float PRESET##TopBaseCurlScale < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Base Curl Scale"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_BASE_CURL_SCALE_D; \
-uniform float PRESET##TopDetailCurlScale_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_BASE_CURL_SCALE; \
+uniform float PRESET##TopDetailCurlScale < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Detail Curl Scale"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_DETAIL_CURL_SCALE_D; \
-uniform float PRESET##TopSmoothness_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_DETAIL_CURL_SCALE; \
+uniform float PRESET##TopSmoothness < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Smoothness"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_SMOOTHNESS_D; \
-uniform float PRESET##TopSoftness_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_SMOOTHNESS; \
+uniform float PRESET##TopSoftness < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
     string ui_label = "Softness"; \
     string ui_type = "drag"; \
     float ui_min = -1.00; \
     float ui_max = 1.00; \
     float ui_step = 0.01; \
-> = TOP_SOFTNESS_D; \
-uniform float PRESET##TopBottom_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_SOFTNESS; \
+uniform float PRESET##TopBottom < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Bottom Height"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 10000.00; \
     float ui_step = 1.0; \
-> = TOP_BOTTOM_D; \
-uniform float PRESET##TopTop_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_BOTTOM; \
+uniform float PRESET##TopTop < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Top Height"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 10000.00; \
     float ui_step = 1.0; \
-> = TOP_TOP_D; \
-uniform float PRESET##TopCover_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_TOP; \
+uniform float PRESET##TopCover < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Coverage"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_COVER_D; \
-uniform float PRESET##TopExtinction_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_COVER; \
+uniform float PRESET##TopExtinction < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Extinction"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_EXTINCTION_D; \
-uniform float PRESET##TopAmbientAmount_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_EXTINCTION; \
+uniform float PRESET##TopAmbientAmount < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Ambient Amount"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_AMBIENT_D; \
-uniform float PRESET##TopAbsorption_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_AMBIENT; \
+uniform float PRESET##TopAbsorption < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Absorption"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_ABSORPTION_D; \
-uniform float PRESET##TopLuminance_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_ABSORPTION; \
+uniform float PRESET##TopLuminance < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Luminance"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_LUMINANCE_D; \
-uniform float PRESET##TopSunLightPower_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_LUMINANCE; \
+uniform float PRESET##TopSunLightPower < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Sun Light Power"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_SUNLIGHT_POWER_D; \
-uniform float PRESET##TopSkyLightPower_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_SUNLIGHT_POWER; \
+uniform float PRESET##TopSkyLightPower < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Sky Light Power"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_SKYLIGHT_POWER_D; \
-uniform float PRESET##TopBottomDensity_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_SKYLIGHT_POWER; \
+uniform float PRESET##TopBottomDensity < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Bottom Density"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_BOTTOM_DENSITY_D; \
-uniform float PRESET##TopMiddleDensity_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_BOTTOM_DENSITY; \
+uniform float PRESET##TopMiddleDensity < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Middle Density"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_MIDDLE_DENSITY_D; \
-uniform float PRESET##TopTopDensity_DAY < \
-    string ui_category = #PRESET " Top Layer - DAY"; \
+> = TOP_MIDDLE_DENSITY; \
+uniform float PRESET##TopTopDensity < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
 	string ui_label = "Top Density"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_TOP_DENSITY_D; \
-/* NIGHT PARAMETERS - Initially hidden from UI, values are set here based on DAY values */ \
-uniform float PRESET##BottomScale_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Scale (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_SCALE_N; \
-uniform float PRESET##BottomDetailScale_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Detail Scale (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_DETAIL_SCALE_N; \
-uniform float PRESET##BottomStretch_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Stretch (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_STRETCH_N; \
-uniform float PRESET##BottomBaseCurl_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Base Curl (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_BASE_CURL_N; \
-uniform float PRESET##BottomDetailCurl_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Detail Curl (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_DETAIL_CURL_N; \
-uniform float PRESET##BottomBaseCurlScale_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Base Curl Scale (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_BASE_CURL_SCALE_N; \
-uniform float PRESET##BottomDetailCurlScale_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Detail Curl Scale (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_DETAIL_CURL_SCALE_N; \
-uniform float PRESET##BottomSmoothness_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Smoothness (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_SMOOTHNESS_N; \
-uniform float PRESET##BottomSoftness_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Softness (Night)"; string ui_type = "drag"; float ui_min = -1.00; float ui_max = 1.00; float ui_step = 0.01; > = BOTTOM_SOFTNESS_N; \
-uniform float PRESET##BottomBottom_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Bottom Height (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 10000.00; float ui_step = 1.0; > = BOTTOM_BOTTOM_N; \
-uniform float PRESET##BottomTop_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Top Height (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 10000.00; float ui_step = 1.0; > = BOTTOM_TOP_N; \
-uniform float PRESET##BottomCover_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Coverage (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_COVER_N; \
-uniform float PRESET##BottomExtinction_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Extinction (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_EXTINCTION_N; \
-uniform float PRESET##BottomAmbientAmount_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Ambient Amount (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_AMBIENT_N; \
-uniform float PRESET##BottomAbsorption_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Absorption (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_ABSORPTION_N; \
-uniform float PRESET##BottomLuminance_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Luminance (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_LUMINANCE_N; \
-uniform float PRESET##BottomSunLightPower_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Sun Light Power (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_SUNLIGHT_POWER_N; \
-uniform float PRESET##BottomSkyLightPower_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Sky Light Power (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_SKYLIGHT_POWER_N; \
-uniform float PRESET##BottomBottomDensity_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Bottom Density (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_BOTTOM_DENSITY_N; \
-uniform float PRESET##BottomMiddleDensity_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Middle Density (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_MIDDLE_DENSITY_N; \
-uniform float PRESET##BottomTopDensity_NIGHT <string ui_category = #PRESET " Bottom Layer - NIGHT"; bool hidden = false; string ui_label = "Top Density (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = BOTTOM_TOP_DENSITY_N; \
-uniform float PRESET##TopScale_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool ui_category_closed = true; bool hidden = false; string ui_label = "Scale (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_SCALE_N; \
-uniform float PRESET##TopDetailScale_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Detail Scale (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_DETAIL_SCALE_N; \
-uniform float PRESET##TopStretch_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Stretch (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_STRETCH_N; \
-uniform float PRESET##TopBaseCurl_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Base Curl (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_BASE_CURL_N; \
-uniform float PRESET##TopDetailCurl_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Detail Curl (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_DETAIL_CURL_N; \
-uniform float PRESET##TopBaseCurlScale_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Base Curl Scale (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_BASE_CURL_SCALE_N; \
-uniform float PRESET##TopDetailCurlScale_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Detail Curl Scale (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_DETAIL_CURL_SCALE_N; \
-uniform float PRESET##TopSmoothness_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Smoothness (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_SMOOTHNESS_N; \
-uniform float PRESET##TopSoftness_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Softness (Night)"; string ui_type = "drag"; float ui_min = -1.00; float ui_max = 1.00; float ui_step = 0.01; > = TOP_SOFTNESS_N; \
-uniform float PRESET##TopBottom_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Bottom Height (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 10000.00; float ui_step = 1.0; > = TOP_BOTTOM_N; \
-uniform float PRESET##TopTop_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Top Height (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 10000.00; float ui_step = 1.0; > = TOP_TOP_N; \
-uniform float PRESET##TopCover_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Coverage (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_COVER_N; \
-uniform float PRESET##TopExtinction_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Extinction (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_EXTINCTION_N; \
-uniform float PRESET##TopAmbientAmount_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Ambient Amount (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_AMBIENT_N; \
-uniform float PRESET##TopAbsorption_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Absorption (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_ABSORPTION_N; \
-uniform float PRESET##TopLuminance_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Luminance (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_LUMINANCE_N; \
-uniform float PRESET##TopSunLightPower_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Sun Light Power (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_SUNLIGHT_POWER_N; \
-uniform float PRESET##TopSkyLightPower_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Sky Light Power (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_SKYLIGHT_POWER_N; \
-uniform float PRESET##TopBottomDensity_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Bottom Density (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_BOTTOM_DENSITY_N; \
-uniform float PRESET##TopMiddleDensity_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Middle Density (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_MIDDLE_DENSITY_N; \
-uniform float PRESET##TopTopDensity_NIGHT <string ui_category = #PRESET " Top Layer - NIGHT"; bool hidden = false; string ui_label = "Top Density (Night)"; string ui_type = "drag"; float ui_min = 0.00; float ui_max = 2.00; float ui_step = 0.01; > = TOP_TOP_DENSITY_N;
+> = TOP_TOP_DENSITY;
 
-#define CLOUD_BOTTOM_LAYER(PRESET, IS_NIGHT_FACTOR) \
-params.scale = lerp(PRESET##BottomScale_DAY, PRESET##BottomScale_NIGHT, IS_NIGHT_FACTOR); \
-params.detailScale = lerp(PRESET##BottomDetailScale_DAY, PRESET##BottomDetailScale_NIGHT, IS_NIGHT_FACTOR); \
-params.stretch = lerp(PRESET##BottomStretch_DAY, PRESET##BottomStretch_NIGHT, IS_NIGHT_FACTOR); \
-params.baseCurl = lerp(PRESET##BottomBaseCurl_DAY, PRESET##BottomBaseCurl_NIGHT, IS_NIGHT_FACTOR); \
-params.detailCurl = lerp(PRESET##BottomDetailCurl_DAY, PRESET##BottomDetailCurl_NIGHT, IS_NIGHT_FACTOR); \
-params.baseCurlScale = lerp(PRESET##BottomBaseCurlScale_DAY, PRESET##BottomBaseCurlScale_NIGHT, IS_NIGHT_FACTOR); \
-params.detailCurlScale = lerp(PRESET##BottomDetailCurlScale_DAY, PRESET##BottomDetailCurlScale_NIGHT, IS_NIGHT_FACTOR); \
-params.smoothness = lerp(PRESET##BottomSmoothness_DAY, PRESET##BottomSmoothness_NIGHT, IS_NIGHT_FACTOR); \
-params.softness = lerp(PRESET##BottomSoftness_DAY, PRESET##BottomSoftness_NIGHT, IS_NIGHT_FACTOR); \
-params.bottom = lerp(PRESET##BottomBottom_DAY, PRESET##BottomBottom_NIGHT, IS_NIGHT_FACTOR); \
-params.top = lerp(PRESET##BottomTop_DAY, PRESET##BottomTop_NIGHT, IS_NIGHT_FACTOR); \
-params.cover = lerp(PRESET##BottomCover_DAY, PRESET##BottomCover_NIGHT, IS_NIGHT_FACTOR); \
-params.extinction = lerp(PRESET##BottomExtinction_DAY, PRESET##BottomExtinction_NIGHT, IS_NIGHT_FACTOR); \
-params.ambientAmount = lerp(PRESET##BottomAmbientAmount_DAY, PRESET##BottomAmbientAmount_NIGHT, IS_NIGHT_FACTOR); \
-params.absorption = lerp(PRESET##BottomAbsorption_DAY, PRESET##BottomAbsorption_NIGHT, IS_NIGHT_FACTOR); \
-params.luminance = lerp(PRESET##BottomLuminance_DAY, PRESET##BottomLuminance_NIGHT, IS_NIGHT_FACTOR); \
-params.sunLightPower = lerp(PRESET##BottomSunLightPower_DAY, PRESET##BottomSunLightPower_NIGHT, IS_NIGHT_FACTOR); \
-params.skyLightPower = lerp(PRESET##BottomSkyLightPower_DAY, PRESET##BottomSkyLightPower_NIGHT, IS_NIGHT_FACTOR); \
-params.bottomDensity = lerp(PRESET##BottomBottomDensity_DAY, PRESET##BottomBottomDensity_NIGHT, IS_NIGHT_FACTOR); \
-params.middleDensity = lerp(PRESET##BottomMiddleDensity_DAY, PRESET##BottomMiddleDensity_NIGHT, IS_NIGHT_FACTOR); \
-params.topDensity = lerp(PRESET##BottomTopDensity_DAY, PRESET##BottomTopDensity_NIGHT, IS_NIGHT_FACTOR);
+#define CLOUD_BOTTOM_LAYER(PRESET) \
+params.scale = PRESET##BottomScale; \
+params.detailScale = PRESET##BottomDetailScale; \
+params.stretch = PRESET##BottomStretch; \
+params.baseCurl = PRESET##BottomBaseCurl; \
+params.detailCurl = PRESET##BottomDetailCurl; \
+params.baseCurlScale = PRESET##BottomBaseCurlScale; \
+params.detailCurlScale = PRESET##BottomDetailCurlScale; \
+params.smoothness = PRESET##BottomSmoothness; \
+params.softness = PRESET##BottomSoftness; \
+params.bottom = PRESET##BottomBottom; \
+params.top = PRESET##BottomTop; \
+params.cover = PRESET##BottomCover; \
+params.extinction = PRESET##BottomExtinction; \
+params.ambientAmount = PRESET##BottomAmbientAmount; \
+params.absorption = PRESET##BottomAbsorption; \
+params.luminance = PRESET##BottomLuminance; \
+params.sunLightPower = PRESET##BottomSunLightPower; \
+params.skyLightPower = PRESET##BottomSkyLightPower; \
+params.bottomDensity = PRESET##BottomBottomDensity; \
+params.middleDensity = PRESET##BottomMiddleDensity; \
+params.topDensity = PRESET##BottomTopDensity;
 
-#define CLOUD_TOP_LAYER(PRESET, IS_NIGHT_FACTOR) \
-params.scale = lerp(PRESET##TopScale_DAY, PRESET##TopScale_NIGHT, IS_NIGHT_FACTOR); \
-params.detailScale = lerp(PRESET##TopDetailScale_DAY, PRESET##TopDetailScale_NIGHT, IS_NIGHT_FACTOR); \
-params.stretch = lerp(PRESET##TopStretch_DAY, PRESET##TopStretch_NIGHT, IS_NIGHT_FACTOR); \
-params.baseCurl = lerp(PRESET##TopBaseCurl_DAY, PRESET##TopBaseCurl_NIGHT, IS_NIGHT_FACTOR); \
-params.detailCurl = lerp(PRESET##TopDetailCurl_DAY, PRESET##TopDetailCurl_NIGHT, IS_NIGHT_FACTOR); \
-params.baseCurlScale = lerp(PRESET##TopBaseCurlScale_DAY, PRESET##TopBaseCurlScale_NIGHT, IS_NIGHT_FACTOR); \
-params.detailCurlScale = lerp(PRESET##TopDetailCurlScale_DAY, PRESET##TopDetailCurlScale_NIGHT, IS_NIGHT_FACTOR); \
-params.smoothness = lerp(PRESET##TopSmoothness_DAY, PRESET##TopSmoothness_NIGHT, IS_NIGHT_FACTOR); \
-params.softness = lerp(PRESET##TopSoftness_DAY, PRESET##TopSoftness_NIGHT, IS_NIGHT_FACTOR); \
-params.bottom = lerp(PRESET##TopBottom_DAY, PRESET##TopBottom_NIGHT, IS_NIGHT_FACTOR); \
-params.top = lerp(PRESET##TopTop_DAY, PRESET##TopTop_NIGHT, IS_NIGHT_FACTOR); \
-params.cover = lerp(PRESET##TopCover_DAY, PRESET##TopCover_NIGHT, IS_NIGHT_FACTOR); \
-params.extinction = lerp(PRESET##TopExtinction_DAY, PRESET##TopExtinction_NIGHT, IS_NIGHT_FACTOR); \
-params.ambientAmount = lerp(PRESET##TopAmbientAmount_DAY, PRESET##TopAmbientAmount_NIGHT, IS_NIGHT_FACTOR); \
-params.absorption = lerp(PRESET##TopAbsorption_DAY, PRESET##TopAbsorption_NIGHT, IS_NIGHT_FACTOR); \
-params.luminance = lerp(PRESET##TopLuminance_DAY, PRESET##TopLuminance_NIGHT, IS_NIGHT_FACTOR); \
-params.sunLightPower = lerp(PRESET##TopSunLightPower_DAY, PRESET##TopSunLightPower_NIGHT, IS_NIGHT_FACTOR); \
-params.skyLightPower = lerp(PRESET##TopSkyLightPower_DAY, PRESET##TopSkyLightPower_NIGHT, IS_NIGHT_FACTOR); \
-params.bottomDensity = lerp(PRESET##TopBottomDensity_DAY, PRESET##TopBottomDensity_NIGHT, IS_NIGHT_FACTOR); \
-params.middleDensity = lerp(PRESET##TopMiddleDensity_DAY, PRESET##TopMiddleDensity_NIGHT, IS_NIGHT_FACTOR); \
-params.topDensity = lerp(PRESET##TopTopDensity_DAY, PRESET##TopTopDensity_NIGHT, IS_NIGHT_FACTOR);
+#define CLOUD_TOP_LAYER(PRESET) \
+params.scale = PRESET##TopScale; \
+params.detailScale = PRESET##TopDetailScale; \
+params.stretch = PRESET##TopStretch; \
+params.baseCurl = PRESET##TopBaseCurl; \
+params.detailCurl = PRESET##TopDetailCurl; \
+params.baseCurlScale = PRESET##TopBaseCurlScale; \
+params.detailCurlScale = PRESET##TopDetailCurlScale; \
+params.smoothness = PRESET##TopSmoothness; \
+params.softness = PRESET##TopSoftness; \
+params.bottom = PRESET##TopBottom; \
+params.top = PRESET##TopTop; \
+params.cover = PRESET##TopCover; \
+params.extinction = PRESET##TopExtinction; \
+params.ambientAmount = PRESET##TopAmbientAmount; \
+params.absorption = PRESET##TopAbsorption; \
+params.luminance = PRESET##TopLuminance; \
+params.sunLightPower = PRESET##TopSunLightPower; \
+params.skyLightPower = PRESET##TopSkyLightPower; \
+params.bottomDensity = PRESET##TopBottomDensity; \
+params.middleDensity = PRESET##TopMiddleDensity; \
+params.topDensity = PRESET##TopTopDensity;
 
-// Weather Presets - DAY values are the original, NIGHT values are derived
-// For NIGHT values, using general multipliers:
-// cover * 0.7, extinction * 0.8, ambient * 0.4, absorption * 1.2, luminance * 0.3, sunPower * 0.05, skyPower * 0.2, densities * 0.7
-// Specific cover multipliers: Clear/ExtraSunny: 0.3, Clouds/Clearing: 0.8, Foggy: 1.1, Others: 1.0
-
-CLOUD_LAYER_PRESET_DAYNIGHT(Clear,
-    // DAY Bottom Layer
-    1.5, 0.5, 1.25, 0.5, 0.5, 1.0, 1.0, 2.0, 0.0, 450.0, 1000.0, 0.15, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0, 0.0,
-    // DAY Top Layer
-    2.0, 1.5, 3.0, 1.0, 2.0, 1.0, 1.5, 2.0, 0.0, 1000.0, 2000.0, 0.4, 1.0, 1.0, 0.75, 1.0, 1.0, 1.0, 0.75, 1.0, 0.7,
-    // NIGHT Bottom Layer (Clear cover: 0.15 * 0.3 = 0.045)
-    1.5, 0.5, 1.25, 0.5, 0.5, 1.0, 1.0, 2.0, 0.0, 450.0, 1000.0, 0.15*0.3, 1.0*0.8, 1.0*0.4, 1.0*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 2.0*0.3, 1.0*0.3, 0.0*0.3,
-    // NIGHT Top Layer (Clear cover: 0.4 * 0.3 = 0.12)
-    2.0, 1.5, 3.0, 1.0, 2.0, 1.0, 1.5, 2.0, 0.0, 1000.0, 2000.0, 0.4*0.3, 1.0*0.8, 1.0*0.4, 0.75*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 0.75*0.3, 1.0*0.3, 0.7*0.3
+CLOUD_LAYER_PRESET(Clear,
+    1.5, // bottom scale
+    0.5, // bottom detailScale
+    1.25, // bottom stretch
+    0.5, // bottom baseCurl
+    0.5, // bottom detailCurl
+    1.0, // bottom baseCurlScale
+    1.0, // bottom detailCurlScale
+    2.0, // bottom smoothness
+    0.0, // bottom softness
+    450.0, // bottom bottom
+    1000.0, // bottom top
+    0.15, //bottom cover
+    1.0, // bottom extinction
+    1.0, // bottom ambientAmount
+    1.0, // bottom absorption
+    1.0, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    2.0, // bottom bottomDensity
+    1.0, // bottom middleDensity
+    0.0, // bottom topDensity
+    2.0, // bottom scale
+    1.5, // top detailScale
+    3.0, // top stretch
+    1.0, // top baseCurl
+    2.0, // top detailCurl
+    1.0, // top baseCurlScale
+    1.5, // top detailCurlScale
+    2.0, // top smoothness
+    0.0, // top softness
+    1000.0, // top bottom
+    2000.0, // top top
+    0.4, // top cover
+    1.0, // top extinction
+    1.0, // top ambientAmount
+    0.75, // top absorption
+    1.0, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    0.75, // top bottomDensity
+    1.0, // top middleDensity
+    0.7 // top topDensity
 )
-CLOUD_LAYER_PRESET_DAYNIGHT(ExtraSunny,
-    // DAY Bottom Layer
-    1.5, 0.5, 1.25, 0.5, 0.5, 1.0, 1.0, 1.5, 0.0, 450.0, 1200.0, 0.3, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0, 0.0,
-    // DAY Top Layer
-    2.0, 1.5, 3.0, 2.0, 1.0, 1.0, 1.5, 2.0, 0.0, 2500.0, 3500.0, 0.5, 1.0, 1.0, 0.75, 1.0, 1.0, 1.0, 0.75, 1.0, 0.75,
-    // NIGHT Bottom Layer (ExtraSunny cover: 0.3 * 0.3 = 0.09)
-    1.5, 0.5, 1.25, 0.5, 0.5, 1.0, 1.0, 1.5, 0.0, 450.0, 1200.0, 0.3*0.3, 1.0*0.8, 1.0*0.4, 1.0*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 2.0*0.3, 1.0*0.3, 0.0*0.3,
-    // NIGHT Top Layer (ExtraSunny cover: 0.5 * 0.3 = 0.15)
-    2.0, 1.5, 3.0, 2.0, 1.0, 1.0, 1.5, 2.0, 0.0, 2500.0, 3500.0, 0.5*0.3, 1.0*0.8, 1.0*0.4, 0.75*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 0.75*0.3, 1.0*0.3, 0.75*0.3
+CLOUD_LAYER_PRESET(ExtraSunny,
+    1.5, // bottom scale
+    0.5, // bottom detailScale
+    1.25, // bottom stretch
+    0.5, // bottom baseCurl
+    0.5, // bottom detailCurl
+    1.0, // bottom baseCurlScale
+    1.0, // bottom detailCurlScale
+    1.5, // bottom smoothness
+    0.0, // bottom softness
+    450.0, // bottom bottom
+    1200.0, // bottom top
+    0.3, // bottom cover
+    1.0, // bottom extinction
+    1.0, // bottom ambientAmount
+    1.0, // bottom absorption
+    1.0, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    2.0, // bottom bottomDensity
+    1.0, // bottom middleDensity
+    0.0, // bottom topDensity
+    2.0, // top scale
+    1.5, // top detailScale
+    3.0, // top stretch
+    2.0, // top baseCurl
+    1.0, // top detailCurl
+    1.0, // top baseCurlScale
+    1.5, // top detailCurlScale
+    2.0, // top smoothness
+    0.0, // top softness
+    2500.0, // top bottom
+    3500.0, // top top
+    0.5, // top cover
+    1.0, // top extinction
+    1.0, // top ambientAmount
+    0.75, // top absorption
+    1.0, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    0.75, // top bottomDensity
+    1.0, // top middleDensity
+    0.75 // top topDensity
 )
-CLOUD_LAYER_PRESET_DAYNIGHT(Clouds,
-    // DAY Bottom Layer
-    3.0, 0.25, 0.9, 0.25, 0.15, 1.0, 1.0, 0.35, 0.0, 350.0, 1000.0, 0.45, 1.0, 1.0, 1.25, 1.25, 1.0, 1.0, 2.0, 1.0, 0.0,
-    // DAY Top Layer
-    2.0, 1.5, 3.0, 1.0, 1.0, 1.0, 1.5, 1.5, 0.0, 1000.0, 3000.0, 0.3, 1.0, 1.0, 0.75, 1.0, 1.0, 1.0, 0.75, 1.0, 1.0,
-    // NIGHT Bottom Layer (Clouds cover: 0.45 * 0.8 = 0.36)
-    3.0, 0.25, 0.9, 0.25, 0.15, 1.0, 1.0, 0.35, 0.0, 350.0, 1000.0, 0.45*0.8, 1.0*0.8, 1.0*0.4, 1.25*1.2, 1.25*0.3, 1.0*0.05, 1.0*0.2, 2.0*0.8, 1.0*0.8, 0.0*0.8,
-    // NIGHT Top Layer (Clouds cover: 0.3 * 0.8 = 0.24)
-    2.0, 1.5, 3.0, 1.0, 1.0, 1.0, 1.5, 1.5, 0.0, 1000.0, 3000.0, 0.3*0.8, 1.0*0.8, 1.0*0.4, 0.75*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 0.75*0.8, 1.0*0.8, 1.0*0.8
+CLOUD_LAYER_PRESET(Clouds,
+    3.0, // bottom scale
+    0.25, // bottom detailScale
+    0.9, // bottom stretch
+    0.25, // bottom baseCurl
+    0.15, // bottom detailCurl
+    1.0, // bottom baseCurlScale
+    1.0, // bottom detailCurlScale
+    0.35, // bottom smoothness
+    0.0, // bottom softness
+    350.0, // bottom bottom
+    1000.0, // bottom top
+    0.45, // bottom cover
+    1.0, // bottom extinction
+    1.0, // bottom ambientAmount
+    1.25, // bottom absorption
+    1.25, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    2.0, // bottom bottomDensity
+    1.0, // bottom middleDensity
+    0.0, // bottom topDensity
+    2.0, // top scale
+    1.5, // top detailScale
+    3.0, // top stretch
+    1.0, // top baseCurl
+    1.0, // top detailCurl
+    1.0, // top baseCurlScale
+    1.5, // top detailCurlScale
+    1.5, // top smoothness
+    0.0, // top softness
+    1000.0, // top bottom
+    3000.0, // top top
+    0.3, // top cover
+    1.0, // top extinction
+    1.0, // top ambientAmount
+    0.75, // top absorption
+    1.0, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    0.75, // top bottomDensity
+    1.0, // top middleDensity
+    1.0 // top topDensity
 )
-CLOUD_LAYER_PRESET_DAYNIGHT(Overcast,
-    // DAY Bottom Layer
-    1.5, 0.5, 1.25, 0.25, 0.25, 1.0, 1.0, 1.5, 0.0, 400.0, 1500.0, 0.45, 1.0, 1.25, 0.75, 1.0, 1.0, 1.0, 1.5, 0.5, 0.0,
-    // DAY Top Layer
-    2.0, 1.5, 3.0, 1.5, 0.75, 1.0, 1.5, 1.5, 0.0, 1500.0, 3000.0, 0.55, 1.0, 1.0, 0.75, 1.0, 1.0, 1.0, 0.75, 1.0, 0.75,
-    // NIGHT Bottom Layer (Overcast cover: 0.45 * 1.0 = 0.45)
-    1.5, 0.5, 1.25, 0.25, 0.25, 1.0, 1.0, 1.5, 0.0, 400.0, 1500.0, 0.45*1.0, 1.0*0.8, 1.25*0.4, 0.75*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 1.5*1.0, 0.5*1.0, 0.0*1.0,
-    // NIGHT Top Layer (Overcast cover: 0.55 * 1.0 = 0.55)
-    2.0, 1.5, 3.0, 1.5, 0.75, 1.0, 1.5, 1.5, 0.0, 1500.0, 3000.0, 0.55*1.0, 1.0*0.8, 1.0*0.4, 0.75*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 0.75*1.0, 1.0*1.0, 0.75*1.0
+CLOUD_LAYER_PRESET(Overcast,
+    1.5, // bottom scale
+    0.5, // bottom detailScale
+    1.25, // bottom stretch
+    0.25, // bottom baseCurl
+    0.25, // bottom detailCurl
+    1.0, // bottom baseCurlScale
+    1.0, // bottom detailCurlScale
+    1.5, // bottom smoothness
+    0.0, // bottom softness
+    400.0, // bottom bottom
+    1500.0, // bottom top
+    0.45, // bottom cover
+    1.0, // bottom extinction
+    1.25, // bottom ambientAmount
+    0.75, // bottom absorption
+    1.0, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    1.5, // bottom bottomDensity
+    0.5, // bottom middleDensity
+    0.0, // bottom topDensity
+    2.0, // top scale
+    1.5, // top detailScale
+    3.0, // top stretch
+    1.5, // top baseCurl
+    0.75, // top detailCurl
+    1.0, // top baseCurlScale
+    1.5, // top detailCurlScale
+    1.5, // top smoothness
+    0.0, // top softness
+    1500.0, // top bottom
+    3000.0, // top top
+    0.55, // top cover
+    1.0, // top extinction
+    1.0, // top ambientAmount
+    0.75, // top absorption
+    1.0, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    0.75, // top bottomDensity
+    1.0, // top middleDensity
+    0.75 // top topDensity
 )
-CLOUD_LAYER_PRESET_DAYNIGHT(Rain,
-    // DAY Bottom Layer
-    2.0, 1.0, 1.5, 0.5, 0.75, 1.0, 1.0, 0.75, 0.0, 200.0, 1500.0, 0.4, 1.0, 0.75, 1.5, 1.5, 1.0, 1.0, 2.0, 1.5, 0.5,
-    // DAY Top Layer
-    2.0, 1.5, 2.5, 1.0, 0.75, 1.0, 1.5, 1.25, 0.0, 1500.0, 2500.0, 0.65, 1.0, 0.75, 0.75, 1.0, 1.0, 1.0, 0.75, 1.0, 0.75,
-    // NIGHT Bottom Layer (Rain cover: 0.4 * 1.0 = 0.4)
-    2.0, 1.0, 1.5, 0.5, 0.75, 1.0, 1.0, 0.75, 0.0, 200.0, 1500.0, 0.4*1.0, 1.0*0.8, 0.75*0.4, 1.5*1.2, 1.5*0.3, 1.0*0.05, 1.0*0.2, 2.0*1.0, 1.5*1.0, 0.5*1.0,
-    // NIGHT Top Layer (Rain cover: 0.65 * 1.0 = 0.65)
-    2.0, 1.5, 2.5, 1.0, 0.75, 1.0, 1.5, 1.25, 0.0, 1500.0, 2500.0, 0.65*1.0, 1.0*0.8, 0.75*0.4, 0.75*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 0.75*1.0, 1.0*1.0, 0.75*1.0
+CLOUD_LAYER_PRESET(Rain,
+    2.0, // bottom scale
+    1.0, // bottom detailScale
+    1.5, // bottom stretch
+    0.5, // bottom baseCurl
+    0.75, // bottom detailCurl
+    1.0, // bottom baseCurlScale
+    1.0, // bottom detailCurlScale
+    0.75, // bottom smoothness
+    0.0, // bottom softness
+    200.0, // bottom bottom
+    1500.0, // bottom top
+    0.4, // bottom cover
+    1.0, // bottom extinction
+    0.75, // bottom ambientAmount
+    1.5, // bottom absorption
+    1.5, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    2.0, // bottom bottomDensity
+    1.5, // bottom middleDensity
+    0.5, // bottom topDensity
+    2.0, // top scale
+    1.5, // top detailScale
+    2.5, // top stretch
+    1.0, // top baseCurl
+    0.75, // top detailCurl
+    1.0, // top baseCurlScale
+    1.5, // top detailCurlScale
+    1.25, // top smoothness
+    0.0, // top softness
+    1500.0, // top bottom
+    2500.0, // top top
+    0.65, // top cover
+    1.0, // top extinction
+    0.75, // top ambientAmount
+    0.75, // top absorption
+    1.0, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    0.75, // top bottomDensity
+    1.0, // top middleDensity
+    0.75 // top topDensity
 )
-CLOUD_LAYER_PRESET_DAYNIGHT(Clearing,
-    // DAY Bottom Layer
-    1.75, 0.75, 1.35, 0.5, 0.65, 1.0, 1.0, 1.25, 0.0, 325.0, 1250.0, 0.3, 1.0, 0.85, 1.15, 0.6, 1.0, 1.0, 1.75, 1.25, 0.25,
-    // DAY Top Layer
-    2.0, 1.5, 2.75, 1.0, 1.35, 1.0, 1.5, 1.5, 0.0, 1250.0, 2250.0, 0.55, 1.0, 0.95, 1.0, 0.6, 1.0, 1.0, 0.85, 1.0, 0.75,
-    // NIGHT Bottom Layer (Clearing cover: 0.3 * 0.8 = 0.24)
-    1.75, 0.75, 1.35, 0.5, 0.65, 1.0, 1.0, 1.25, 0.0, 325.0, 1250.0, 0.3*0.8, 1.0*0.8, 0.85*0.4, 1.15*1.2, 0.6*0.3, 1.0*0.05, 1.0*0.2, 1.75*0.8, 1.25*0.8, 0.25*0.8,
-    // NIGHT Top Layer (Clearing cover: 0.55 * 0.8 = 0.44)
-    2.0, 1.5, 2.75, 1.0, 1.35, 1.0, 1.5, 1.5, 0.0, 1250.0, 2250.0, 0.55*0.8, 1.0*0.8, 0.95*0.4, 1.0*1.2, 0.6*0.3, 1.0*0.05, 1.0*0.2, 0.85*0.8, 1.0*0.8, 0.75*0.8
+CLOUD_LAYER_PRESET(Clearing,
+    1.75, // bottom scale
+    0.75, // bottom detailScale
+    1.35, // bottom stretch
+    0.5, // bottom baseCurl
+    0.65, // bottom detailCurl
+    1.0, // bottom baseCurlScale
+    1.0, // bottom detailCurlScale
+    1.25, // bottom smoothness
+    0.0, // bottom softness
+    325.0, // bottom bottom
+    1250.0, // bottom top
+    0.3, // bottom cover
+    1.0, // bottom extinction
+    0.85, // bottom ambientAmount
+    1.15, // bottom absorption
+    0.6, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    1.75, // bottom bottomDensity
+    1.25, // bottom middleDensity
+    0.25, // bottom topDensity
+    2.0, // top scale
+    1.5, // top detailScale
+    2.75, // top stretch
+    1.0, // top baseCurl
+    1.35, // top detailCurl
+    1.0, // top baseCurlScale
+    1.5, // top detailCurlScale
+    1.5, // top smoothness
+    0.0, // top softness
+    1250.0, // top bottom
+    2250.0, // top top
+    0.55, // top cover
+    1.0, // top extinction
+    0.95, // top ambientAmount
+    1.0, // top absorption
+    0.6, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    0.85, // top bottomDensity
+    1.0, // top middleDensity
+    0.75 // top topDensity
 )
-CLOUD_LAYER_PRESET_DAYNIGHT(Thunder,
-    // DAY Bottom Layer
-    2.0, 0.25, 1.15, 0.25, 0.5, 1.25, 1.25, 0.65, 0.0, 400.0, 2000.0, 0.4, 1.0, 0.75, 1.5, 1.5, 1.0, 1.0, 2.5, 1.25, 1.55,
-    // DAY Top Layer
-    2.0, 0.25, 2.0, 0.25, 0.5, 1.5, 1.0, 2.0, 0.0, 3000.0, 4000.0, 0.85, 1.0, 0.75, 0.35, 1.0, 1.0, 1.0, 0.75, 1.0, 0.75,
-    // NIGHT Bottom Layer (Thunder cover: 0.4 * 1.0 = 0.4)
-    2.0, 0.25, 1.15, 0.25, 0.5, 1.25, 1.25, 0.65, 0.0, 400.0, 2000.0, 0.4*1.0, 1.0*0.8, 0.75*0.4, 1.5*1.2, 1.5*0.3, 1.0*0.05, 1.0*0.2, 2.5*1.0, 1.25*1.0, 1.55*1.0,
-    // NIGHT Top Layer (Thunder cover: 0.85 * 1.0 = 0.85)
-    2.0, 0.25, 2.0, 0.25, 0.5, 1.5, 1.0, 2.0, 0.0, 3000.0, 4000.0, 0.85*1.0, 1.0*0.8, 0.75*0.4, 0.35*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 0.75*1.0, 1.0*1.0, 0.75*1.0
+CLOUD_LAYER_PRESET(Thunder,
+    2.0, // bottom scale
+    0.25, // bottom detailScale
+    1.15, // bottom stretch
+    0.25, // bottom baseCurl
+    0.5, // bottom detailCurl
+    1.25, // bottom baseCurlScale
+    1.25, // bottom detailCurlScale
+    0.65, // bottom smoothness
+    0.0, // bottom softness
+    400.0, // bottom bottom
+    2000.0, // bottom top
+    0.4, // bottom cover
+    1.0, // bottom extinction
+    0.75, // bottom ambientAmount
+    1.5, // bottom absorption
+    1.5, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    2.5, // bottom bottomDensity
+    1.25, // bottom middleDensity
+    1.55, // bottom topDensity
+    2.0, // top scale
+    0.25, // top detailScale
+    2.0, // top stretch
+    0.25, // top baseCurl
+    0.5, // top detailCurl
+    1.5, // top baseCurlScale
+    1.0, // top detailCurlScale
+    2.0, // top smoothness
+    0.0, // top softness
+    3000.0, // top bottom
+    4000.0, // top top
+    0.85, // top cover
+    1.0, // top extinction
+    0.75, // top ambientAmount
+    0.35, // top absorption
+    1.0, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    0.75, // top bottomDensity
+    1.0, // top middleDensity
+    0.75 // top topDensity
 )
-CLOUD_LAYER_PRESET_DAYNIGHT(Smog,
-    // DAY Bottom Layer
-    2.0, 0.5, 2.5, 0.25, 0.75, 1.0, 1.0, 1.25, 0.0, 400.0, 1500.0, 0.43, 1.0, 1.0, 1.25, 0.5, 1.0, 1.0, 1.5, 0.5, 0.0,
-    // DAY Top Layer
-    1.5, 1.5, 5.0, 1.5, 0.75, 1.0, 1.5, 1.25, 0.0, 1500.0, 3000.0, 0.4, 1.0, 0.6, 0.75, 0.45, 1.0, 1.0, 0.75, 1.0, 0.75,
-    // NIGHT Bottom Layer (Smog cover: 0.43 * 1.0 = 0.43)
-    2.0, 0.5, 2.5, 0.25, 0.75, 1.0, 1.0, 1.25, 0.0, 400.0, 1500.0, 0.43*1.0, 1.0*0.8, 1.0*0.4, 1.25*1.2, 0.5*0.3, 1.0*0.05, 1.0*0.2, 1.5*1.0, 0.5*1.0, 0.0*1.0,
-    // NIGHT Top Layer (Smog cover: 0.4 * 1.0 = 0.4)
-    1.5, 1.5, 5.0, 1.5, 0.75, 1.0, 1.5, 1.25, 0.0, 1500.0, 3000.0, 0.4*1.0, 1.0*0.8, 0.6*0.4, 0.75*1.2, 0.45*0.3, 1.0*0.05, 1.0*0.2, 0.75*1.0, 1.0*1.0, 0.75*1.0
+CLOUD_LAYER_PRESET(Smog,
+    2.0, // bottom scale
+    0.5, // bottom detailScale
+    2.5, // bottom stretch
+    0.25, // bottom baseCurl
+    0.75, // bottom detailCurl
+    1.0, // bottom baseCurlScale
+    1.0, // bottom detailCurlScale
+    1.25, // bottom smoothness
+    0.0, // bottom softness
+    400.0, // bottom bottom
+    1500.0, // bottom top
+    0.43, // bottom cover
+    1.0, // bottom extinction
+    1.0, // bottom ambientAmount
+    1.25, // bottom absorption
+    0.5, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    1.5, // bottom bottomDensity
+    0.5, // bottom middleDensity
+    0.0, // bottom topDensity
+    1.5, // top scale
+    1.5, // top detailScale
+    5.0, // top stretch
+    1.5, // top baseCurl
+    0.75, // top detailCurl
+    1.0, // top baseCurlScale
+    1.5, // top detailCurlScale
+    1.25, // top smoothness
+    0.0, // top softness
+    1500.0, // top bottom
+    3000.0, // top top
+    0.4, // top cover
+    1.0, // top extinction
+    0.6, // top ambientAmount
+    0.75, // top absorption
+    0.45, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    0.75, // top bottomDensity
+    1.0, // top middleDensity
+    0.75 // top topDensity
 )
-CLOUD_LAYER_PRESET_DAYNIGHT(Foggy,
-    // DAY Bottom Layer
-    5.0, 0.5, 2.0, 0.25, 0.15, 1.0, 1.0, 1.0, 0.0, 0.0, 700.0, 1.0, 1.0, 1.0, 2.0, 0.5, 1.0, 1.0, 1.1, 0.25, 0.0,
-    // DAY Top Layer
-    2.0, 1.5, 3.0, 1.0, 1.0, 1.0, 1.5, 1.5, 0.0, 2000.0, 3000.0, 0.0, 1.0, 1.0, 0.75, 1.0, 1.0, 1.0, 0.75, 1.0, 1.0,
-    // NIGHT Bottom Layer (Foggy cover: 1.0 * 1.1 = 1.1)
-    5.0, 0.5, 2.0, 0.25, 0.15, 1.0, 1.0, 1.0, 0.0, 0.0, 700.0, 1.0*1.1, 1.0*0.8, 1.0*0.4, 2.0*1.2, 0.5*0.3, 1.0*0.05, 1.0*0.2, 1.1*1.1, 0.25*1.1, 0.0*1.1,
-    // NIGHT Top Layer (Foggy cover: 0.0 * 1.1 = 0.0)
-    2.0, 1.5, 3.0, 1.0, 1.0, 1.0, 1.5, 1.5, 0.0, 2000.0, 3000.0, 0.0*1.1, 1.0*0.8, 1.0*0.4, 0.75*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 0.75*1.1, 1.0*1.1, 1.0*1.1
+CLOUD_LAYER_PRESET(Foggy,
+    5.0, // bottom scale
+    0.5, // bottom detailScale
+    2.0, // bottom stretch
+    0.25, // bottom baseCurl
+    0.15, // bottom detailCurl
+    1.0, // bottom baseCurlScale
+    1.0, // bottom detailCurlScale
+    1.0, // bottom smoothness
+    0.0, // bottom softness
+    0.0, // bottom bottom
+    700.0, // bottom top
+    1.0, // bottom cover
+    1.0, // bottom extinction
+    1.0, // bottom ambientAmount
+    2.0, // bottom absorption
+    0.5, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    1.1, // bottom bottomDensity
+    0.25, // bottom middleDensity
+    0.0, // bottom topDensity
+    2.0, // top scale
+    1.5, // top detailScale
+    3.0, // top stretch
+    1.0, // top baseCurl
+    1.0, // top detailCurl
+    1.0, // top baseCurlScale
+    1.5, // top detailCurlScale
+    1.5, // top smoothness
+    0.0, // top softness
+    2000.0, // top bottom
+    3000.0, // top top
+    0.0, // top cover
+    1.0, // top extinction
+    1.0, // top ambientAmount
+    0.75, // top absorption
+    1.0, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    0.75, // top bottomDensity
+    1.0, // top middleDensity
+    1.0 // top topDensity
 )
-CLOUD_LAYER_PRESET_DAYNIGHT(Snow,
-    // DAY Bottom Layer
-    2.0, 1.0, 1.75, 0.35, 0.45, 1.0, 1.0, 0.75, 0.0, 175.0, 1000.0, 0.65, 1.0, 0.85, 1.25, 0.6, 1.0, 1.0, 0.5, 1.0, 0.0,
-    // DAY Top Layer
-    1.75, 0.75, 1.35, 0.5, 0.65, 1.0, 1.0, 1.25, 0.0, 1500.0, 2000.0, 0.3, 1.0, 0.85, 1.15, 0.75, 1.0, 1.0, 1.75, 1.25, 0.25,
-    // NIGHT Bottom Layer (Snow cover: 0.65 * 1.0 = 0.65)
-    2.0, 1.0, 1.75, 0.35, 0.45, 1.0, 1.0, 0.75, 0.0, 175.0, 1000.0, 0.65*1.0, 1.0*0.8, 0.85*0.4, 1.25*1.2, 0.6*0.3, 1.0*0.05, 1.0*0.2, 0.5*1.0, 1.0*1.0, 0.0*1.0,
-    // NIGHT Top Layer (Snow cover: 0.3 * 1.0 = 0.3)
-    1.75, 0.75, 1.35, 0.5, 0.65, 1.0, 1.0, 1.25, 0.0, 1500.0, 2000.0, 0.3*1.0, 1.0*0.8, 0.85*0.4, 1.15*1.2, 0.75*0.3, 1.0*0.05, 1.0*0.2, 1.75*1.0, 1.25*1.0, 0.25*1.0
+CLOUD_LAYER_PRESET(Snow,
+    2.0, // bottom scale
+    1.0, // bottom detailScale
+    1.75, // bottom stretch
+    0.35, // bottom baseCurl
+    0.45, // bottom detailCurl
+    1.0, // bottom baseCurlScale
+    1.0, // bottom detailCurlScale
+    0.75, // bottom smoothness
+    0.0, // bottom softness
+    175.0, // bottom bottom
+    1000.0, // bottom top
+    0.65, // bottom cover
+    1.0, // bottom extinction
+    0.85, // bottom ambientAmount
+    1.25, // bottom absorption
+    0.6, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    0.5, // bottom bottomDensity
+    1.0, // bottom middleDensity
+    0.0, // bottom topDensity
+    1.75, // top scale
+    0.75, // top detailScale
+    1.35, // top stretch
+    0.5, // top baseCurl
+    0.65, // top detailCurl
+    1.0, // top baseCurlScale
+    1.0, // top detailCurlScale
+    1.25, // top smoothness
+    0.0, // top softness
+    1500.0, // top bottom
+    2000.0, // top top
+    0.3, // top cover
+    1.0, // top extinction
+    0.85, // top ambientAmount
+    1.15, // top absorption
+    0.75, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    1.75, // top bottomDensity
+    1.25, // top middleDensity
+    0.25 // top topDensity
 )
-CLOUD_LAYER_PRESET_DAYNIGHT(Blizzard,
-    // DAY Bottom Layer
-    2.0, 1.0, 1.75, 0.35, 0.45, 1.0, 1.0, 0.75, 0.0, 175.0, 1000.0, 0.5, 1.0, 0.85, 1.25, 0.7, 1.0, 1.0, 1.5, 1.0, 0.0,
-    // DAY Top Layer
-    1.75, 0.75, 1.35, 0.5, 0.65, 1.0, 1.0, 1.25, 0.0, 1500.0, 2000.0, 0.8, 1.0, 0.85, 1.15, 0.75, 1.0, 1.0, 1.0, 0.5, 0.5,
-    // NIGHT Bottom Layer (Blizzard cover: 0.5 * 1.0 = 0.5)
-    2.0, 1.0, 1.75, 0.35, 0.45, 1.0, 1.0, 0.75, 0.0, 175.0, 1000.0, 0.5*1.0, 1.0*0.8, 0.85*0.4, 1.25*1.2, 0.7*0.3, 1.0*0.05, 1.0*0.2, 1.5*1.0, 1.0*1.0, 0.0*1.0,
-    // NIGHT Top Layer (Blizzard cover: 0.8 * 1.0 = 0.8)
-    1.75, 0.75, 1.35, 0.5, 0.65, 1.0, 1.0, 1.25, 0.0, 1500.0, 2000.0, 0.8*1.0, 1.0*0.8, 0.85*0.4, 1.15*1.2, 0.75*0.3, 1.0*0.05, 1.0*0.2, 1.0*1.0, 0.5*1.0, 0.5*1.0
+CLOUD_LAYER_PRESET(Blizzard,
+    2.0, // bottom scale
+    1.0, // bottom detailScale
+    1.75, // bottom stretch
+    0.35, // bottom baseCurl
+    0.45, // bottom detailCurl
+    1.0, // bottom baseCurlScale
+    1.0, // bottom detailCurlScale
+    0.75, // bottom smoothness
+    0.0, // bottom softness
+    175.0, // bottom bottom
+    1000.0, // bottom top
+    0.5, // bottom cover
+    1.0, // bottom extinction
+    0.85, // bottom ambientAmount
+    1.25, // bottom absorption
+    0.7, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    1.5, // bottom bottomDensity
+    1.0, // bottom middleDensity
+    0.0, // bottom topDensity
+    1.75, // top scale
+    0.75, // top detailScale
+    1.35, // top stretch
+    0.5, // top baseCurl
+    0.65, // top detailCurl
+    1.0, // top baseCurlScale
+    1.0, // top detailCurlScale
+    1.25, // top smoothness
+    0.0, // top softness
+    1500.0, // top bottom
+    2000.0, // top top
+    0.8, // top cover
+    1.0, // top extinction
+    0.85, // top ambientAmount
+    1.15, // top absorption
+    0.75, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    1.0, // top bottomDensity
+    0.5, // top middleDensity
+    0.5 // top topDensity
 )
-CLOUD_LAYER_PRESET_DAYNIGHT(SnowLight,
-    // DAY Bottom Layer
-    2.0, 1.0, 1.75, 0.35, 0.35, 1.0, 1.0, 0.75, 0.0, 175.0, 1000.0, 0.5, 1.0, 1.0, 1.25, 1.0, 1.0, 1.0, 0.5, 1.0, 0.0,
-    // DAY Top Layer
-    1.75, 0.75, 1.35, 0.5, 0.65, 1.0, 1.0, 1.25, 0.0, 1500.0, 2000.0, 0.3, 1.0, 0.85, 1.15, 1.0, 1.0, 1.0, 1.75, 1.25, 0.25,
-    // NIGHT Bottom Layer (SnowLight cover: 0.5 * 1.0 = 0.5)
-    2.0, 1.0, 1.75, 0.35, 0.35, 1.0, 1.0, 0.75, 0.0, 175.0, 1000.0, 0.5*1.0, 1.0*0.8, 1.0*0.4, 1.25*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 0.5*1.0, 1.0*1.0, 0.0*1.0,
-    // NIGHT Top Layer (SnowLight cover: 0.3 * 1.0 = 0.3)
-    1.75, 0.75, 1.35, 0.5, 0.65, 1.0, 1.0, 1.25, 0.0, 1500.0, 2000.0, 0.3*1.0, 1.0*0.8, 0.85*0.4, 1.15*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 1.75*1.0, 1.25*1.0, 0.25*1.0
+CLOUD_LAYER_PRESET(SnowLight,
+    2.0, // bottom scale
+    1.0, // bottom detailScale
+    1.75, // bottom stretch
+    0.35, // bottom baseCurl
+    0.35, // bottom detailCurl
+    1.0, // bottom baseCurlScale
+    1.0, // bottom detailCurlScale
+    0.75, // bottom smoothness
+    0.0, // bottom softness
+    175.0, // bottom bottom
+    1000.0, // bottom top
+    0.5, // bottom cover
+    1.0, // bottom extinction
+    1.0, // bottom ambientAmount
+    1.25, // bottom absorption
+    1.0, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    0.5, // bottom bottomDensity
+    1.0, // bottom middleDensity
+    0.0, // bottom topDensity
+    1.75, // top scale
+    0.75, // top detailScale
+    1.35, // top stretch
+    0.5, // top baseCurl
+    0.65, // top detailCurl
+    1.0, // top baseCurlScale
+    1.0, // top detailCurlScale
+    1.25, // top smoothness
+    0.0, // top softness
+    1500.0, // top bottom
+    2000.0, // top top
+    0.3, // top cover
+    1.0, // top extinction
+    0.85, // top ambientAmount
+    1.15, // top absorption
+    1.0, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    1.75, // top bottomDensity
+    1.25, // top middleDensity
+    0.25 // top topDensity
 )
-CLOUD_LAYER_PRESET_DAYNIGHT(Halloween,
-    // DAY Bottom Layer
-    3.0, 0.25, 0.9, 1.0, 0.5, 1.0, 1.0, 0.35, 0.0, 350.0, 1000.0, 0.45, 1.0, 1.0, 1.25, 1.25, 1.0, 1.0, 2.0, 1.0, 0.0,
-    // DAY Top Layer
-    2.0, 1.5, 3.0, 2.0, 2.0, 1.0, 1.5, 1.5, 0.0, 1000.0, 3000.0, 0.3, 1.0, 1.0, 0.75, 1.0, 1.0, 1.0, 0.75, 1.0, 1.0,
-    // NIGHT Bottom Layer (Halloween cover: 0.45 * 1.0 = 0.45)
-    3.0, 0.25, 0.9, 1.0, 0.5, 1.0, 1.0, 0.35, 0.0, 350.0, 1000.0, 0.45*1.0, 1.0*0.8, 1.0*0.4, 1.25*1.2, 1.25*0.3, 1.0*0.05, 1.0*0.2, 2.0*1.0, 1.0*1.0, 0.0*1.0,
-    // NIGHT Top Layer (Halloween cover: 0.3 * 1.0 = 0.3)
-    2.0, 1.5, 3.0, 2.0, 2.0, 1.0, 1.5, 1.5, 0.0, 1000.0, 3000.0, 0.3*1.0, 1.0*0.8, 1.0*0.4, 0.75*1.2, 1.0*0.3, 1.0*0.05, 1.0*0.2, 0.75*1.0, 1.0*1.0, 1.0*1.0
+CLOUD_LAYER_PRESET(Halloween,
+    3.0, // bottom scale
+    0.25, // bottom detailScale
+    0.9, // bottom stretch
+    1.0, // bottom baseCurl
+    0.5, // bottom detailCurl
+    1.0, // bottom baseCurlScale
+    1.0, // bottom detailCurlScale
+    0.35, // bottom smoothness
+    0.0, // bottom softness
+    350.0, // bottom bottom
+    1000.0, // bottom top
+    0.45, // bottom cover
+    1.0, // bottom extinction
+    1.0, // bottom ambientAmount
+    1.25, // bottom absorption
+    1.25, // bottom luminance
+    1.0, // bottom sunLightPower
+    1.0, // bottom skyLightPower
+    2.0, // bottom bottomDensity
+    1.0, // bottom middleDensity
+    0.0, // bottom topDensity
+    2.0, // top scale
+    1.5, // top detailScale
+    3.0, // top stretch
+    2.0, // top baseCurl
+    2.0, // top detailCurl
+    1.0, // top baseCurlScale
+    1.5, // top detailCurlScale
+    1.5, // top smoothness
+    0.0, // top softness
+    1000.0, // top bottom
+    3000.0, // top top
+    0.3, // top cover
+    1.0, // top extinction
+    1.0, // top ambientAmount
+    0.75, // top absorption
+    1.0, // top luminance
+    1.0, // top sunLightPower
+    1.0, // top skyLightPower
+    0.75, // top bottomDensity
+    1.0, // top middleDensity
+    1.0 // top topDensity
 )
 
 struct LayerParameters
