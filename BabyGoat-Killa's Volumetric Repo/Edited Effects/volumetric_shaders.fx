@@ -924,7 +924,8 @@ LayerParameters mixLayerParams(LayerParameters fromParams, LayerParameters toPar
 {
     LayerParameters params;
     
-    params.scale = lerp(fromParams.scale, toParams.scale, ratio);
+    params.dayScale = lerp(fromParams.dayScale, toParams.dayScale, ratio);
+    params.nightScale = lerp(fromParams.nightScale, toParams.nightScale, ratio);
     params.detailScale = lerp(fromParams.detailScale, toParams.detailScale, ratio);
     params.stretch = lerp(fromParams.stretch, toParams.stretch, ratio);
     params.baseCurl = lerp(fromParams.baseCurl, toParams.baseCurl, ratio);
@@ -939,7 +940,8 @@ LayerParameters mixLayerParams(LayerParameters fromParams, LayerParameters toPar
     params.extinction = lerp(fromParams.extinction, toParams.extinction, ratio);
     params.ambientAmount = lerp(fromParams.ambientAmount, toParams.ambientAmount, ratio);
     params.absorption = lerp(fromParams.absorption, toParams.absorption, ratio);
-    params.luminance = lerp(fromParams.luminance, toParams.luminance, ratio);
+    params.dayLuminance = lerp(fromParams.dayLuminance, toParams.dayLuminance, ratio);
+    params.nightLuminance = lerp(fromParams.nightLuminance, toParams.nightLuminance, ratio);
     params.sunLightPower = lerp(fromParams.sunLightPower, toParams.sunLightPower, ratio);
     params.skyLightPower = lerp(fromParams.skyLightPower, toParams.skyLightPower, ratio);
     params.bottomDensity = lerp(fromParams.bottomDensity, toParams.bottomDensity, ratio);
@@ -976,7 +978,7 @@ float3 cloudExtents(float inBottom, float inTop)
     return float3(bottom, top, height);
 }
 
-float cloudNoise(float3 pos, float3 wind, LayerParameters layer)
+float cloudNoise(float3 pos, float3 wind, LayerParameters layer, float dayAmount)
 {
     const float curl_amount = 0.1;
     pos *= float2(1.0 / layer.stretch, 1.0).xyx;
@@ -999,11 +1001,12 @@ float cloudNoise(float3 pos, float3 wind, LayerParameters layer)
     return noise;
 }
 
-float cloudDensity(float3 pos, LayerParameters layer, float altitude, float altitudeDensity)
+float cloudDensity(float3 pos, LayerParameters layer, float altitude, float altitudeDensity, float dayAmount)
 {
     float time = timer * TIME_SCALE * cloudTimescale;
     float3 wind = cloudWind * time * WIND_SCALE;
-    float cloud = cloudNoise(pos * BASE_NOISE_SCALE * cloudScale * layer.scale, wind, layer);
+    float scale = lerp(layer.nightScale, layer.dayScale, dayAmount);
+    float cloud = cloudNoise(pos * BASE_NOISE_SCALE * cloudScale * scale, wind, layer, dayAmount);
     
     cloud = smoothstep(0.0, sqrt(layer.smoothness) * 2.0, sqrt(cloudCover * layer.cover * altitudeDensity) + cloud * smoothstep(-0.25, 0.25, altitude) - 1.0);
     return cloud;
@@ -1033,7 +1036,7 @@ float cloudLightMarch(float3 pos, LayerParameters layer, float3 lightDirection, 
     for (int i = 0; i < CLOUD_LIGHT_SAMPLES; ++i)
     {
         currentPos += lightDirection * stepSize;
-        density += cloudDensity(currentPos, layer, altitude, altitudeDensity) * stepSize;
+        density += cloudDensity(currentPos, layer, altitude, altitudeDensity, 1.0) * stepSize;
     }
     
     transmittance = exp(-density * absorption * layer.absorption * 10.0);
@@ -1150,9 +1153,13 @@ float nightTimeAmount()
 {
     float time = inputTimeOfDay;
     
-    if (time <= NIGHT_DAWN_END)
+    if (time <= 0.25)
     {
-        return saturate(1.0 - smoothstep(NIGHT_DAWN_START, NIGHT_DAWN_END, time));
+        return 1.0;
+    }
+    else if (time <= 0.291666)
+    {
+        return saturate(1.0 - smoothstep(0.25, 0.291666, time));
     }
     else
     {
@@ -1336,9 +1343,8 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float3 moonDirection = getMoonDirection();
     
     float3 sky = getSkyColor(ray.direction, dayAmount * (depth < range ? 0.0 : 1.0), nightAmount);
-    // JULES: Ensure sky has a minimum brightness at night to prevent black clouds
-    if (nightAmount > 0.5) { // Ensure it's recognizably night
-        sky = max(sky, float3(0.2f, 0.2f, 0.2f)); // Clamp to a minimum dark grey
+    if (nightAmount > 0.0) { 
+        sky = max(sky, float3(0.2f, 0.2f, 0.2f)); 
     }
 
     float enter = (height - ray.origin.y) / ray.direction.y;
@@ -1410,7 +1416,7 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
         float altitudeLighting = pow(min(1.0 / altitudeDensity, 1.0), 1.5);
         
         float fade = smoothstep(0.0, cloudYFade, layerAltitude) * smoothstep(0.0, cloudYFade, 1.0 - layerAltitude);
-        float density = cloudDensity(pos, layer, layerAltitude, altitudeDensity) * fade;
+        float density = cloudDensity(pos, layer, layerAltitude, altitudeDensity, dayAmount) * fade;
 
         if (density > cloudThreshold && !(auroraVisibility > 0.0 && pos.y > bottomLayer.top))
         {
@@ -1427,7 +1433,8 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
             float segmentExtinction = exp(-density * stepSize * cloudExtinction * layer.extinction * 0.08);
 
             float3 segmentLight = density * contribution * stepSize;
-            accumulatedLight += segmentLight * transmittance * layer.luminance;
+            float luminance = lerp(layer.nightLuminance, layer.dayLuminance, dayAmount);
+            accumulatedLight += segmentLight * transmittance * luminance;
             transmittance *= segmentExtinction;
         }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#define CLOUD_LAYER_PRESET(PRESET, BOTTOM_SCALE, BOTTOM_DETAIL_SCALE, BOTTOM_STRETCH, BOTTOM_BASE_CURL, BOTTOM_DETAIL_CURL, BOTTOM_BASE_CURL_SCALE, BOTTOM_DETAIL_CURL_SCALE, BOTTOM_SMOOTHNESS, BOTTOM_SOFTNESS, BOTTOM_BOTTOM, BOTTOM_TOP, BOTTOM_COVER, BOTTOM_EXTINCTION, BOTTOM_AMBIENT, BOTTOM_ABSORPTION, BOTTOM_LUMINANCE, BOTTOM_SUNLIGHT_POWER, BOTTOM_SKYLIGHT_POWER, BOTTOM_BOTTOM_DENSITY, BOTTOM_MIDDLE_DENSITY, BOTTOM_TOP_DENSITY, TOP_SCALE, TOP_DETAIL_SCALE, TOP_STRETCH, TOP_BASE_CURL, TOP_DETAIL_CURL, TOP_BASE_CURL_SCALE, TOP_DETAIL_CURL_SCALE, TOP_SMOOTHNESS, TOP_SOFTNESS, TOP_BOTTOM, TOP_TOP, TOP_COVER, TOP_EXTINCTION, TOP_AMBIENT, TOP_ABSORPTION, TOP_LUMINANCE, TOP_SUNLIGHT_POWER, TOP_SKYLIGHT_POWER, TOP_BOTTOM_DENSITY, TOP_MIDDLE_DENSITY, TOP_TOP_DENSITY) \
+#define CLOUD_LAYER_PRESET(PRESET, BOTTOM_DAY_SCALE, BOTTOM_NIGHT_SCALE, BOTTOM_DETAIL_SCALE, BOTTOM_STRETCH, BOTTOM_BASE_CURL, BOTTOM_DETAIL_CURL, BOTTOM_BASE_CURL_SCALE, BOTTOM_DETAIL_CURL_SCALE, BOTTOM_SMOOTHNESS, BOTTOM_SOFTNESS, BOTTOM_BOTTOM, BOTTOM_TOP, BOTTOM_COVER, BOTTOM_EXTINCTION, BOTTOM_AMBIENT, BOTTOM_ABSORPTION, BOTTOM_DAY_LUMINANCE, BOTTOM_NIGHT_LUMINANCE, BOTTOM_SUNLIGHT_POWER, BOTTOM_SKYLIGHT_POWER, BOTTOM_BOTTOM_DENSITY, BOTTOM_MIDDLE_DENSITY, BOTTOM_TOP_DENSITY, TOP_DAY_SCALE, TOP_NIGHT_SCALE, TOP_DETAIL_SCALE, TOP_STRETCH, TOP_BASE_CURL, TOP_DETAIL_CURL, TOP_BASE_CURL_SCALE, TOP_DETAIL_CURL_SCALE, TOP_SMOOTHNESS, TOP_SOFTNESS, TOP_BOTTOM, TOP_TOP, TOP_COVER, TOP_EXTINCTION, TOP_AMBIENT, TOP_ABSORPTION, TOP_DAY_LUMINANCE, TOP_NIGHT_LUMINANCE, TOP_SUNLIGHT_POWER, TOP_SKYLIGHT_POWER, TOP_BOTTOM_DENSITY, TOP_MIDDLE_DENSITY, TOP_TOP_DENSITY) \
 uniform float3 PRESET##BottomDayTint < \
     string ui_category = #PRESET " Bottom Layer"; \
     string ui_label = "Day Clouds Color"; \
@@ -11,15 +11,38 @@ uniform float3 PRESET##BottomNightTint < \
     string ui_label = "Night Clouds Color"; \
     string ui_type = "color"; \
 > = float3(1.0, 1.0, 1.0); \
-uniform float PRESET##BottomScale < \
+uniform float PRESET##BottomDayLuminance < \
     string ui_category = #PRESET " Bottom Layer"; \
-    bool ui_category_closed = true; \
-    string ui_label = "Scale"; \
+    string ui_label = "Day Luminance"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = BOTTOM_SCALE; \
+> = BOTTOM_DAY_LUMINANCE; \
+uniform float PRESET##BottomNightLuminance < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    string ui_label = "Night Luminance"; \
+    string ui_type = "drag"; \
+    float ui_min = 0.00; \
+    float ui_max = 2.00; \
+    float ui_step = 0.01; \
+> = BOTTOM_NIGHT_LUMINANCE; \
+uniform float PRESET##BottomDayScale < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    string ui_label = "Day Scale"; \
+    string ui_type = "drag"; \
+    float ui_min = 0.00; \
+    float ui_max = 2.00; \
+    float ui_step = 0.01; \
+> = BOTTOM_DAY_SCALE; \
+uniform float PRESET##BottomNightScale < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    string ui_label = "Night Scale"; \
+    string ui_type = "drag"; \
+    float ui_min = 0.00; \
+    float ui_max = 2.00; \
+    float ui_step = 0.01; \
+> = BOTTOM_NIGHT_SCALE; \
 uniform float PRESET##BottomDetailScale < \
     string ui_category = #PRESET " Bottom Layer"; \
     bool ui_category_closed = true; \
@@ -146,15 +169,6 @@ uniform float PRESET##BottomAbsorption < \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
 > = BOTTOM_ABSORPTION; \
-uniform float PRESET##BottomLuminance < \
-    string ui_category = #PRESET " Bottom Layer"; \
-    bool ui_category_closed = true; \
-    string ui_label = "Luminance"; \
-    string ui_type = "drag"; \
-    float ui_min = 0.00; \
-    float ui_max = 2.00; \
-    float ui_step = 0.01; \
-> = BOTTOM_LUMINANCE; \
 uniform float PRESET##BottomSunLightPower < \
     string ui_category = #PRESET " Bottom Layer"; \
     bool ui_category_closed = true; \
@@ -210,15 +224,38 @@ uniform float3 PRESET##TopNightTint < \
     string ui_label = "Night Clouds Color"; \
     string ui_type = "color"; \
 > = float3(1.0, 1.0, 1.0); \
-uniform float PRESET##TopScale < \
+uniform float PRESET##TopDayLuminance < \
     string ui_category = #PRESET " Top Layer"; \
-    bool ui_category_closed = true; \
-	string ui_label = "Scale"; \
+    string ui_label = "Day Luminance"; \
     string ui_type = "drag"; \
     float ui_min = 0.00; \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
-> = TOP_SCALE; \
+> = TOP_DAY_LUMINANCE; \
+uniform float PRESET##TopNightLuminance < \
+    string ui_category = #PRESET " Top Layer"; \
+    string ui_label = "Night Luminance"; \
+    string ui_type = "drag"; \
+    float ui_min = 0.00; \
+    float ui_max = 2.00; \
+    float ui_step = 0.01; \
+> = TOP_NIGHT_LUMINANCE; \
+uniform float PRESET##TopDayScale < \
+    string ui_category = #PRESET " Top Layer"; \
+    string ui_label = "Day Scale"; \
+    string ui_type = "drag"; \
+    float ui_min = 0.00; \
+    float ui_max = 2.00; \
+    float ui_step = 0.01; \
+> = TOP_DAY_SCALE; \
+uniform float PRESET##TopNightScale < \
+    string ui_category = #PRESET " Top Layer"; \
+    string ui_label = "Night Scale"; \
+    string ui_type = "drag"; \
+    float ui_min = 0.00; \
+    float ui_max = 2.00; \
+    float ui_step = 0.01; \
+> = TOP_NIGHT_SCALE; \
 uniform float PRESET##TopDetailScale < \
     string ui_category = #PRESET " Top Layer"; \
     bool ui_category_closed = true; \
@@ -345,15 +382,6 @@ uniform float PRESET##TopAbsorption < \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
 > = TOP_ABSORPTION; \
-uniform float PRESET##TopLuminance < \
-    string ui_category = #PRESET " Top Layer"; \
-    bool ui_category_closed = true; \
-	string ui_label = "Luminance"; \
-    string ui_type = "drag"; \
-    float ui_min = 0.00; \
-    float ui_max = 2.00; \
-    float ui_step = 0.01; \
-> = TOP_LUMINANCE; \
 uniform float PRESET##TopSunLightPower < \
     string ui_category = #PRESET " Top Layer"; \
     bool ui_category_closed = true; \
@@ -401,7 +429,8 @@ uniform float PRESET##TopTopDensity < \
 > = TOP_TOP_DENSITY;
 
 #define CLOUD_BOTTOM_LAYER(PRESET) \
-params.scale = PRESET##BottomScale; \
+params.dayScale = PRESET##BottomDayScale; \
+params.nightScale = PRESET##BottomNightScale; \
 params.detailScale = PRESET##BottomDetailScale; \
 params.stretch = PRESET##BottomStretch; \
 params.baseCurl = PRESET##BottomBaseCurl; \
@@ -416,7 +445,8 @@ params.cover = PRESET##BottomCover; \
 params.extinction = PRESET##BottomExtinction; \
 params.ambientAmount = PRESET##BottomAmbientAmount; \
 params.absorption = PRESET##BottomAbsorption; \
-params.luminance = PRESET##BottomLuminance; \
+params.dayLuminance = PRESET##BottomDayLuminance; \
+params.nightLuminance = PRESET##BottomNightLuminance; \
 params.sunLightPower = PRESET##BottomSunLightPower; \
 params.skyLightPower = PRESET##BottomSkyLightPower; \
 params.bottomDensity = PRESET##BottomBottomDensity; \
@@ -426,7 +456,8 @@ params.dayTintBottom = PRESET##BottomDayTint; \
 params.nightTintBottom = PRESET##BottomNightTint;
 
 #define CLOUD_TOP_LAYER(PRESET) \
-params.scale = PRESET##TopScale; \
+params.dayScale = PRESET##TopDayScale; \
+params.nightScale = PRESET##TopNightScale; \
 params.detailScale = PRESET##TopDetailScale; \
 params.stretch = PRESET##TopStretch; \
 params.baseCurl = PRESET##TopBaseCurl; \
@@ -441,7 +472,8 @@ params.cover = PRESET##TopCover; \
 params.extinction = PRESET##TopExtinction; \
 params.ambientAmount = PRESET##TopAmbientAmount; \
 params.absorption = PRESET##TopAbsorption; \
-params.luminance = PRESET##TopLuminance; \
+params.dayLuminance = PRESET##TopDayLuminance; \
+params.nightLuminance = PRESET##TopNightLuminance; \
 params.sunLightPower = PRESET##TopSunLightPower; \
 params.skyLightPower = PRESET##TopSkyLightPower; \
 params.bottomDensity = PRESET##TopBottomDensity; \
@@ -451,7 +483,8 @@ params.dayTintTop = PRESET##TopDayTint; \
 params.nightTintTop = PRESET##TopNightTint;
 
 CLOUD_LAYER_PRESET(Clear,
-    1.5, // bottom scale
+    1.5, // bottom day scale
+    1.5, // bottom night scale
     0.5, // bottom detailScale
     1.25, // bottom stretch
     0.5, // bottom baseCurl
@@ -466,13 +499,15 @@ CLOUD_LAYER_PRESET(Clear,
     1.0, // bottom extinction
     1.0, // bottom ambientAmount
     1.0, // bottom absorption
-    1.0, // bottom luminance
+1.0, // bottom day luminance
+1.0, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     2.0, // bottom bottomDensity
     1.0, // bottom middleDensity
     0.0, // bottom topDensity
-    2.0, // bottom scale
+    2.0, // top day scale
+    2.0, // top night scale
     1.5, // top detailScale
     3.0, // top stretch
     1.0, // top baseCurl
@@ -487,7 +522,8 @@ CLOUD_LAYER_PRESET(Clear,
     1.0, // top extinction
     1.0, // top ambientAmount
     0.75, // top absorption
-    1.0, // top luminance
+    1.0, // top day luminance
+    1.0, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
@@ -495,7 +531,8 @@ CLOUD_LAYER_PRESET(Clear,
     0.7 // top topDensity
 )
 CLOUD_LAYER_PRESET(ExtraSunny,
-    1.5, // bottom scale
+    1.5, // bottom day scale
+    1.5, // bottom night scale
     0.5, // bottom detailScale
     1.25, // bottom stretch
     0.5, // bottom baseCurl
@@ -510,13 +547,15 @@ CLOUD_LAYER_PRESET(ExtraSunny,
     1.0, // bottom extinction
     1.0, // bottom ambientAmount
     1.0, // bottom absorption
-    1.0, // bottom luminance
+1.0, // bottom day luminance
+1.0, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     2.0, // bottom bottomDensity
     1.0, // bottom middleDensity
     0.0, // bottom topDensity
-    2.0, // top scale
+    2.0, // top day scale
+    2.0, // top night scale
     1.5, // top detailScale
     3.0, // top stretch
     2.0, // top baseCurl
@@ -531,7 +570,8 @@ CLOUD_LAYER_PRESET(ExtraSunny,
     1.0, // top extinction
     1.0, // top ambientAmount
     0.75, // top absorption
-    1.0, // top luminance
+    1.0, // top day luminance
+    1.0, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
@@ -539,7 +579,8 @@ CLOUD_LAYER_PRESET(ExtraSunny,
     0.75 // top topDensity
 )
 CLOUD_LAYER_PRESET(Clouds,
-    3.0, // bottom scale
+    3.0, // bottom day scale
+    3.0, // bottom night scale
     0.25, // bottom detailScale
     0.9, // bottom stretch
     0.25, // bottom baseCurl
@@ -554,13 +595,15 @@ CLOUD_LAYER_PRESET(Clouds,
     1.0, // bottom extinction
     1.0, // bottom ambientAmount
     1.25, // bottom absorption
-    1.25, // bottom luminance
+    1.25, // bottom day luminance
+    1.25, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     2.0, // bottom bottomDensity
     1.0, // bottom middleDensity
     0.0, // bottom topDensity
-    2.0, // top scale
+    2.0, // top day scale
+    2.0, // top night scale
     1.5, // top detailScale
     3.0, // top stretch
     1.0, // top baseCurl
@@ -575,7 +618,8 @@ CLOUD_LAYER_PRESET(Clouds,
     1.0, // top extinction
     1.0, // top ambientAmount
     0.75, // top absorption
-    1.0, // top luminance
+    1.0, // top day luminance
+    1.0, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
@@ -583,7 +627,8 @@ CLOUD_LAYER_PRESET(Clouds,
     1.0 // top topDensity
 )
 CLOUD_LAYER_PRESET(Overcast,
-    1.5, // bottom scale
+    1.5, // bottom day scale
+    1.5, // bottom night scale
     0.5, // bottom detailScale
     1.25, // bottom stretch
     0.25, // bottom baseCurl
@@ -598,13 +643,15 @@ CLOUD_LAYER_PRESET(Overcast,
     1.0, // bottom extinction
     1.25, // bottom ambientAmount
     0.75, // bottom absorption
-    1.0, // bottom luminance
+    1.0, // bottom day luminance
+    1.0, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     1.5, // bottom bottomDensity
     0.5, // bottom middleDensity
     0.0, // bottom topDensity
-    2.0, // top scale
+    2.0, // top day scale
+    2.0, // top night scale
     1.5, // top detailScale
     3.0, // top stretch
     1.5, // top baseCurl
@@ -619,7 +666,8 @@ CLOUD_LAYER_PRESET(Overcast,
     1.0, // top extinction
     1.0, // top ambientAmount
     0.75, // top absorption
-    1.0, // top luminance
+    1.0, // top day luminance
+    1.0, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
@@ -627,7 +675,8 @@ CLOUD_LAYER_PRESET(Overcast,
     0.75 // top topDensity
 )
 CLOUD_LAYER_PRESET(Rain,
-    2.0, // bottom scale
+    2.0, // bottom day scale
+    2.0, // bottom night scale
     1.0, // bottom detailScale
     1.5, // bottom stretch
     0.5, // bottom baseCurl
@@ -642,13 +691,15 @@ CLOUD_LAYER_PRESET(Rain,
     1.0, // bottom extinction
     0.75, // bottom ambientAmount
     1.5, // bottom absorption
-    1.5, // bottom luminance
+    1.5, // bottom day luminance
+    1.5, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     2.0, // bottom bottomDensity
     1.5, // bottom middleDensity
     0.5, // bottom topDensity
-    2.0, // top scale
+    2.0, // top day scale
+    2.0, // top night scale
     1.5, // top detailScale
     2.5, // top stretch
     1.0, // top baseCurl
@@ -663,7 +714,8 @@ CLOUD_LAYER_PRESET(Rain,
     1.0, // top extinction
     0.75, // top ambientAmount
     0.75, // top absorption
-    1.0, // top luminance
+    1.0, // top day luminance
+    1.0, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
@@ -671,7 +723,8 @@ CLOUD_LAYER_PRESET(Rain,
     0.75 // top topDensity
 )
 CLOUD_LAYER_PRESET(Clearing,
-    1.75, // bottom scale
+    1.75, // bottom day scale
+    1.75, // bottom night scale
     0.75, // bottom detailScale
     1.35, // bottom stretch
     0.5, // bottom baseCurl
@@ -686,13 +739,15 @@ CLOUD_LAYER_PRESET(Clearing,
     1.0, // bottom extinction
     0.85, // bottom ambientAmount
     1.15, // bottom absorption
-    0.6, // bottom luminance
+    0.6, // bottom day luminance
+    0.6, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     1.75, // bottom bottomDensity
     1.25, // bottom middleDensity
     0.25, // bottom topDensity
-    2.0, // top scale
+    2.0, // top day scale
+    2.0, // top night scale
     1.5, // top detailScale
     2.75, // top stretch
     1.0, // top baseCurl
@@ -707,7 +762,8 @@ CLOUD_LAYER_PRESET(Clearing,
     1.0, // top extinction
     0.95, // top ambientAmount
     1.0, // top absorption
-    0.6, // top luminance
+    0.6, // top day luminance
+    0.6, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     0.85, // top bottomDensity
@@ -715,7 +771,8 @@ CLOUD_LAYER_PRESET(Clearing,
     0.75 // top topDensity
 )
 CLOUD_LAYER_PRESET(Thunder,
-    2.0, // bottom scale
+    2.0, // bottom day scale
+    2.0, // bottom night scale
     0.25, // bottom detailScale
     1.15, // bottom stretch
     0.25, // bottom baseCurl
@@ -730,13 +787,15 @@ CLOUD_LAYER_PRESET(Thunder,
     1.0, // bottom extinction
     0.75, // bottom ambientAmount
     1.5, // bottom absorption
-    1.5, // bottom luminance
+    1.5, // bottom day luminance
+    1.5, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     2.5, // bottom bottomDensity
     1.25, // bottom middleDensity
     1.55, // bottom topDensity
-    2.0, // top scale
+    2.0, // top day scale
+    2.0, // top night scale
     0.25, // top detailScale
     2.0, // top stretch
     0.25, // top baseCurl
@@ -751,7 +810,8 @@ CLOUD_LAYER_PRESET(Thunder,
     1.0, // top extinction
     0.75, // top ambientAmount
     0.35, // top absorption
-    1.0, // top luminance
+    1.0, // top day luminance
+    1.0, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
@@ -759,7 +819,8 @@ CLOUD_LAYER_PRESET(Thunder,
     0.75 // top topDensity
 )
 CLOUD_LAYER_PRESET(Smog,
-    2.0, // bottom scale
+    2.0, // bottom day scale
+    2.0, // bottom night scale
     0.5, // bottom detailScale
     2.5, // bottom stretch
     0.25, // bottom baseCurl
@@ -774,13 +835,15 @@ CLOUD_LAYER_PRESET(Smog,
     1.0, // bottom extinction
     1.0, // bottom ambientAmount
     1.25, // bottom absorption
-    0.5, // bottom luminance
+    0.5, // bottom day luminance
+    0.5, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     1.5, // bottom bottomDensity
     0.5, // bottom middleDensity
     0.0, // bottom topDensity
-    1.5, // top scale
+    1.5, // top day scale
+    1.5, // top night scale
     1.5, // top detailScale
     5.0, // top stretch
     1.5, // top baseCurl
@@ -795,7 +858,8 @@ CLOUD_LAYER_PRESET(Smog,
     1.0, // top extinction
     0.6, // top ambientAmount
     0.75, // top absorption
-    0.45, // top luminance
+    0.45, // top day luminance
+    0.45, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
@@ -803,7 +867,8 @@ CLOUD_LAYER_PRESET(Smog,
     0.75 // top topDensity
 )
 CLOUD_LAYER_PRESET(Foggy,
-    5.0, // bottom scale
+    5.0, // bottom day scale
+    5.0, // bottom night scale
     0.5, // bottom detailScale
     2.0, // bottom stretch
     0.25, // bottom baseCurl
@@ -818,13 +883,15 @@ CLOUD_LAYER_PRESET(Foggy,
     1.0, // bottom extinction
     1.0, // bottom ambientAmount
     2.0, // bottom absorption
-    0.5, // bottom luminance
+    0.5, // bottom day luminance
+    0.5, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     1.1, // bottom bottomDensity
     0.25, // bottom middleDensity
     0.0, // bottom topDensity
-    2.0, // top scale
+    2.0, // top day scale
+    2.0, // top night scale
     1.5, // top detailScale
     3.0, // top stretch
     1.0, // top baseCurl
@@ -839,7 +906,8 @@ CLOUD_LAYER_PRESET(Foggy,
     1.0, // top extinction
     1.0, // top ambientAmount
     0.75, // top absorption
-    1.0, // top luminance
+    1.0, // top day luminance
+    1.0, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
@@ -847,7 +915,8 @@ CLOUD_LAYER_PRESET(Foggy,
     1.0 // top topDensity
 )
 CLOUD_LAYER_PRESET(Snow,
-    2.0, // bottom scale
+    2.0, // bottom day scale
+    2.0, // bottom night scale
     1.0, // bottom detailScale
     1.75, // bottom stretch
     0.35, // bottom baseCurl
@@ -862,13 +931,15 @@ CLOUD_LAYER_PRESET(Snow,
     1.0, // bottom extinction
     0.85, // bottom ambientAmount
     1.25, // bottom absorption
-    0.6, // bottom luminance
+    0.6, // bottom day luminance
+    0.6, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     0.5, // bottom bottomDensity
     1.0, // bottom middleDensity
     0.0, // bottom topDensity
-    1.75, // top scale
+    1.75, // top day scale
+    1.75, // top night scale
     0.75, // top detailScale
     1.35, // top stretch
     0.5, // top baseCurl
@@ -883,7 +954,8 @@ CLOUD_LAYER_PRESET(Snow,
     1.0, // top extinction
     0.85, // top ambientAmount
     1.15, // top absorption
-    0.75, // top luminance
+    0.75, // top day luminance
+    0.75, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     1.75, // top bottomDensity
@@ -891,7 +963,8 @@ CLOUD_LAYER_PRESET(Snow,
     0.25 // top topDensity
 )
 CLOUD_LAYER_PRESET(Blizzard,
-    2.0, // bottom scale
+    2.0, // bottom day scale
+    2.0, // bottom night scale
     1.0, // bottom detailScale
     1.75, // bottom stretch
     0.35, // bottom baseCurl
@@ -906,13 +979,15 @@ CLOUD_LAYER_PRESET(Blizzard,
     1.0, // bottom extinction
     0.85, // bottom ambientAmount
     1.25, // bottom absorption
-    0.7, // bottom luminance
+    0.7, // bottom day luminance
+    0.7, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     1.5, // bottom bottomDensity
     1.0, // bottom middleDensity
     0.0, // bottom topDensity
-    1.75, // top scale
+    1.75, // top day scale
+    1.75, // top night scale
     0.75, // top detailScale
     1.35, // top stretch
     0.5, // top baseCurl
@@ -927,7 +1002,8 @@ CLOUD_LAYER_PRESET(Blizzard,
     1.0, // top extinction
     0.85, // top ambientAmount
     1.15, // top absorption
-    0.75, // top luminance
+    0.75, // top day luminance
+    0.75, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     1.0, // top bottomDensity
@@ -935,7 +1011,8 @@ CLOUD_LAYER_PRESET(Blizzard,
     0.5 // top topDensity
 )
 CLOUD_LAYER_PRESET(SnowLight,
-    2.0, // bottom scale
+    2.0, // bottom day scale
+    2.0, // bottom night scale
     1.0, // bottom detailScale
     1.75, // bottom stretch
     0.35, // bottom baseCurl
@@ -950,13 +1027,15 @@ CLOUD_LAYER_PRESET(SnowLight,
     1.0, // bottom extinction
     1.0, // bottom ambientAmount
     1.25, // bottom absorption
-    1.0, // bottom luminance
+    1.0, // bottom day luminance
+    1.0, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     0.5, // bottom bottomDensity
     1.0, // bottom middleDensity
     0.0, // bottom topDensity
-    1.75, // top scale
+    1.75, // top day scale
+    1.75, // top night scale
     0.75, // top detailScale
     1.35, // top stretch
     0.5, // top baseCurl
@@ -971,7 +1050,8 @@ CLOUD_LAYER_PRESET(SnowLight,
     1.0, // top extinction
     0.85, // top ambientAmount
     1.15, // top absorption
-    1.0, // top luminance
+    1.0, // top day luminance
+    1.0, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     1.75, // top bottomDensity
@@ -979,7 +1059,8 @@ CLOUD_LAYER_PRESET(SnowLight,
     0.25 // top topDensity
 )
 CLOUD_LAYER_PRESET(Halloween,
-    3.0, // bottom scale
+    3.0, // bottom day scale
+    3.0, // bottom night scale
     0.25, // bottom detailScale
     0.9, // bottom stretch
     1.0, // bottom baseCurl
@@ -994,13 +1075,15 @@ CLOUD_LAYER_PRESET(Halloween,
     1.0, // bottom extinction
     1.0, // bottom ambientAmount
     1.25, // bottom absorption
-    1.25, // bottom luminance
+    1.25, // bottom day luminance
+    1.25, // bottom night luminance
     1.0, // bottom sunLightPower
     1.0, // bottom skyLightPower
     2.0, // bottom bottomDensity
     1.0, // bottom middleDensity
     0.0, // bottom topDensity
-    2.0, // top scale
+    2.0, // top day scale
+    2.0, // top night scale
     1.5, // top detailScale
     3.0, // top stretch
     2.0, // top baseCurl
@@ -1015,7 +1098,8 @@ CLOUD_LAYER_PRESET(Halloween,
     1.0, // top extinction
     1.0, // top ambientAmount
     0.75, // top absorption
-    1.0, // top luminance
+    1.0, // top day luminance
+    1.0, // top night luminance
     1.0, // top sunLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
@@ -1025,7 +1109,8 @@ CLOUD_LAYER_PRESET(Halloween,
 
 struct LayerParameters
 {
-    float scale;
+    float dayScale;
+    float nightScale;
     float detailScale;
     float stretch;
     float baseCurl;
@@ -1040,7 +1125,8 @@ struct LayerParameters
     float extinction;
     float ambientAmount;
     float absorption;
-    float luminance;
+    float dayLuminance;
+    float nightLuminance;
     float sunLightPower;
     float skyLightPower;
     float bottomDensity;
