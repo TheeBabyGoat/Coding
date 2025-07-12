@@ -1338,7 +1338,7 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float3 sky = getSkyColor(ray.direction, dayAmount * (depth < range ? 0.0 : 1.0), nightAmount);
     // JULES: Ensure sky has a minimum brightness at night to prevent black clouds
     if (nightAmount > 0.5) { // Ensure it's recognizably night
-        sky = max(sky, float3(0.05f, 0.05f, 0.05f)); // Clamp to a minimum dark grey
+        sky = max(sky, float3(0.2f, 0.2f, 0.2f)); // Clamp to a minimum dark grey
     }
 
     float enter = (height - ray.origin.y) / ray.direction.y;
