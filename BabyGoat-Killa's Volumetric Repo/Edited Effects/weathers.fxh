@@ -1,6 +1,16 @@
 #pragma once
 
 #define CLOUD_LAYER_PRESET(PRESET, BOTTOM_SCALE, BOTTOM_DETAIL_SCALE, BOTTOM_STRETCH, BOTTOM_BASE_CURL, BOTTOM_DETAIL_CURL, BOTTOM_BASE_CURL_SCALE, BOTTOM_DETAIL_CURL_SCALE, BOTTOM_SMOOTHNESS, BOTTOM_SOFTNESS, BOTTOM_BOTTOM, BOTTOM_TOP, BOTTOM_COVER, BOTTOM_EXTINCTION, BOTTOM_AMBIENT, BOTTOM_ABSORPTION, BOTTOM_LUMINANCE, BOTTOM_SUNLIGHT_POWER, BOTTOM_SKYLIGHT_POWER, BOTTOM_BOTTOM_DENSITY, BOTTOM_MIDDLE_DENSITY, BOTTOM_TOP_DENSITY, TOP_SCALE, TOP_DETAIL_SCALE, TOP_STRETCH, TOP_BASE_CURL, TOP_DETAIL_CURL, TOP_BASE_CURL_SCALE, TOP_DETAIL_CURL_SCALE, TOP_SMOOTHNESS, TOP_SOFTNESS, TOP_BOTTOM, TOP_TOP, TOP_COVER, TOP_EXTINCTION, TOP_AMBIENT, TOP_ABSORPTION, TOP_LUMINANCE, TOP_SUNLIGHT_POWER, TOP_SKYLIGHT_POWER, TOP_BOTTOM_DENSITY, TOP_MIDDLE_DENSITY, TOP_TOP_DENSITY) \
+uniform float3 PRESET##BottomDayTint < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    string ui_label = "Day Clouds Color"; \
+    string ui_type = "color"; \
+> = float3(1.0, 1.0, 1.0); \
+uniform float3 PRESET##BottomNightTint < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    string ui_label = "Night Clouds Color"; \
+    string ui_type = "color"; \
+> = float3(1.0, 1.0, 1.0); \
 uniform float PRESET##BottomScale < \
     string ui_category = #PRESET " Bottom Layer"; \
     bool ui_category_closed = true; \
@@ -190,6 +200,16 @@ uniform float PRESET##BottomTopDensity < \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
 > = BOTTOM_TOP_DENSITY; \
+uniform float3 PRESET##TopDayTint < \
+    string ui_category = #PRESET " Top Layer"; \
+    string ui_label = "Day Clouds Color"; \
+    string ui_type = "color"; \
+> = float3(1.0, 1.0, 1.0); \
+uniform float3 PRESET##TopNightTint < \
+    string ui_category = #PRESET " Top Layer"; \
+    string ui_label = "Night Clouds Color"; \
+    string ui_type = "color"; \
+> = float3(1.0, 1.0, 1.0); \
 uniform float PRESET##TopScale < \
     string ui_category = #PRESET " Top Layer"; \
     bool ui_category_closed = true; \
@@ -401,7 +421,9 @@ params.sunLightPower = PRESET##BottomSunLightPower; \
 params.skyLightPower = PRESET##BottomSkyLightPower; \
 params.bottomDensity = PRESET##BottomBottomDensity; \
 params.middleDensity = PRESET##BottomMiddleDensity; \
-params.topDensity = PRESET##BottomTopDensity;
+params.topDensity = PRESET##BottomTopDensity; \
+params.dayTintBottom = PRESET##BottomDayTint; \
+params.nightTintBottom = PRESET##BottomNightTint;
 
 #define CLOUD_TOP_LAYER(PRESET) \
 params.scale = PRESET##TopScale; \
@@ -424,7 +446,9 @@ params.sunLightPower = PRESET##TopSunLightPower; \
 params.skyLightPower = PRESET##TopSkyLightPower; \
 params.bottomDensity = PRESET##TopBottomDensity; \
 params.middleDensity = PRESET##TopMiddleDensity; \
-params.topDensity = PRESET##TopTopDensity;
+params.topDensity = PRESET##TopTopDensity; \
+params.dayTintTop = PRESET##TopDayTint; \
+params.nightTintTop = PRESET##TopNightTint;
 
 CLOUD_LAYER_PRESET(Clear,
     1.5, // bottom scale
@@ -1022,4 +1046,8 @@ struct LayerParameters
     float bottomDensity;
     float middleDensity;
     float topDensity;
+    float3 dayTintBottom;
+    float3 nightTintBottom;
+    float3 dayTintTop;
+    float3 nightTintTop;
 };

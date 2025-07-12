@@ -945,6 +945,10 @@ LayerParameters mixLayerParams(LayerParameters fromParams, LayerParameters toPar
     params.bottomDensity = lerp(fromParams.bottomDensity, toParams.bottomDensity, ratio);
     params.middleDensity = lerp(fromParams.middleDensity, toParams.middleDensity, ratio);
     params.topDensity = lerp(fromParams.topDensity, toParams.topDensity, ratio);
+    params.dayTintBottom = lerp(fromParams.dayTintBottom, toParams.dayTintBottom, ratio);
+    params.nightTintBottom = lerp(fromParams.nightTintBottom, toParams.nightTintBottom, ratio);
+    params.dayTintTop = lerp(fromParams.dayTintTop, toParams.dayTintTop, ratio);
+    params.nightTintTop = lerp(fromParams.nightTintTop, toParams.nightTintTop, ratio);
     
     return params;
 }
@@ -1433,6 +1437,21 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float3 back = tex2D(ReShade::BackBuffer, uv).rgb;
     sky = lerp(sky, back, saturate(transmittance));
     float3 cloudColor = 1.0 - exp(-accumulatedLight * cloudLuminanceMultiplier);
+
+    // Determine active tint based on the final position of the ray.
+    // This is an approximation: if the ray ends up high, we assume top layer tint dominates.
+    // If it ends up low (within bottom layer's original height), bottom layer tint dominates.
+    float3 activeTint;
+    if (pos.y < bottomLayer.top && bottomLayer.cover > 0.0) { // If ray ended within bottom layer's original top extent
+        activeTint = lerp(bottomLayer.nightTintBottom, bottomLayer.dayTintBottom, dayAmount);
+    } else if (topLayer.cover > 0.0) { // Otherwise, if there's a top layer, use its tint
+        activeTint = lerp(topLayer.nightTintTop, topLayer.dayTintTop, dayAmount);
+    } else { // Fallback if somehow no specific layer is identified (e.g. only bottom layer exists and pos is above it)
+        activeTint = lerp(bottomLayer.nightTintBottom, bottomLayer.dayTintBottom, dayAmount);
+    }
+    
+    cloudColor *= activeTint;
+
     float3 finalColor = cloudColor + sky * transmittance;
     float blend = smoothstep(0.0, 1.0, minDistance / far);
     
