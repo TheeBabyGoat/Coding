@@ -478,6 +478,11 @@ float4 PS_Final(float4 pos : SV_POSITION, float2 uv : TEXCOORD) : SV_Target
     return finalColor;
 }
 
+float4 PS_Debug(float4 pos : SV_POSITION, float2 uv : TEXCOORD) : SV_Target
+{
+    return float4(1.0, 0.0, 0.0, 1.0);
+}
+
 technique Raindrops < 
     string ui_label = "PulseV RainDrops";
     string ui_tooltip = "RainDrops Shader";
