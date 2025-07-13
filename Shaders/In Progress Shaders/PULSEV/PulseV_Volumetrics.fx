@@ -200,9 +200,9 @@ uniform float cloudRenderDistance <
 uniform int cloudVolumeSamples <
     string ui_category = "Global Settings";
     string ui_type = "slider";
-    int ui_min = 10;
-    int ui_max = 200;
-> = 64;
+    int ui_min = 128;
+    int ui_max = 1024;
+> = 128;
 uniform float cloudTimescale <
     string ui_category = "Global Settings";
     string ui_type = "drag";
@@ -386,14 +386,6 @@ uniform float cloudSunLightPower <
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 0.15;
-uniform float cloudMoonLightPower <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
-    string ui_type = "drag";
-    float ui_min = 0.01;
-    float ui_max = 8.0;
-    float ui_step = 0.01;
-> = 0.3;
 uniform float cloudSkyLightPower <
     string ui_category = "Advanced Global Settings";
     bool hidden = !ADVANCED;
@@ -427,6 +419,27 @@ uniform float cloudDepthEdgeThreshold <
     float ui_step = 0.1;
 > = 30.0;
 
+uniform bool enableRgbClouds <
+    string ui_category = "RGB Clouds";
+    string ui_label = "Enable RGB Clouds";
+> = false;
+uniform float rgbCloudsSpeed <
+    string ui_category = "RGB Clouds";
+    string ui_label = "Speed";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 10.0;
+    float ui_step = 0.1;
+> = 1.0;
+uniform float rgbCloudsIntensity <
+    string ui_category = "RGB Clouds";
+    string ui_label = "Intensity";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 1.0;
+    float ui_step = 0.01;
+> = 0.5;
+
 uniform float auroraScale <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
@@ -459,10 +472,10 @@ uniform float auroraCurl <
     float ui_step = 0.01;
 > = 0.5;
 uniform int auroraVolumeSamples <
-    string ui_category = "Global Settings";
+    string ui_category = "Aurora Settings";
     string ui_type = "slider";
-    int ui_min = 8;
-    int ui_max = 128;
+    int ui_min = 128;
+    int ui_max = 1024;
 > = 128;
 uniform float auroraHeightOffset <
     string ui_category = "Aurora Settings";
@@ -941,10 +954,15 @@ LayerParameters mixLayerParams(LayerParameters fromParams, LayerParameters toPar
     params.absorption = lerp(fromParams.absorption, toParams.absorption, ratio);
     params.luminance = lerp(fromParams.luminance, toParams.luminance, ratio);
     params.sunLightPower = lerp(fromParams.sunLightPower, toParams.sunLightPower, ratio);
+    params.moonLightPower = lerp(fromParams.moonLightPower, toParams.moonLightPower, ratio);
     params.skyLightPower = lerp(fromParams.skyLightPower, toParams.skyLightPower, ratio);
     params.bottomDensity = lerp(fromParams.bottomDensity, toParams.bottomDensity, ratio);
     params.middleDensity = lerp(fromParams.middleDensity, toParams.middleDensity, ratio);
     params.topDensity = lerp(fromParams.topDensity, toParams.topDensity, ratio);
+    params.dayTintBottom = lerp(fromParams.dayTintBottom, toParams.dayTintBottom, ratio);
+    params.nightTintBottom = lerp(fromParams.nightTintBottom, toParams.nightTintBottom, ratio);
+    params.dayTintTop = lerp(fromParams.dayTintTop, toParams.dayTintTop, ratio);
+    params.nightTintTop = lerp(fromParams.nightTintTop, toParams.nightTintTop, ratio);
     
     return params;
 }
@@ -1146,9 +1164,13 @@ float nightTimeAmount()
 {
     float time = inputTimeOfDay;
     
-    if (time <= NIGHT_DAWN_END)
+    if (time <= 0.25)
     {
-        return saturate(1.0 - smoothstep(NIGHT_DAWN_START, NIGHT_DAWN_END, time));
+        return 1.0;
+    }
+    else if (time <= 0.291666)
+    {
+        return saturate(1.0 - smoothstep(0.25, 0.291666, time));
     }
     else
     {
@@ -1332,6 +1354,9 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float3 moonDirection = getMoonDirection();
     
     float3 sky = getSkyColor(ray.direction, dayAmount * (depth < range ? 0.0 : 1.0), nightAmount);
+    if (nightAmount > 0.0) { 
+        sky = max(sky, float3(0.2f, 0.2f, 0.2f)); 
+    }
 
     float enter = (height - ray.origin.y) / ray.direction.y;
     float exit = (height + thickness - ray.origin.y) / ray.direction.y;
@@ -1361,7 +1386,8 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float sunPhase = phase(cloudForwardScatter, sunCosTheta);
     float moonPhase = phase(cloudForwardScatter, moonCosTheta);
     float3 sunLightBase = doDayLighting ? (cloudSunLightPower * sunPhase).xxx : 0.0;
-    float3 moonLightBase = doNightLighting ? (cloudMoonLightPower * moonPhase).xxx : 0.0;
+    float3 moonLightBaseBottom = doNightLighting ? (bottomLayer.moonLightPower * moonPhase).xxx : 0.0;
+    float3 moonLightBaseTop = doNightLighting ? (topLayer.moonLightPower * moonPhase).xxx : 0.0;
     float3 skyLightBase = cloudSkyLightPower.xxx;
     
     float auroraVisibility = auroraAmount();
@@ -1383,14 +1409,17 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
         }
 
         LayerParameters layer;
+        float3 moonLightBase;
         
         if (pos.y > bottomLayer.top)
         {
             layer = topLayer;
+            moonLightBase = moonLightBaseTop;
         }
         else
         {
             layer = bottomLayer;
+            moonLightBase = moonLightBaseBottom;
         }
         
         float layerAltitude = remap(pos.y, layer.bottom, layer.top);
@@ -1429,6 +1458,32 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float3 back = tex2D(ReShade::BackBuffer, uv).rgb;
     sky = lerp(sky, back, saturate(transmittance));
     float3 cloudColor = 1.0 - exp(-accumulatedLight * cloudLuminanceMultiplier);
+
+    // Determine active tint based on the final position of the ray.
+    // This is an approximation: if the ray ends up high, we assume top layer tint dominates.
+    // If it ends up low (within bottom layer's original height), bottom layer tint dominates.
+    float3 activeTint;
+    if (pos.y < bottomLayer.top && bottomLayer.cover > 0.0) { // If ray ended within bottom layer's original top extent
+        activeTint = lerp(bottomLayer.nightTintBottom, bottomLayer.dayTintBottom, dayAmount);
+    } else if (topLayer.cover > 0.0) { // Otherwise, if there's a top layer, use its tint
+        activeTint = lerp(topLayer.nightTintTop, topLayer.dayTintTop, dayAmount);
+    } else { // Fallback if somehow no specific layer is identified (e.g. only bottom layer exists and pos is above it)
+        activeTint = lerp(bottomLayer.nightTintBottom, bottomLayer.dayTintBottom, dayAmount);
+    }
+    
+    if (enableRgbClouds)
+    {
+        float time = timer * rgbCloudsSpeed * 0.001;
+        float3 rgb = float3(
+            0.5 + 0.5 * sin(time),
+            0.5 + 0.5 * sin(time + PI / 1.5),
+            0.5 + 0.5 * sin(time + PI / 0.75)
+        );
+        activeTint = lerp(activeTint, rgb, rgbCloudsIntensity);
+    }
+    
+    cloudColor *= activeTint;
+
     float3 finalColor = cloudColor + sky * transmittance;
     float blend = smoothstep(0.0, 1.0, minDistance / far);
     
