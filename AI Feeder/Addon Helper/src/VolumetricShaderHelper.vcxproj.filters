@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="addon.cpp" />
+    <ClCompile Include="data_reader.cpp" />
+    <ClCompile Include="timecycle.cpp" />
+    <ClCompile Include="..\deps\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="rdr1_source.hpp" />
+    <ClCompile Include="rdr1_timecycle.hpp" />
+    <ClCompile Include="rdr1_source.cpp" />
+    <ClCompile Include="gtav_source.cpp" />
+    <ClCompile Include="reshade_data.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="data_reader.hpp" />
+    <ClInclude Include="types.hpp" />
+    <ClInclude Include="timecycle.hpp" />
+    <ClInclude Include="..\deps\tinyxml2\tinyxml2.h" />
+    <ClInclude Include="game_data_source.hpp" />
+    <ClInclude Include="util.hpp" />
+    <ClInclude Include="gtav_source.hpp" />
+    <ClInclude Include="gtav_timecycle.hpp" />
+    <ClInclude Include="reshade_data.hpp" />
+    <ClInclude Include="addon.hpp" />
+    <ClInclude Include="depth.hpp" />
+  </ItemGroup>
+</Project>
