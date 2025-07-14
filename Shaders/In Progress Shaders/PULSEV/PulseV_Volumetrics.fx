@@ -460,6 +460,23 @@ uniform float edgeFirstSize <
     float ui_step = 0.1;
 > = 2.0;
 
+uniform bool ui_toggle <
+    ui_type = "toggle";
+    ui_category = "Depth Settings";
+    ui_label = "Use Depth Rejection Mask";
+    ui_tooltip = "Enable this to use a depth rejection mask to prevent clouds from rendering over wires and other thin objects.";
+> = true;
+
+uniform float depthRejectionThreshold <
+    string ui_category = "Depth Settings";
+    string ui_label = "Depth Rejection Threshold";
+    string ui_tooltip = "Controls the threshold for the depth rejection mask.";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 100.0;
+    float ui_step = 0.1;
+> = 30.0;
+
 uniform float auroraScale <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
@@ -582,6 +599,36 @@ sampler2D CloudsLowResSampler
 {
     Texture = CloudsLowResTexture;
 
+    MagFilter = LINEAR;
+    MinFilter = LINEAR;
+    MipFilter = LINEAR;
+};
+
+texture EdgeMaskGrowTexture
+{
+    Width = BUFFER_WIDTH;
+    Height = BUFFER_HEIGHT;
+    Format = R8;
+};
+
+sampler2D EdgeMaskGrowSampler
+{
+    Texture = EdgeMaskGrowTexture;
+    MagFilter = LINEAR;
+    MinFilter = LINEAR;
+    MipFilter = LINEAR;
+};
+
+texture EdgeMaskTexture
+{
+    Width = BUFFER_WIDTH;
+    Height = BUFFER_HEIGHT;
+    Format = R8;
+};
+
+sampler2D EdgeMaskSampler
+{
+    Texture = EdgeMaskTexture;
     MagFilter = LINEAR;
     MinFilter = LINEAR;
     MipFilter = LINEAR;
@@ -1664,6 +1711,11 @@ float4 PS_VolumetricCloudsLow(float4 fragcoord : SV_Position, float2 uv : TexCoo
 
 float4 PS_VolumetricCloudsIntermediate(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
+    if (ui_toggle && tex2D(EdgeMaskGrowSampler, uv).r > 0.0)
+    {
+        discard;
+    }
+
     if (!inputEnabled)
     {
         discard;
@@ -1694,7 +1746,7 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord : SV_Position, float2 uv
         volumeSamples = 1024;
     }
 
-    if (RENDER_LOW)
+    if (RENDER_LOW && !ui_toggle)
     {
         edge = softDepthEdge(uv);
     }
@@ -1722,6 +1774,11 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord : SV_Position, float2 uv
 
 float4 PS_VolumetricClouds(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
+    if (ui_toggle && tex2D(EdgeMaskGrowSampler, uv).r > 0.0)
+    {
+        return tex2D(ReShade::BackBuffer, uv);
+    }
+
     if (!inputEnabled)
     {
         discard;
@@ -1814,6 +1871,49 @@ float4 PS_DebugDepthEdge(float4 fragcoord : SV_Position, float2 uv : TexCoord) :
     return float4(softDepthEdge(uv).xxx, 0.0);
 }
 
+float4 PS_EdgeMask(float4 vpos : SV_Position, float2 tex : TexCoord) : SV_Target
+{
+    float2 texel = 1.0 / float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+    float3 camPos = worldPosition();
+
+    float3 worldPos = depthToLinear(tex2D(ReShade::DepthBuffer, tex).r, inputNearClip, inputFarClip) * worldDirection(tex);
+    float depth = length(camPos - worldPos);
+
+    float depthTest = 0.0;
+    float fillDepth = depth;
+    for (int i = 0; i < 9; i++)
+    {
+        depthTest = length(camPos - depthToLinear(tex2D(ReShade::DepthBuffer, tex + texel * GAUSSIAN_DIRECTIONS[i] * edgeMaskSize).r, inputNearClip, inputFarClip) * worldDirection(tex + texel * GAUSSIAN_DIRECTIONS[i] * edgeMaskSize));
+        if (depthTest < depth)
+        {
+            depth = depthTest;
+        }
+    }
+
+    if (abs(depth - fillDepth) >= (depthRejectionThreshold * 2.0f) * depth * 4.0f && fillDepth < 375000)
+    {
+        return float4(1, 0, 0, 1);
+    }
+    return float4(0, 0, 0, 0);
+}
+
+float PS_EdgeMaskGrow(float4 vpos : SV_Position, float2 tex : TexCoord) : SV_Target
+{
+    float2 texel = 1.0 / float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+
+    float mask = tex2D(EdgeMaskSampler, tex.xy).x;
+
+    for (int i = 1; i <= 2; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            mask = max(mask, tex2D(EdgeMaskSampler, tex.xy + texel * GAUSSIAN_DIRECTIONS[j].xy * i).x);
+        }
+    }
+
+    return mask;
+}
+
 technique PulseV_VolumetricCloudsNoise <
     string ui_label = "PulseV Volumetric Clouds - Noise Gen";
     string ui_tooltip = "Regenerates the noise textures for clouds when reloading shaders (NOTE: reloading is mandatory, enabling this technique does nothing!)";
@@ -1850,6 +1950,20 @@ technique PulseV_VolumetricClouds <
     string ui_tooltip = "Main volumetric clouds shader";
 >
 {
+    pass edge_mask
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_EdgeMask;
+        RenderTarget = EdgeMaskTexture;
+    }
+
+    pass edge_mask_grow
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_EdgeMaskGrow;
+        RenderTarget = EdgeMaskGrowTexture;
+    }
+
     pass aurora
     {
         VertexShader = PostProcessVS;
@@ -1919,3 +2033,6 @@ technique PulseV_VolumetricClouds_DEBUGDEPTHEDGE <
         PixelShader = PS_DebugDepthEdge;
     }
 }
+
+
+ 
