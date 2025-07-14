@@ -194,7 +194,7 @@ uniform int qualityPreset <
     ui_type = "combo";
     ui_category = "Global Settings";
     ui_label = "Quality Preset";
-    ui_items = "Very Low�Low�Medium�High�Ultra�";
+    ui_items = "Very Low\0Low\0Medium\0High\0Ultra\0";
     ui_tooltip = "Choose a quality preset for the clouds";
 > = 2;
 uniform float cloudRenderDistance <
