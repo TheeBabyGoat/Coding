@@ -46,11 +46,11 @@ void tex2Dstore(storage2D a, uint2 b, float4 c)
  **/
 
 #ifndef RENDER_SCALE
-	#define RENDER_SCALE 0.5
+#define RENDER_SCALE 0.5
 #endif
 
 #ifndef ADVANCED
-	#define ADVANCED 0
+#define ADVANCED 0
 #endif
 
 #define NOISE_W 256
@@ -190,6 +190,13 @@ uniform float timer <
  * User-editable uniforms (Global Settings)
  **/
 
+uniform int qualityPreset <
+    ui_type = "combo";
+    ui_category = "Global Settings";
+    ui_label = "Quality Preset";
+    ui_items = "Very Low�Low�Medium�High�Ultra�";
+    ui_tooltip = "Choose a quality preset for the clouds";
+> = 2;
 uniform float cloudRenderDistance <
     string ui_category = "Global Settings";
     string ui_type = "drag";
@@ -197,12 +204,6 @@ uniform float cloudRenderDistance <
     float ui_max = 100000.0;
     float ui_step = 10.0;
 > = 10000.0;
-uniform int cloudVolumeSamples <
-    string ui_category = "Global Settings";
-    string ui_type = "slider";
-    int ui_min = 128;
-    int ui_max = 1024;
-> = 128;
 uniform float cloudTimescale <
     string ui_category = "Global Settings";
     string ui_type = "drag";
@@ -386,6 +387,14 @@ uniform float cloudSunLightPower <
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 0.15;
+uniform float cloudMoonLightPower <
+    string ui_category = "Advanced Global Settings";
+    bool hidden = !ADVANCED;
+    string ui_type = "drag";
+    float ui_min = 0.01;
+    float ui_max = 8.0;
+    float ui_step = 0.01;
+> = 0.3;
 uniform float cloudSkyLightPower <
     string ui_category = "Advanced Global Settings";
     bool hidden = !ADVANCED;
@@ -403,42 +412,53 @@ uniform float cloudDenoise <
     float ui_step = 0.005;
 > = 0.25;
 uniform float cloudDepthEdgeFar <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Depth Settings";
+    string ui_label = "Depth Edge Far";
+    string ui_tooltip = "Controls the far distance for depth edge detection.";
     string ui_type = "drag";
     float ui_min = 1.0;
     float ui_max = 10000.0;
     float ui_step = 1.0;
 > = 100.0;
 uniform float cloudDepthEdgeThreshold <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Depth Settings";
+    string ui_label = "Depth Edge Threshold";
+    string ui_tooltip = "Controls the threshold for depth edge detection.";
     string ui_type = "drag";
     float ui_min = 1.0;
     float ui_max = 100.0;
     float ui_step = 0.1;
 > = 30.0;
 
-uniform bool enableRgbClouds <
-    string ui_category = "RGB Clouds";
-    string ui_label = "Enable RGB Clouds";
-> = false;
-uniform float rgbCloudsSpeed <
-    string ui_category = "RGB Clouds";
-    string ui_label = "Speed";
+uniform float edgeMaskSize <
+    string ui_category = "Depth Settings";
+    string ui_label = "Edge Mask Size";
+    string ui_tooltip = "Controls the size of the edge mask.";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 10.0;
     float ui_step = 0.1;
-> = 1.0;
-uniform float rgbCloudsIntensity <
-    string ui_category = "RGB Clouds";
-    string ui_label = "Intensity";
+> = 1.5;
+
+uniform float edgeMaskSizeFill <
+    string ui_category = "Depth Settings";
+    string ui_label = "Edge Mask Size Fill";
+    string ui_tooltip = "Controls the size of the edge mask fill.";
     string ui_type = "drag";
     float ui_min = 0.0;
-    float ui_max = 1.0;
-    float ui_step = 0.01;
-> = 0.5;
+    float ui_max = 10.0;
+    float ui_step = 0.1;
+> = 2.0;
+
+uniform float edgeFirstSize <
+    string ui_category = "Depth Settings";
+    string ui_label = "Edge First Size";
+    string ui_tooltip = "Controls the size of the first edge detection pass.";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 10.0;
+    float ui_step = 0.1;
+> = 2.0;
 
 uniform float auroraScale <
     string ui_category = "Aurora Settings";
@@ -472,10 +492,10 @@ uniform float auroraCurl <
     float ui_step = 0.01;
 > = 0.5;
 uniform int auroraVolumeSamples <
-    string ui_category = "Aurora Settings";
+    string ui_category = "Global Settings";
     string ui_type = "slider";
-    int ui_min = 128;
-    int ui_max = 1024;
+    int ui_min = 8;
+    int ui_max = 128;
 > = 128;
 uniform float auroraHeightOffset <
     string ui_category = "Aurora Settings";
@@ -762,7 +782,7 @@ float3 worldPosition()
 {
     float4x4 inverseView = inverseViewMatrix();
 
-    return float3(inverseView._14, inverseView._24, inverseView._34); 
+    return float3(inverseView._14, inverseView._24, inverseView._34);
 }
 
 Ray cameraRay(float2 uv)
@@ -928,7 +948,7 @@ LayerParameters getWeather(int weatherType, int layerIndex)
     }
     
     params.bottom += cloudHeightOffset;
-    params.top +=  cloudHeightOffset;
+    params.top += cloudHeightOffset;
     
     return params;
 }
@@ -954,15 +974,10 @@ LayerParameters mixLayerParams(LayerParameters fromParams, LayerParameters toPar
     params.absorption = lerp(fromParams.absorption, toParams.absorption, ratio);
     params.luminance = lerp(fromParams.luminance, toParams.luminance, ratio);
     params.sunLightPower = lerp(fromParams.sunLightPower, toParams.sunLightPower, ratio);
-    params.moonLightPower = lerp(fromParams.moonLightPower, toParams.moonLightPower, ratio);
     params.skyLightPower = lerp(fromParams.skyLightPower, toParams.skyLightPower, ratio);
     params.bottomDensity = lerp(fromParams.bottomDensity, toParams.bottomDensity, ratio);
     params.middleDensity = lerp(fromParams.middleDensity, toParams.middleDensity, ratio);
     params.topDensity = lerp(fromParams.topDensity, toParams.topDensity, ratio);
-    params.dayTintBottom = lerp(fromParams.dayTintBottom, toParams.dayTintBottom, ratio);
-    params.nightTintBottom = lerp(fromParams.nightTintBottom, toParams.nightTintBottom, ratio);
-    params.dayTintTop = lerp(fromParams.dayTintTop, toParams.dayTintTop, ratio);
-    params.nightTintTop = lerp(fromParams.nightTintTop, toParams.nightTintTop, ratio);
     
     return params;
 }
@@ -1164,13 +1179,9 @@ float nightTimeAmount()
 {
     float time = inputTimeOfDay;
     
-    if (time <= 0.25)
+    if (time <= NIGHT_DAWN_END)
     {
-        return 1.0;
-    }
-    else if (time <= 0.291666)
-    {
-        return saturate(1.0 - smoothstep(0.25, 0.291666, time));
+        return saturate(1.0 - smoothstep(NIGHT_DAWN_START, NIGHT_DAWN_END, time));
     }
     else
     {
@@ -1354,9 +1365,6 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float3 moonDirection = getMoonDirection();
     
     float3 sky = getSkyColor(ray.direction, dayAmount * (depth < range ? 0.0 : 1.0), nightAmount);
-    if (nightAmount > 0.0) { 
-        sky = max(sky, float3(0.2f, 0.2f, 0.2f)); 
-    }
 
     float enter = (height - ray.origin.y) / ray.direction.y;
     float exit = (height + thickness - ray.origin.y) / ray.direction.y;
@@ -1386,8 +1394,7 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float sunPhase = phase(cloudForwardScatter, sunCosTheta);
     float moonPhase = phase(cloudForwardScatter, moonCosTheta);
     float3 sunLightBase = doDayLighting ? (cloudSunLightPower * sunPhase).xxx : 0.0;
-    float3 moonLightBaseBottom = doNightLighting ? (bottomLayer.moonLightPower * moonPhase).xxx : 0.0;
-    float3 moonLightBaseTop = doNightLighting ? (topLayer.moonLightPower * moonPhase).xxx : 0.0;
+    float3 moonLightBase = doNightLighting ? (cloudMoonLightPower * moonPhase).xxx : 0.0;
     float3 skyLightBase = cloudSkyLightPower.xxx;
     
     float auroraVisibility = auroraAmount();
@@ -1409,17 +1416,14 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
         }
 
         LayerParameters layer;
-        float3 moonLightBase;
         
         if (pos.y > bottomLayer.top)
         {
             layer = topLayer;
-            moonLightBase = moonLightBaseTop;
         }
         else
         {
             layer = bottomLayer;
-            moonLightBase = moonLightBaseBottom;
         }
         
         float layerAltitude = remap(pos.y, layer.bottom, layer.top);
@@ -1458,32 +1462,6 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float3 back = tex2D(ReShade::BackBuffer, uv).rgb;
     sky = lerp(sky, back, saturate(transmittance));
     float3 cloudColor = 1.0 - exp(-accumulatedLight * cloudLuminanceMultiplier);
-
-    // Determine active tint based on the final position of the ray.
-    // This is an approximation: if the ray ends up high, we assume top layer tint dominates.
-    // If it ends up low (within bottom layer's original height), bottom layer tint dominates.
-    float3 activeTint;
-    if (pos.y < bottomLayer.top && bottomLayer.cover > 0.0) { // If ray ended within bottom layer's original top extent
-        activeTint = lerp(bottomLayer.nightTintBottom, bottomLayer.dayTintBottom, dayAmount);
-    } else if (topLayer.cover > 0.0) { // Otherwise, if there's a top layer, use its tint
-        activeTint = lerp(topLayer.nightTintTop, topLayer.dayTintTop, dayAmount);
-    } else { // Fallback if somehow no specific layer is identified (e.g. only bottom layer exists and pos is above it)
-        activeTint = lerp(bottomLayer.nightTintBottom, bottomLayer.dayTintBottom, dayAmount);
-    }
-    
-    if (enableRgbClouds)
-    {
-        float time = timer * rgbCloudsSpeed * 0.001;
-        float3 rgb = float3(
-            0.5 + 0.5 * sin(time),
-            0.5 + 0.5 * sin(time + PI / 1.5),
-            0.5 + 0.5 * sin(time + PI / 0.75)
-        );
-        activeTint = lerp(activeTint, rgb, rgbCloudsIntensity);
-    }
-    
-    cloudColor *= activeTint;
-
     float3 finalColor = cloudColor + sky * transmittance;
     float blend = smoothstep(0.0, 1.0, minDistance / far);
     
@@ -1563,7 +1541,7 @@ float4 drawTextureRect3D(sampler3D tex, float2 uv, float2 position, float2 size,
 }
 
 [numthreads(NOISE_TX, NOISE_TY, NOISE_TZ)]
-void CS_GenerateNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_GroupID)
+void CS_GenerateNoise(uint3 threadID : SV_GroupThreadID, uint3 groupID : SV_GroupID)
 {
     uint3 globalThreadID = groupID * uint3(NOISE_TX, NOISE_TY, NOISE_TZ) + threadID;
 
@@ -1576,7 +1554,7 @@ void CS_GenerateNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_GroupI
 }
 
 [numthreads(NOISE_TX, NOISE_TY, NOISE_TZ)]
-void CS_GenerateCurlNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_GroupID)
+void CS_GenerateCurlNoise(uint3 threadID : SV_GroupThreadID, uint3 groupID : SV_GroupID)
 {
     uint3 globalThreadID = groupID * uint3(NOISE_TX, NOISE_TY, NOISE_TZ) + threadID;
 
@@ -1589,7 +1567,7 @@ void CS_GenerateCurlNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_Gr
 }
 
 [numthreads(NOISE_TX, NOISE_TY, 1)]
-void CS_GenerateAuroraNoise(uint2 threadID: SV_GroupThreadID, uint2 groupID: SV_GroupID)
+void CS_GenerateAuroraNoise(uint2 threadID : SV_GroupThreadID, uint2 groupID : SV_GroupID)
 {
     uint2 globalThreadID = groupID * uint2(NOISE_TX, NOISE_TY) + threadID;
 
@@ -1634,7 +1612,7 @@ float4 denoise(sampler2D tex, float2 uv, float2 size, float sigma, float strengt
     return color / divisor;
 }
 
-float4 PS_Aurora(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_Aurora(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (!inputEnabled)
     {
@@ -1652,17 +1630,39 @@ float4 PS_Aurora(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
     return output;
 }
 
-float4 PS_VolumetricCloudsLow(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_VolumetricCloudsLow(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (!inputEnabled)
     {
         discard;
     }
     
-    return renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples);
+    int volumeSamples;
+    if (qualityPreset == 0)
+    {
+        volumeSamples = 64;
+    }
+    else if (qualityPreset == 1)
+    {
+        volumeSamples = 128;
+    }
+    else if (qualityPreset == 2)
+    {
+        volumeSamples = 256;
+    }
+    else if (qualityPreset == 3)
+    {
+        volumeSamples = 512;
+    }
+    else
+    {
+        volumeSamples = 1024;
+    }
+
+    return renderClouds(uv, getWeatherParams(0), getWeatherParams(1), volumeSamples);
 }
 
-float4 PS_VolumetricCloudsIntermediate(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_VolumetricCloudsIntermediate(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (!inputEnabled)
     {
@@ -1672,6 +1672,28 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord: SV_Position, float2 uv:
     float4 clouds = 0.0;
     float edge = 0.0;
     
+    int volumeSamples;
+    if (qualityPreset == 0)
+    {
+        volumeSamples = 64;
+    }
+    else if (qualityPreset == 1)
+    {
+        volumeSamples = 128;
+    }
+    else if (qualityPreset == 2)
+    {
+        volumeSamples = 256;
+    }
+    else if (qualityPreset == 3)
+    {
+        volumeSamples = 512;
+    }
+    else
+    {
+        volumeSamples = 1024;
+    }
+
     if (RENDER_LOW)
     {
         edge = softDepthEdge(uv);
@@ -1679,7 +1701,7 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord: SV_Position, float2 uv:
     
     if (!RENDER_LOW || edge > 0.0)
     {
-        clouds = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples);
+        clouds = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), volumeSamples);
     }
     else
     {
@@ -1698,7 +1720,7 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord: SV_Position, float2 uv:
     return clouds;
 }
 
-float4 PS_VolumetricClouds(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_VolumetricClouds(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (!inputEnabled)
     {
@@ -1728,7 +1750,7 @@ float4 PS_VolumetricClouds(float4 fragcoord: SV_Position, float2 uv: TexCoord): 
     return float4(lerp(back.rgb, clouds.rgb, clouds.a * uiMask(uv)), 1.0);
 }
 
-float4 PS_Debug(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_Debug(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
 #define UVT (1.0 / 48.0) // Units in UV screen width space
     float2 uvtSquare = float2(UVT, UVT * BUFFER_ASPECT_RATIO);
@@ -1777,7 +1799,7 @@ float4 PS_Debug(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
     return float4(lerp(screen.rgb, final.rgb, final.a), 1.0);
 }
 
-float4 PS_DebugSky(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_DebugSky(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (uv.y < 0.125)
     {
@@ -1787,7 +1809,7 @@ float4 PS_DebugSky(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Targe
     return uv.x < 0.5 ? float4(getSkyColor(worldDirection(uv), 1.0, nightTimeAmount()), 1.0) : tex2D(ReShade::BackBuffer, uv);
 }
 
-float4 PS_DebugDepthEdge(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_DebugDepthEdge(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     return float4(softDepthEdge(uv).xxx, 0.0);
 }
