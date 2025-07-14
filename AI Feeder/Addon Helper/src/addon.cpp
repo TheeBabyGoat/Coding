@@ -12,7 +12,7 @@ using namespace reshade::api;
 
 constexpr size_t MAX_UNIFORM_NAME = 48;
 
-static DataSource *data_source;
+static DataSource* data_source;
 std::unordered_map<std::string, UniformType> staged_uniforms;
 
 
@@ -21,13 +21,13 @@ std::unordered_map<std::string, UniformType> staged_uniforms;
 **/
 
 template <typename T>
-void stage_uniform(const std::string &annotation, const T &value)
+void stage_uniform(const std::string& annotation, const T& value)
 {
 	staged_uniforms[annotation] = UniformType(value);
 }
 
 template<>
-void stage_uniform<Float4x4>(const std::string &annotation, const Float4x4 &value)
+void stage_uniform<Float4x4>(const std::string& annotation, const Float4x4& value)
 {
 	staged_uniforms[annotation + "__r1"] = value.r1;
 	staged_uniforms[annotation + "__r2"] = value.r2;
@@ -36,20 +36,20 @@ void stage_uniform<Float4x4>(const std::string &annotation, const Float4x4 &valu
 }
 
 template<>
-void stage_uniform<TimeCycle::WeatherFrame>(const std::string &annotation, const TimeCycle::WeatherFrame &value)
+void stage_uniform<TimeCycle::WeatherFrame>(const std::string& annotation, const TimeCycle::WeatherFrame& value)
 {
-	for (const auto &variable : value.floats) {
+	for (const auto& variable : value.floats) {
 		staged_uniforms[annotation + "_" + variable.first] = variable.second;
 	}
 
-	for (const auto &variable : value.colors) {
+	for (const auto& variable : value.colors) {
 		staged_uniforms[annotation + "_" + variable.first] = variable.second;
 	}
 }
 
 struct UniformInjectionVisitor {
-	effect_runtime *runtime;
-	effect_uniform_variable &variable;
+	effect_runtime* runtime;
+	effect_uniform_variable& variable;
 
 	void operator()(bool value) const {
 		runtime->set_uniform_value_bool(variable, value);
@@ -63,40 +63,40 @@ struct UniformInjectionVisitor {
 		runtime->set_uniform_value_float(variable, value);
 	}
 
-	void operator()(const Float2 &value) const {
+	void operator()(const Float2& value) const {
 		runtime->set_uniform_value_float(variable, value.v, 2);
 	}
 
-	void operator()(const Float3 &value) const {
+	void operator()(const Float3& value) const {
 		runtime->set_uniform_value_float(variable, value.v, 3);
 	}
 
-	void operator()(const Float4 &value) const {
+	void operator()(const Float4& value) const {
 		runtime->set_uniform_value_float(variable, value.v, 4);
 	}
 
-	void operator()(const Float4x4 &value) const {
+	void operator()(const Float4x4& value) const {
 		reshade::log::message(reshade::log::level::error, "Tried to inject Float4x4 without marshalling!");
 	}
 
-	void operator()(const TimeCycle::WeatherFrame &value) const {
+	void operator()(const TimeCycle::WeatherFrame& value) const {
 		reshade::log::message(reshade::log::level::error, "Tried to inject WeatherFrame without marshalling!");
 	}
 
-	void operator()(const UniformType &value) const
+	void operator()(const UniformType& value) const
 	{
 		reshade::log::message(reshade::log::level::error, "Tried to inject unknown uniform type!");
 	}
 };
 
-static void inject_uniform(effect_runtime *runtime, effect_uniform_variable &variable, const UniformType &value)
+static void inject_uniform(effect_runtime* runtime, effect_uniform_variable& variable, const UniformType& value)
 {
 	std::visit(UniformInjectionVisitor{ runtime, variable }, value);
 }
 
-static void commit_uniforms(effect_runtime *runtime)
+static void commit_uniforms(effect_runtime* runtime)
 {
-	runtime->enumerate_uniform_variables(nullptr, [](effect_runtime *runtime, effect_uniform_variable variable) {
+	runtime->enumerate_uniform_variables(nullptr, [](effect_runtime* runtime, effect_uniform_variable variable) {
 		char annotation[MAX_UNIFORM_NAME] = { 0 };
 
 		if (runtime->get_annotation_string_from_uniform_variable(variable, "source", annotation))
@@ -113,7 +113,7 @@ static void commit_uniforms(effect_runtime *runtime)
 	staged_uniforms.clear();
 }
 
-static void inject_uniforms(effect_runtime *runtime, command_list *cmd_list, resource_view rtv, resource_view rtv_srgb)
+static void inject_uniforms(effect_runtime* runtime, command_list* cmd_list, resource_view rtv, resource_view rtv_srgb)
 {
 	const bool enabled = DataReader::get_enabled();
 	stage_uniform("enabled", enabled);
@@ -151,7 +151,7 @@ static void inject_uniforms(effect_runtime *runtime, command_list *cmd_list, res
 	commit_uniforms(runtime);
 }
 
-static void shaders_reloaded(effect_runtime *runtime)
+static void shaders_reloaded(effect_runtime* runtime)
 {
 	char dummy[1] = { 0 };
 #if defined RFX_GAME_GTAV
@@ -174,7 +174,33 @@ static void reload_timecycle()
 }
 
 // Print the uniforms to the addon page for debugging
-static void draw_uniforms(reshade::api::effect_runtime *)
+static void draw_pulsev_ui(reshade::api::effect_runtime*)
+{
+	ImGuiID dockspace_id = ImGui::GetID("ViewportDockspace");
+	if (dockspace_id != 0)
+	{
+		static bool first_time = true;
+		if (first_time)
+		{
+			first_time = false;
+			ImGui::SetNextWindowDockID(dockspace_id, ImGuiCond_Always);
+		}
+	}
+
+	if (ImGui::Begin("PulseV"))
+	{
+		ImGui::Text("Hello from PulseV!");
+
+		static bool example_checkbox = false;
+		ImGui::Checkbox("Example Checkbox", &example_checkbox);
+
+		static float example_slider = 0.0f;
+		ImGui::SliderFloat("Example Slider", &example_slider, 0.0f, 1.0f);
+	}
+	ImGui::End();
+}
+
+static void draw_uniforms(reshade::api::effect_runtime*)
 {
 	const bool enabled = DataReader::get_enabled();
 
@@ -186,13 +212,13 @@ static void draw_uniforms(reshade::api::effect_runtime *)
 
 	if (ImGui::CollapsingHeader("Camera"))
 	{
-		const auto &pos = DataReader::get_camera_pos();
-		const auto &rot = DataReader::get_camera_rot();
-		const auto &dpos = DataReader::get_delta_camera_pos();
-		const auto &drot = DataReader::get_delta_camera_rot();
-		const auto &fov = DataReader::get_camera_fov();
-		const auto &nearc = DataReader::get_near_clip();
-		const auto &farc = DataReader::get_far_clip();
+		const auto& pos = DataReader::get_camera_pos();
+		const auto& rot = DataReader::get_camera_rot();
+		const auto& dpos = DataReader::get_delta_camera_pos();
+		const auto& drot = DataReader::get_delta_camera_rot();
+		const auto& fov = DataReader::get_camera_fov();
+		const auto& nearc = DataReader::get_near_clip();
+		const auto& farc = DataReader::get_far_clip();
 		const bool depthr = DataReader::get_depth_reversed();
 
 		ImGui::Text("Position: (%g, %g, %g)", pos.v[0], pos.v[1], pos.v[2]);
@@ -207,9 +233,9 @@ static void draw_uniforms(reshade::api::effect_runtime *)
 
 	if (ImGui::CollapsingHeader("Scene"))
 	{
-		const auto &time = DataReader::get_time_of_day();
-		const auto &wind = DataReader::get_wind_dir();
-		const auto &moon = DataReader::get_moon_dir();
+		const auto& time = DataReader::get_time_of_day();
+		const auto& wind = DataReader::get_wind_dir();
+		const auto& moon = DataReader::get_moon_dir();
 		const float aurora = DataReader::get_aurora_visibility();
 
 		ImGui::Text("Time of Day: %g", time);
@@ -219,7 +245,7 @@ static void draw_uniforms(reshade::api::effect_runtime *)
 	}
 	if (ImGui::CollapsingHeader("View Matrix"))
 	{
-		const auto &view = DataReader::get_view_matrix();
+		const auto& view = DataReader::get_view_matrix();
 
 		ImGui::Text("(%g, %g, %g, %g)", view.r1.v[0], view.r1.v[1], view.r1.v[2], view.r1.v[3]);
 		ImGui::Text("(%g, %g, %g, %g)", view.r2.v[0], view.r2.v[1], view.r2.v[2], view.r2.v[3]);
@@ -229,7 +255,7 @@ static void draw_uniforms(reshade::api::effect_runtime *)
 
 	if (ImGui::CollapsingHeader("Projection Matrix"))
 	{
-		const auto &proj = DataReader::get_proj_matrix();
+		const auto& proj = DataReader::get_proj_matrix();
 
 		ImGui::Text("(%g, %g, %g, %g)", proj.r1.v[0], proj.r1.v[1], proj.r1.v[2], proj.r1.v[3]);
 		ImGui::Text("(%g, %g, %g, %g)", proj.r2.v[0], proj.r2.v[1], proj.r2.v[2], proj.r2.v[3]);
@@ -239,7 +265,7 @@ static void draw_uniforms(reshade::api::effect_runtime *)
 
 	if (ImGui::CollapsingHeader("Inverse View Matrix"))
 	{
-		const auto &iview = DataReader::get_inv_view_matrix();
+		const auto& iview = DataReader::get_inv_view_matrix();
 
 		ImGui::Text("(%g, %g, %g, %g)", iview.r1.v[0], iview.r1.v[1], iview.r1.v[2], iview.r1.v[3]);
 		ImGui::Text("(%g, %g, %g, %g)", iview.r2.v[0], iview.r2.v[1], iview.r2.v[2], iview.r2.v[3]);
@@ -249,7 +275,7 @@ static void draw_uniforms(reshade::api::effect_runtime *)
 
 	if (ImGui::CollapsingHeader("Inverse Projection Matrix"))
 	{
-		const auto &iproj = DataReader::get_inv_proj_matrix();
+		const auto& iproj = DataReader::get_inv_proj_matrix();
 
 		ImGui::Text("(%g, %g, %g, %g)", iproj.r1.v[0], iproj.r1.v[1], iproj.r1.v[2], iproj.r1.v[3]);
 		ImGui::Text("(%g, %g, %g, %g)", iproj.r2.v[0], iproj.r2.v[1], iproj.r2.v[2], iproj.r2.v[3]);
@@ -259,11 +285,11 @@ static void draw_uniforms(reshade::api::effect_runtime *)
 
 	if (ImGui::CollapsingHeader("Timecycle"))
 	{
-		const auto &wfrom = (int)DataReader::get_from_weather_type();
-		const auto &wto = (int)DataReader::get_to_weather_type();
-		const auto &wtrans = DataReader::get_weather_transition();
-		const auto &wregion = DataReader::get_region();
-		const auto &wframe = DataReader::get_weather_frame();
+		const auto& wfrom = (int)DataReader::get_from_weather_type();
+		const auto& wto = (int)DataReader::get_to_weather_type();
+		const auto& wtrans = DataReader::get_weather_transition();
+		const auto& wregion = DataReader::get_region();
+		const auto& wframe = DataReader::get_weather_frame();
 		const int color_flags = (
 			ImGuiColorEditFlags_NoPicker |
 			ImGuiColorEditFlags_NoOptions |
@@ -282,13 +308,13 @@ static void draw_uniforms(reshade::api::effect_runtime *)
 			wtrans * 100.0
 		);
 
-		for (const auto &variable : wframe.colors) {
+		for (const auto& variable : wframe.colors) {
 			ImGui::Text("%s: ", variable.first.c_str());
 			ImGui::SameLine(ImGui::GetWindowWidth() - 225);
-			ImGui::ColorEdit4(variable.first.c_str(), const_cast<float *>(variable.second.v), color_flags);
+			ImGui::ColorEdit4(variable.first.c_str(), const_cast<float*>(variable.second.v), color_flags);
 		}
 
-		for (const auto &variable : wframe.floats) {
+		for (const auto& variable : wframe.floats) {
 			ImGui::Text("%s: %g", variable.first.c_str(), variable.second);
 		}
 	}
@@ -302,7 +328,7 @@ static void draw_uniforms(reshade::api::effect_runtime *)
 * Addon management
 **/
 
-static void startup(device *device)
+static void startup(device* device)
 {
 	reload_timecycle();
 }
@@ -330,8 +356,8 @@ static void unregister_addon(HMODULE hModule)
 }
 
 // Metadata for addon
-extern "C" __declspec(dllexport) const char *NAME = "VolumetricShaderHelper";
-extern "C" __declspec(dllexport) const char *DESCRIPTION = "Provides game data as shader uniforms from RAGE games";
+extern "C" __declspec(dllexport) const char* NAME = "VolumetricShaderHelper";
+extern "C" __declspec(dllexport) const char* DESCRIPTION = "Provides game data as shader uniforms from RAGE games";
 
 // Entry point for addon
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
@@ -346,10 +372,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
 
 		// Register addon events
 		reshade::register_event<reshade::addon_event::init_device>(startup);
-		reshade::register_event<reshade::addon_event::init_swapchain>(on_init_swapchain);
+		reshade::register_event<reshade::addon_event::present>(on_present);
 		reshade::register_event<reshade::addon_event::reshade_begin_effects>(inject_uniforms);
 		reshade::register_event<reshade::addon_event::reshade_reloaded_effects>(shaders_reloaded);
 		reshade::register_overlay(nullptr, draw_uniforms);
+		reshade::register_overlay("PulseV", draw_pulsev_ui);
 
 #if defined RFX_GAME_GTAV
 		register_depth_switcher();
