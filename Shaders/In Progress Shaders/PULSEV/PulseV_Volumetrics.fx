@@ -78,27 +78,17 @@ void tex2Dstore(storage2D a, uint2 b, float4 c)
 static const bool RENDER_LOW = RENDER_SCALE < 1.0;
 static const float RENDER_WIDTH = 1.0 / RENDER_SCALE;
 
-static const int GAUSSIAN_SAMPLE_COUNT = 17;
-static const float GAUSSIAN_WEIGHT = 1.0 / GAUSSIAN_SAMPLE_COUNT;
-static const float2 GAUSSIAN_DIRECTIONS[17] =
+static const float4 gaussKernel3x3[9] =
 {
-    float2(4.000000, 0.000000),
-    float2(3.729889, 1.444967),
-    float2(2.956036, 2.694783),
-    float2(1.782953, 3.580653),
-    float2(0.369073, 3.982937),
-    float2(-1.094652, 3.847303),
-    float2(-2.410539, 3.192069),
-    float2(-3.400869, 2.105729),
-    float2(-3.931892, 0.734998),
-    float2(-3.931892, -0.734998),
-    float2(-3.400869, -2.105729),
-    float2(-2.410539, -3.192069),
-    float2(-1.094652, -3.847303),
-    float2(0.369073, -3.982937),
-    float2(1.782953, -3.580653),
-    float2(2.956036, -2.694783),
-    float2(3.729889, -1.444967)
+    float4(-1.0, -1.0, 0.0, 1.0 / 16.0),
+  float4(-1.0, 0.0, 0.0, 2.0 / 16.0),
+  float4(-1.0, +1.0, 0.0, 1.0 / 16.0),
+  float4(0.0, -1.0, 0.0, 2.0 / 16.0),
+  float4(0.0, 0.0, 0.0, 4.0 / 16.0),
+  float4(0.0, +1.0, 0.0, 2.0 / 16.0),
+  float4(+1.0, -1.0, 0.0, 1.0 / 16.0),
+  float4(+1.0, 0.0, 0.0, 2.0 / 16.0),
+  float4(+1.0, +1.0, 0.0, 1.0 / 16.0)
 };
 
 static const float3 NoiseTexel = 1.0 / float3(NOISE_W, NOISE_H, NOISE_D);
@@ -1075,6 +1065,24 @@ float cloudNoise(float3 pos, float3 wind, LayerParameters layer)
     return noise;
 }
 
+float GetLinearizedDepth(float2 texcoord, float mult)
+{
+    return tex2Dlod(ReShade::DepthBuffer, float4(texcoord, 0, 0)).x * mult;
+}
+
+float3 DepthToWorldPos(float depth, float2 uv)
+{
+    float4x4 invView = inverseViewMatrix();
+    float4x4 invProj = inverseProjectionMatrix();
+
+    float2 pos = float2(1.0 - uv.x, uv.y) * 2.0 - 1.0;
+    float4 H = float4(pos.x, pos.y, depth, 1.0);
+    float4 D = mul(H, invProj);
+    float4 worldPos = mul(float4(D.xyz / D.w, 1.0), invView);
+
+    return worldPos.xyz;
+}
+
 float cloudDensity(float3 pos, LayerParameters layer, float altitude, float altitudeDensity)
 {
     float time = timer * TIME_SCALE * cloudTimescale;
@@ -1206,10 +1214,10 @@ float depthEdge(float2 uv, float width)
 float softDepthEdge(float2 uv)
 {
     float result = depthEdge(uv, 0.25);
-    for (int i = 0; i < GAUSSIAN_SAMPLE_COUNT; ++i)
+    for (int i = 0; i < 9; ++i)
     {
-        float2 offset = GAUSSIAN_DIRECTIONS[i] * BUFFER_PIXEL_SIZE;
-        result += depthEdge(uv + offset, 1.0) * GAUSSIAN_WEIGHT;
+        float2 offset = gaussKernel3x3[i].xy * BUFFER_PIXEL_SIZE;
+        result += depthEdge(uv + offset, 1.0) * gaussKernel3x3[i].w;
     }
     
     return saturate(result);
@@ -1874,23 +1882,24 @@ float4 PS_DebugDepthEdge(float4 fragcoord : SV_Position, float2 uv : TexCoord) :
 float4 PS_EdgeMask(float4 vpos : SV_Position, float2 tex : TexCoord) : SV_Target
 {
     float2 texel = 1.0 / float2(BUFFER_WIDTH, BUFFER_HEIGHT);
-    float3 camPos = worldPosition();
+    float3 camPos = float3(inverseViewMatrix()._14, inverseViewMatrix()._24, inverseViewMatrix()._34);
 
-    float3 worldPos = depthToLinear(tex2D(ReShade::DepthBuffer, tex).r, inputNearClip, inputFarClip) * worldDirection(tex);
+    float3 worldPos = DepthToWorldPos(GetLinearizedDepth(tex, 1.0), tex);
     float depth = length(camPos - worldPos);
+
 
     float depthTest = 0.0;
     float fillDepth = depth;
     for (int i = 0; i < 9; i++)
     {
-        depthTest = length(camPos - depthToLinear(tex2D(ReShade::DepthBuffer, tex + texel * GAUSSIAN_DIRECTIONS[i] * edgeMaskSize).r, inputNearClip, inputFarClip) * worldDirection(tex + texel * GAUSSIAN_DIRECTIONS[i] * edgeMaskSize));
+        depthTest = length(camPos - DepthToWorldPos(GetLinearizedDepth(tex + texel * gaussKernel3x3[i].xy * edgeMaskSize, 1.0), tex)).x;
         if (depthTest < depth)
         {
             depth = depthTest;
         }
     }
 
-    if (abs(depth - fillDepth) >= (depthRejectionThreshold * 2.0f) * depth * 4.0f && fillDepth < 375000)
+    if (length(depth - fillDepth) >= (depthRejectionThreshold * 2.0f) * depth * 4.0f && fillDepth < 375000)
     {
         return float4(1, 0, 0, 1);
     }
@@ -1907,7 +1916,7 @@ float PS_EdgeMaskGrow(float4 vpos : SV_Position, float2 tex : TexCoord) : SV_Tar
     {
         for (int j = 0; j < 8; j++)
         {
-            mask = max(mask, tex2D(EdgeMaskSampler, tex.xy + texel * GAUSSIAN_DIRECTIONS[j].xy * i).x);
+            mask = max(mask, tex2D(EdgeMaskSampler, tex.xy + texel * gaussKernel3x3[j].xy * i).x);
         }
     }
 
