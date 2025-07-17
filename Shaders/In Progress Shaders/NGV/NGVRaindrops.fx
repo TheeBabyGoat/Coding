@@ -31,10 +31,28 @@ uniform float BulgeStrength <ui_label = "Bulge Strength"; ui_type = "drag"; ui_m
 uniform float BulgeStretchIntensity <ui_label = "Bulge Stretch Intensity"; ui_type = "drag"; ui_min = 0.0; ui_max = 2.0; ui_step = 0.1; ui_category = "Bulge Settings";> = 0.5;
 
 // === Wind ===
-uniform float2 Wind <ui_label = "Wind Direction"; ui_type = "drag"; ui_min = -0.1; ui_max = 0.1; ui_step = 0.001; ui_category = "Wind";> = float2(0.15, 1.0);
+uniform float WindSpeed <ui_label = "Wind Speed"; ui_type = "drag"; ui_min = 0.0; ui_max = 10.0; ui_step = 0.1; ui_category = "Wind";> = 1.0;
+
+// === Addon Data ===
+uniform bool a <source = "enabled";>;
+uniform float b <source = "delta_camera_position";>;
+uniform float c <source = "delta_camera_rotation";>;
+uniform float d <source = "time_of_day";>;
+uniform float e <source = "weather_transition";>;
+uniform float3 wind_direction <source = "wind_direction";>;
+uniform int from_weather_type <source = "from_weather_type";>;
+uniform int to_weather_type <source = "to_weather_type";>;
+uniform float weather_transition <source = "weather_transition";>;
+
+// === Debug ===
+uniform bool ShowDebug <ui_label = "Show Debug Info"; ui_type = "checkbox"; ui_category = "Debug";> = false;
 
 #define MAX_DROPS 200
 #define TRAIL_STEPS 6
+
+bool isRainyWeather(int weather) {
+    return weather == 4 || weather == 5 || weather == 6;
+}
 
 float hash(float2 p) {
     return frac(sin(dot(p, float2(127.1, 311.7))) * 43758.5453);
@@ -67,37 +85,60 @@ float4 MainPass(float4 pos : SV_Position, float2 uv : TEXCOORD) : SV_Target {
     float2 totalOffset = float2(0.0, 0.0);
     float t = Time * 0.001;
 
-    [loop]
-    for (int i = 0; i < MAX_DROPS; ++i) {
-        if (i >= DropCount) break;
-        float fi = float(i);
-        float x = hash(float2(fi, 0.0));
-        float yStart = hash(float2(fi, 1.0));
-        float gravity = 1.0 + hash(float2(fi, 2.0));
-        float speedVar = 0.5 + hash(float2(fi, 3.0)) * DropSpeedVariation;
-        bool isSlow = i < SlowDripCount;
-        float slowFactor = isSlow ? 0.1 : 1.0;
-        float dropSpeed = DropSpeed * speedVar * gravity * slowFactor;
-        float age = frac(t * dropSpeed);
-        float y = frac(yStart + age);
+    bool fromRainy = isRainyWeather(from_weather_type);
+    bool toRainy = isRainyWeather(to_weather_type);
+    float rain = lerp(fromRainy ? 1.0 : 0.0, toRainy ? 1.0 : 0.0, weather_transition);
 
-        float baseSize = 0.05 * (0.5 + hash(float2(fi, 4.0)));
-        float shrink = lerp(1.0, 0.4, saturate(y));
-        float size = baseSize * shrink;
+    if (rain > 0.0) {
+        float2 windOffset = wind_direction.xy * WindSpeed * 0.01;
 
-        float sx = DropScaleX * (0.8 + hash(float2(fi, 5.0)) * 0.4);
-        float sy = DropScaleY * (0.8 + hash(float2(fi, 6.0)) * 0.4);
+        [loop]
+        for (int i = 0; i < DropCount; ++i) {
+            float fi = float(i);
+            float x = hash(float2(fi, 0.0));
+            float yStart = hash(float2(fi, 1.0));
+            float gravity = 1.0 + hash(float2(fi, 2.0));
+            float speedVar = 0.5 + hash(float2(fi, 3.0)) * DropSpeedVariation;
+            bool isSlow = i < SlowDripCount;
+            float slowFactor = isSlow ? 0.1 : 1.0;
+            float dropSpeed = DropSpeed * speedVar * gravity * slowFactor;
+            float age = frac(t * dropSpeed);
+            float y = frac(yStart + age);
 
-        for (int j = 0; j < ScatterCopies; ++j) {
-            float2 scatter = float2(hash(float2(fi, j + 10.0)) - 0.5, hash(float2(fi, j + 20.0)) - 0.5) * 0.25;
-            float2 dropPos = frac(float2(x, y) + scatter);
+            float2 windMovement = windOffset * y;
+            float2 dropPos = float2(x + windMovement.x, y + windMovement.y);
 
-            float localTrail = EnableTrails ? sampleTaperedTrail(uv, dropPos, float2(0.0, -1.0), size, sx, sy, y) * (isSlow ? 1.5 : 1.0) : 0.0;
-            float bulge = lensBulge(uv, dropPos, size, sx, sy * lerp(1.0, 1.0 + BulgeStretchIntensity, saturate(y)));
-            float fade = pow(1.0 - saturate(y), FadeoutStrength);
-            float2 normal = normalize(uv - dropPos);
+            float baseSize = 0.05 * (0.5 + hash(float2(fi, 4.0)));
+            float shrink = lerp(1.0, 0.4, saturate(dropPos.y));
+            float size = baseSize * shrink;
+
+            float sx = DropScaleX * (0.8 + hash(float2(fi, 5.0)) * 0.4);
+            float sy = DropScaleY * (0.8 + hash(float2(fi, 6.0)) * 0.4);
+
+            float2 trailDir = float2(windOffset.x, -1.0);
+            if (length(trailDir) < 0.00001) {
+                trailDir = float2(0.0, -1.0);
+            } else {
+                trailDir = normalize(trailDir);
+            }
+
+            float localTrail = 0.0;
+            if (EnableTrails) {
+                localTrail = sampleTaperedTrail(uv, dropPos, trailDir, size, sx, sy, y) * (isSlow ? 1.5 : 1.0);
+            }
+
+            float bulge = lensBulge(uv, dropPos, size, sx, sy * lerp(1.0, 1.0 + BulgeStretchIntensity, saturate(dropPos.y)));
+            float fade = pow(1.0 - saturate(dropPos.y), FadeoutStrength);
+
+            float2 normal = uv - dropPos;
+            if (length(normal) < 0.00001) {
+                normal = float2(0.0, 0.0);
+            } else {
+                normal = normalize(normal);
+            }
+
             float2 offsetBulge = normal * BulgeStrength * bulge;
-            float2 offsetTrail = float2(0.0, -1.0) * BulgeStrength * localTrail;
+            float2 offsetTrail = trailDir * BulgeStrength * localTrail;
             totalOffset += (offsetTrail * 0.5 + offsetBulge * 1.5) * fade * RefractionStrength * RainIntensity;
         }
     }
@@ -113,7 +154,26 @@ float4 MainPass(float4 pos : SV_Position, float2 uv : TEXCOORD) : SV_Target {
         1.0
     );
 
-    return lerp(base, chromaColor, saturate(RainIntensity));
+    if (ShowDebug)
+    {
+        float4 debugColor = float4(0.0, 0.0, 0.0, 1.0);
+        if (any(isinf(totalOffset)) || any(isnan(totalOffset))) {
+            debugColor.r = 1.0;
+        }
+        if (any(isinf(redUV)) || any(isnan(redUV))) {
+            debugColor.g = 1.0;
+        }
+        if (any(isinf(greenUV)) || any(isnan(greenUV))) {
+            debugColor.b = 1.0;
+        }
+        if (any(isinf(blueUV)) || any(isnan(blueUV))) {
+            debugColor.r = 1.0;
+            debugColor.g = 1.0;
+        }
+        return debugColor;
+    }
+
+    return lerp(base, chromaColor, saturate(RainIntensity * rain));
 }
 
 technique NGVRaindrops {
