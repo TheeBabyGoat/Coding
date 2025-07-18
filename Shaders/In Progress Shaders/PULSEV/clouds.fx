@@ -1,6 +1,6 @@
 //#define RSDEV // Uncomment when developing
 
-#include "include/ReShade.fxh"
+#include "ReShade.fxh"
 #include "include/noise.fxh"
 
 
@@ -46,11 +46,11 @@ void tex2Dstore(storage2D a, uint2 b, float4 c)
  **/
 
 #ifndef RENDER_SCALE
-	#define RENDER_SCALE 0.5
+#define RENDER_SCALE 0.5
 #endif
 
 #ifndef ADVANCED
-	#define ADVANCED 0
+#define ADVANCED 0
 #endif
 
 #define NOISE_W 256
@@ -77,6 +77,20 @@ void tex2Dstore(storage2D a, uint2 b, float4 c)
 
 static const bool RENDER_LOW = RENDER_SCALE < 1.0;
 static const float RENDER_WIDTH = 1.0 / RENDER_SCALE;
+
+static const int NVE_GAUSSIAN_SAMPLE_COUNT = 9;
+static const float4 NVE_GAUSSIAN_KERNEL[9] =
+{
+    float4(-1.0, -1.0, 0.0, 1.0 / 16.0),
+  float4(-1.0, 0.0, 0.0, 2.0 / 16.0),
+  float4(-1.0, +1.0, 0.0, 1.0 / 16.0),
+  float4(0.0, -1.0, 0.0, 2.0 / 16.0),
+  float4(0.0, 0.0, 0.0, 4.0 / 16.0),
+  float4(0.0, +1.0, 0.0, 2.0 / 16.0),
+  float4(+1.0, -1.0, 0.0, 1.0 / 16.0),
+  float4(+1.0, 0.0, 0.0, 2.0 / 16.0),
+  float4(+1.0, +1.0, 0.0, 1.0 / 16.0)
+};
 
 static const int GAUSSIAN_SAMPLE_COUNT = 17;
 static const float GAUSSIAN_WEIGHT = 1.0 / GAUSSIAN_SAMPLE_COUNT;
@@ -554,6 +568,132 @@ sampler2D CloudsLowResSampler
     MipFilter = LINEAR;
 };
 
+// NVE-style multi-resolution buffers and samplers
+texture2D CloudsReflectionBuffer
+{
+    Width = BUFFER_WIDTH / 2;
+    Height = BUFFER_HEIGHT / 2;
+    Format = RGBA16F;
+};
+texture2D CloudsWaterReflectionBuffer
+{
+    Width = BUFFER_WIDTH / 2;
+    Height = BUFFER_HEIGHT / 2;
+    Format = RGBA16F;
+};
+sampler2D CloudsReflectionSampler
+{
+    Texture = CloudsReflectionBuffer;
+};
+sampler2D CloudsWaterReflectionSampler
+{
+    Texture = CloudsWaterReflectionBuffer;
+};
+
+texture2D RenderTarget256
+{
+    Width = 256;
+    Height = 256;
+    Format = RGBA32F;
+};
+texture2D RenderTarget512
+{
+    Width = 512;
+    Height = 512;
+    Format = RGBA32F;
+};
+texture2D RenderTarget1024
+{
+    Width = 1024;
+    Height = 1024;
+    Format = RGBA32F;
+};
+texture2D RenderTargetFull
+{
+    Width = BUFFER_WIDTH;
+    Height = BUFFER_HEIGHT;
+    Format = RGBA32F;
+};
+texture2D RenderTargetFull2
+{
+    Width = BUFFER_WIDTH;
+    Height = BUFFER_HEIGHT;
+    Format = RGBA32F;
+};
+texture2D RenderTargetFullMask
+{
+    Width = BUFFER_WIDTH;
+    Height = BUFFER_HEIGHT;
+    Format = R8;
+};
+texture2D RenderTargetFullMaskGrow
+{
+    Width = BUFFER_WIDTH;
+    Height = BUFFER_HEIGHT;
+    Format = R8;
+};
+
+texture2D RenderTarget256_2
+{
+    Width = 256;
+    Height = 256;
+    Format = RGBA32F;
+};
+texture2D RenderTarget512_2
+{
+    Width = 512;
+    Height = 512;
+    Format = RGBA32F;
+};
+texture2D RenderTarget1024_2
+{
+    Width = 1024;
+    Height = 1024;
+    Format = RGBA32F;
+};
+
+sampler2D RTSampler256
+{
+    Texture = RenderTarget256;
+};
+sampler2D RTSampler512
+{
+    Texture = RenderTarget512;
+};
+sampler2D RTSampler1024
+{
+    Texture = RenderTarget1024;
+};
+sampler2D RTSamplerFull
+{
+    Texture = RenderTargetFull;
+};
+sampler2D RTSamplerFull2
+{
+    Texture = RenderTargetFull2;
+};
+sampler2D RTSamplerFullMask
+{
+    Texture = RenderTargetFullMask;
+};
+sampler2D RTSamplerFullMaskGrow
+{
+    Texture = RenderTargetFullMaskGrow;
+};
+
+sampler2D RTSampler256_2
+{
+    Texture = RenderTarget256_2;
+};
+sampler2D RTSampler512_2
+{
+    Texture = RenderTarget512_2;
+};
+sampler2D RTSampler1024_2
+{
+    Texture = RenderTarget1024_2;
+};
+
 texture AuroraTexture
 {
     Width = BUFFER_WIDTH * RENDER_SCALE;
@@ -749,7 +889,7 @@ float3 worldPosition()
 {
     float4x4 inverseView = inverseViewMatrix();
 
-    return float3(inverseView._14, inverseView._24, inverseView._34); 
+    return float3(inverseView._14, inverseView._24, inverseView._34);
 }
 
 Ray cameraRay(float2 uv)
@@ -915,7 +1055,7 @@ LayerParameters getWeather(int weatherType, int layerIndex)
     }
     
     params.bottom += cloudHeightOffset;
-    params.top +=  cloudHeightOffset;
+    params.top += cloudHeightOffset;
     
     return params;
 }
@@ -1308,7 +1448,7 @@ float4 renderAurora(float2 uv)
     return float4(color, alpha);
 }
 
-float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topLayer, int samples)
+float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topLayer, int samples, float3 cameraPos)
 {
     const float jitter = blueNoise(uv) * cloudJitter;
     const float range = inputFarClip - inputNearClip;
@@ -1327,7 +1467,9 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     const bool doDayLighting = dayAmount > 0.0;
     const bool doNightLighting = nightAmount > 0.0;
     
-    Ray ray = cameraRay(uv);
+    Ray ray;
+    ray.origin = cameraPos;
+    ray.direction = worldDirection(uv);
     float3 sunDirection = getSunDirection();
     float3 moonDirection = getMoonDirection();
     
@@ -1508,7 +1650,7 @@ float4 drawTextureRect3D(sampler3D tex, float2 uv, float2 position, float2 size,
 }
 
 [numthreads(NOISE_TX, NOISE_TY, NOISE_TZ)]
-void CS_GenerateNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_GroupID)
+void CS_GenerateNoise(uint3 threadID : SV_GroupThreadID, uint3 groupID : SV_GroupID)
 {
     uint3 globalThreadID = groupID * uint3(NOISE_TX, NOISE_TY, NOISE_TZ) + threadID;
 
@@ -1521,7 +1663,7 @@ void CS_GenerateNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_GroupI
 }
 
 [numthreads(NOISE_TX, NOISE_TY, NOISE_TZ)]
-void CS_GenerateCurlNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_GroupID)
+void CS_GenerateCurlNoise(uint3 threadID : SV_GroupThreadID, uint3 groupID : SV_GroupID)
 {
     uint3 globalThreadID = groupID * uint3(NOISE_TX, NOISE_TY, NOISE_TZ) + threadID;
 
@@ -1534,7 +1676,7 @@ void CS_GenerateCurlNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_Gr
 }
 
 [numthreads(NOISE_TX, NOISE_TY, 1)]
-void CS_GenerateAuroraNoise(uint2 threadID: SV_GroupThreadID, uint2 groupID: SV_GroupID)
+void CS_GenerateAuroraNoise(uint2 threadID : SV_GroupThreadID, uint2 groupID : SV_GroupID)
 {
     uint2 globalThreadID = groupID * uint2(NOISE_TX, NOISE_TY) + threadID;
 
@@ -1579,7 +1721,204 @@ float4 denoise(sampler2D tex, float2 uv, float2 size, float sigma, float strengt
     return color / divisor;
 }
 
-float4 PS_Aurora(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 DepthToViewPos(float depth, float2 texCoord)
+{
+    float x = texCoord.x * 2 - 1;
+    x *= -1;
+    float y = (texCoord.y) * 2 - 1;
+    float4x4 projectionMatrix = inverseProjectionMatrix();
+    float2 screenSpaceRay =
+        float2((x / projectionMatrix[0].x), (y / projectionMatrix[1].y));
+    float4 pos = float4(screenSpaceRay * depth, depth, 1.0);
+    return pos;
+}
+
+float3 DepthToWorldPos(float depth, float2 texCoord)
+{
+    float4 pos = DepthToViewPos(depth, texCoord);
+    pos = mul(pos, inverseViewMatrix());
+    return pos.xyz;
+}
+
+// NVE Cloud Reflections
+float3 SphericalRay(float2 uv)
+{
+    float2 p = uv * 2.0 - 1.0;
+    float r = saturate(length(p));
+    float theta = atan2(p.y, p.x);
+    float phi = r * (0.5 * PI);
+    float sinPhi = sin(phi);
+    float cosPhi = cos(phi);
+    float3 localDir;
+    localDir.x = sinPhi * cos(theta);
+    localDir.y = sinPhi * sin(theta);
+    localDir.z = cosPhi;
+    return normalize(localDir);
+}
+
+float3 ViewRay_UpsideDown(float2 texCoord)
+{
+    float x = texCoord.x * 2.0 - 1.0;
+    float y = (1.0 - texCoord.y) * 2.0 - 1.0;
+    float4x4 projectionMatrix = inverseProjectionMatrix();
+    float3 cameraSpaceRay = float3(x / projectionMatrix[0].x, (y / projectionMatrix[1].y) * -1.0, 1.0);
+    cameraSpaceRay.x = -cameraSpaceRay.x;
+    float4x4 worldView = viewMatrix();
+    float3 ray = normalize(mul(cameraSpaceRay, transpose(float3x3(
+        -worldView[0].xyz,
+        -worldView[1].xyz,
+         worldView[2].xyz
+    ))));
+
+    return ray;
+}
+
+float4 PS_CloudsReflection(float4 vpos : SV_Position, float2 tex : TexCoord) : SV_Target
+{
+    float2 uv = tex;
+    float3 camPos = worldPosition();
+    float3 sunDir = getSunDirection();
+    float3 rayDir = SphericalRay(tex);
+    float4 cl = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples, camPos);
+    cl.w = saturate(cl.w);
+    return cl;
+}
+
+float4 PS_FinalReflection(float4 vpos : SV_Position, float2 uv : TexCoord) : SV_Target
+{
+    float4 col = tex2Dlod(ReShade::BackBuffer, float4(uv, 0.0, 0.0));
+    if (cloudCover <= 0.019 || length(col.xyz) < saturate(getSunDirection().z))
+    {
+        return col;
+    }
+
+    float2 mapUv = float2(-1.0 + uv.x * 2, uv.y);
+    mapUv.y = 1.0 - mapUv.y;
+    float4 cl = tex2D(CloudsReflectionSampler, mapUv);
+
+    if (length(cl.xyz) > 0)
+    {
+        cl.xyz = cl.xyz + col.xyz * saturate(cl.w * 0.5);
+        col.xyz = lerp(col.xyz, cl.xyz, saturate(1.0f - cl.w));
+    }
+    return col;
+}
+
+float4 PS_CloudsWaterReflection(float4 vpos : SV_Position, float2 tex : TexCoord) : SV_Target
+{
+    float2 uv = tex;
+    float3 camPos = worldPosition();
+    camPos.z = -camPos.z;
+    float3 sunDir = getSunDirection();
+    float3 rayDir = ViewRay_UpsideDown(tex);
+    float4 cl = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples, camPos);
+    cl.w = saturate(cl.w);
+    return cl;
+}
+
+float4 PS_FinalWaterReflection(float4 vpos : SV_Position, float2 uv : TexCoord) : SV_Target
+{
+    float4 col = tex2Dlod(ReShade::BackBuffer, float4(uv, 0.0, 0.0));
+    if (cloudCover <= 0.019)
+    {
+        return col;
+    }
+
+    float4 cl = tex2D(CloudsWaterReflectionSampler, uv);
+
+    if (length(cl.xyz) > 0)
+    {
+        cl.xyz = cl.xyz + col.xyz * saturate(cl.w * 0.5);
+        col.xyz = lerp(col.xyz, cl.xyz, saturate(1.0f - cl.w) * 0.15f);
+    }
+    return float4(col.x, col.y, col.z, col.w);
+}
+
+// NVE Edge and Full Masking
+float4 PS_EdgeMask(float4 vpos : SV_Position, float2 tex : TexCoord) : SV_Target
+{
+    float2 texel = 1.0 / float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+    float3 camPos = worldPosition();
+
+    float3 worldPos = DepthToWorldPos(linearDepth(tex, inputNearClip, inputFarClip), tex);
+    float depth = length(camPos - worldPos);
+
+    float depthTest = 0.0;
+    float fillDepth = depth;
+    for (int i = 0; i < NVE_GAUSSIAN_SAMPLE_COUNT; i++)
+    {
+        depthTest = length(camPos - DepthToWorldPos(linearDepth(tex + texel * NVE_GAUSSIAN_KERNEL[i].xy * 1.5, inputNearClip, inputFarClip), tex)).x;
+        if (depthTest < depth)
+        {
+            depth = depthTest;
+        }
+    }
+
+    if (length(depth - fillDepth) >= (1.0 * 2.0f) * depth * 4.0f && fillDepth < 375000)
+    {
+        return float4(1, 0, 0, 1);
+    }
+    return float4(0, 0, 0, 0);
+}
+
+float PS_EdgeMaskGrow(float4 vpos : SV_Position, float2 tex : TexCoord) : SV_Target
+{
+    float2 texel = 1.0 / float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+    float mask = tex2D(RTSamplerFullMask, tex.xy).x;
+
+    for (int i = 1; i <= 2; i++)
+    {
+        for (int j = 0; j < NVE_GAUSSIAN_SAMPLE_COUNT; j++)
+        {
+            mask = max(mask, tex2D(RTSamplerFullMask, tex.xy + texel * NVE_GAUSSIAN_KERNEL[j].xy * i).x);
+        }
+    }
+
+    return mask;
+}
+
+float4 PS_CloudsFillGap(float4 vpos : SV_Position, float2 tex : TexCoord) : SV_Target
+{
+    float3 camPos = worldPosition();
+    if (cloudCover <= 0.019)
+    {
+        return float4(0.0, 0.0, 0.0, 1.0);
+    }
+
+    float2 uv = tex;
+    float2 resolution = float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+
+    float4 cl = 0.0f;
+
+    float2 texel = 1.0 / resolution;
+
+    float3 worldPos = DepthToWorldPos(linearDepth(uv, inputNearClip, inputFarClip), uv);
+    float dp = length(camPos - worldPos);
+
+    float depth = dp;
+
+    float mask = tex2D(RTSamplerFullMask, tex.xy).x;
+
+    for (int i = 1; i <= 2; i++)
+    {
+        for (int j = 0; j < NVE_GAUSSIAN_SAMPLE_COUNT; j++)
+        {
+            mask = max(mask, tex2D(RTSamplerFullMask, tex.xy + texel * NVE_GAUSSIAN_KERNEL[j].xy * i).x);
+        }
+    }
+
+    if (mask == 1)
+    {
+        cl = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples, camPos);
+        return cl;
+    }
+    else
+    {
+        return float4(0, 0, 0, 1);
+    }
+}
+
+float4 PS_Aurora(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (!inputEnabled)
     {
@@ -1597,17 +1936,17 @@ float4 PS_Aurora(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
     return output;
 }
 
-float4 PS_VolumetricCloudsLow(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_VolumetricCloudsLow(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (!inputEnabled)
     {
         discard;
     }
     
-    return renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples);
+    return renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples, worldPosition());
 }
 
-float4 PS_VolumetricCloudsIntermediate(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_VolumetricCloudsIntermediate(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (!inputEnabled)
     {
@@ -1624,7 +1963,7 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord: SV_Position, float2 uv:
     
     if (!RENDER_LOW || edge > 0.0)
     {
-        clouds = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples);
+        clouds = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples, worldPosition());
     }
     else
     {
@@ -1643,7 +1982,7 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord: SV_Position, float2 uv:
     return clouds;
 }
 
-float4 PS_VolumetricClouds(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_VolumetricClouds(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (!inputEnabled)
     {
@@ -1673,7 +2012,7 @@ float4 PS_VolumetricClouds(float4 fragcoord: SV_Position, float2 uv: TexCoord): 
     return float4(lerp(back.rgb, clouds.rgb, clouds.a * uiMask(uv)), 1.0);
 }
 
-float4 PS_Debug(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_Debug(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
 #define UVT (1.0 / 48.0) // Units in UV screen width space
     float2 uvtSquare = float2(UVT, UVT * BUFFER_ASPECT_RATIO);
@@ -1722,7 +2061,7 @@ float4 PS_Debug(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
     return float4(lerp(screen.rgb, final.rgb, final.a), 1.0);
 }
 
-float4 PS_DebugSky(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_DebugSky(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (uv.y < 0.125)
     {
@@ -1732,7 +2071,7 @@ float4 PS_DebugSky(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Targe
     return uv.x < 0.5 ? float4(getSkyColor(worldDirection(uv), 1.0, nightTimeAmount()), 1.0) : tex2D(ReShade::BackBuffer, uv);
 }
 
-float4 PS_DebugDepthEdge(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_DebugDepthEdge(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     return float4(softDepthEdge(uv).xxx, 0.0);
 }
@@ -1768,6 +2107,166 @@ technique RealityV_VolumetricCloudsNoise <
     }
 }
 
+technique PULSEV_CloudReflections <
+    string ui_label = "PULSEV Cloud Reflections";
+    string ui_tooltip = "Renders cloud reflections.";
+>
+{
+    pass
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_CloudsReflection;
+        RenderTarget = CloudsReflectionBuffer;
+    }
+    pass
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_FinalReflection;
+    }
+}
+
+technique PULSEV_CloudWaterReflections <
+    string ui_label = "PULSEV Cloud Water Reflections";
+    string ui_tooltip = "Renders cloud water reflections.";
+>
+{
+    pass
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_CloudsWaterReflection;
+        RenderTarget = CloudsWaterReflectionBuffer;
+    }
+    pass
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_FinalWaterReflection;
+    }
+}
+
+technique PULSEV_Masks <
+    string ui_label = "PULSEV Masks";
+    string ui_tooltip = "Generates edge and full masks for clouds.";
+>
+{
+    pass p0
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_EdgeMask;
+        RenderTarget = RenderTargetFullMask;
+    }
+    pass p1
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_EdgeMaskGrow;
+        RenderTarget = RenderTargetFullMaskGrow;
+    }
+    pass p2
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_CloudsFillGap;
+        RenderTarget = RenderTargetFull;
+    }
+}
+
+float4 PS_CloudsTAALow(float4 vpos : SV_Position, float2 uv : TexCoord) : SV_Target
+{
+    if (cloudCover <= 0.019)
+    {
+        return float4(0.0, 0.0, 0.0, 0.0);
+    }
+    const float2 res = float2(256, 256);
+    float4 _texture = tex2D(RTSampler256, uv);
+    return _texture;
+}
+float4 PS_CloudsTAA(float4 vpos : SV_Position, float2 uv : TexCoord) : SV_Target
+{
+    if (cloudCover <= 0.019)
+    {
+        return float4(0.0, 0.0, 0.0, 0.0);
+    }
+    const float2 res = float2(512, 512);
+    float4 _texture = tex2D(RTSampler512, uv);
+    return _texture;
+}
+float4 PS_CloudsTAAHD(float4 vpos : SV_Position, float2 uv : TexCoord) : SV_Target
+{
+    if (cloudCover <= 0.019)
+    {
+        return float4(0.0, 0.0, 0.0, 0.0);
+    }
+    const float2 res = float2(1024, 1024);
+    float4 _texture = tex2D(RTSampler1024, uv);
+    return _texture;
+}
+float4 PS_CloudsTAAFull(float4 vpos : SV_Position, float2 uv : TexCoord) : SV_Target
+{
+    if (cloudCover <= 0.019)
+    {
+        return float4(0.0, 0.0, 0.0, 0.0);
+    }
+    const float2 res = float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+    float4 _texture = tex2D(RTSamplerFull, uv);
+    return _texture;
+}
+
+float4 PS_FinalDrawLow(float4 vpos : SV_Position, float2 uv : TexCoord) : SV_Target
+{
+    float4 cl = tex2D(RTSampler256_2, uv);
+    float4 cl_fill = tex2D(RTSamplerFull, uv);
+
+    if (tex2D(RTSamplerFullMaskGrow, uv).x == 1)
+    {
+        cl = cl_fill;
+    };
+
+    return cl;
+}
+
+float4 PS_FinalDraw(float4 vpos : SV_Position, float2 uv : TexCoord) : SV_Target
+{
+    float4 cl = tex2D(RTSampler512_2, uv);
+    float4 cl_fill = tex2D(RTSamplerFull, uv);
+
+    if (tex2D(RTSamplerFullMaskGrow, uv).x == 1)
+    {
+        cl = cl_fill;
+    };
+
+    return cl;
+}
+
+float4 PS_FinalDrawHD(float4 vpos : SV_Position, float2 uv : TexCoord) : SV_Target
+{
+    float4 cl = tex2D(RTSampler1024_2, uv);
+    float4 cl_fill = tex2D(RTSamplerFull, uv);
+
+    if (tex2D(RTSamplerFullMaskGrow, uv).x == 1)
+    {
+        cl = cl_fill;
+    };
+    return cl;
+}
+
+float4 PS_Final(float4 vpos : SV_Position, float2 uv : TexCoord) : SV_Target
+{
+    float4 col = tex2Dlod(ReShade::BackBuffer, float4(uv, 0.0, 0.0));
+    if (cloudCover <= 0.019)
+    {
+        return col;
+    }
+
+    float4 cl = tex2D(RTSamplerFull2, uv);
+
+    if (length(cl.xyz) > 0)
+    {
+
+        cl.xyz = cl.xyz + col.xyz * saturate(cl.w * 0.5);
+        col.xyz = lerp(col.xyz, cl.xyz, saturate(1.0f - cl.w));
+    }
+    return col;
+}
+
+
 technique RealityV_VolumetricClouds <
     string ui_label = "RealityV Volumetric Clouds";
     string ui_tooltip = "Main volumetric clouds shader";
@@ -1801,6 +2300,174 @@ technique RealityV_VolumetricClouds <
     {
         VertexShader = PostProcessVS;
         PixelShader = PS_VolumetricClouds;
+    }
+}
+
+technique PULSEV_CloudsLow <
+    string ui_label = "PULSEV Clouds Low";
+    string ui_tooltip = "Low-quality volumetric clouds.";
+>
+{
+    pass p0
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_EdgeMask;
+        RenderTarget = RenderTargetFullMask;
+    }
+    pass p1
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_EdgeMaskGrow;
+        RenderTarget = RenderTargetFullMaskGrow;
+    }
+    pass p2
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_VolumetricCloudsLow;
+        RenderTarget = RenderTarget256;
+    }
+    pass p3
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_CloudsTAALow;
+        RenderTarget = RenderTarget256_2;
+    }
+    pass p4
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_CloudsFillGap;
+        RenderTarget = RenderTargetFull;
+    }
+    pass p5
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_FinalDrawLow;
+        RenderTarget = RenderTargetFull2;
+    }
+    pass p6
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_Final;
+    }
+}
+
+technique PULSEV_CloudsMedium <
+    string ui_label = "PULSEV Clouds Medium";
+    string ui_tooltip = "Medium-quality volumetric clouds.";
+>
+{
+    pass p0
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_EdgeMask;
+        RenderTarget = RenderTargetFullMask;
+    }
+    pass p1
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_EdgeMaskGrow;
+        RenderTarget = RenderTargetFullMaskGrow;
+    }
+    pass p2
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_VolumetricCloudsIntermediate;
+        RenderTarget = RenderTarget512;
+    }
+    pass p3
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_CloudsTAA;
+        RenderTarget = RenderTarget512_2;
+    }
+    pass p4
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_CloudsFillGap;
+        RenderTarget = RenderTargetFull;
+    }
+    pass p5
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_FinalDraw;
+        RenderTarget = RenderTargetFull2;
+    }
+    pass p6
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_Final;
+    }
+}
+
+technique PULSEV_CloudsHigh <
+    string ui_label = "PULSEV Clouds High";
+    string ui_tooltip = "High-quality volumetric clouds.";
+>
+{
+    pass p0
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_EdgeMask;
+        RenderTarget = RenderTargetFullMask;
+    }
+    pass p1
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_EdgeMaskGrow;
+        RenderTarget = RenderTargetFullMaskGrow;
+    }
+    pass p2
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_VolumetricClouds;
+        RenderTarget = RenderTarget1024;
+    }
+    pass p3
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_CloudsTAAHD;
+        RenderTarget = RenderTarget1024_2;
+    }
+    pass p4
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_CloudsFillGap;
+        RenderTarget = RenderTargetFull;
+    }
+    pass p5
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_FinalDrawHD;
+        RenderTarget = RenderTargetFull2;
+    }
+    pass p6
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_Final;
+    }
+}
+
+technique PULSEV_CloudsFull <
+    string ui_label = "PULSEV Clouds Full";
+    string ui_tooltip = "Full-resolution volumetric clouds.";
+>
+{
+    pass p0
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_VolumetricClouds;
+        RenderTarget = RenderTargetFull;
+    }
+    pass p1
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_CloudsTAAFull;
+        RenderTarget = RenderTargetFull2;
+    }
+    pass p2
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_Final;
     }
 }
 
