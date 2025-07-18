@@ -1810,7 +1810,8 @@ float4 PS_CloudsWaterReflection(float4 vpos : SV_Position, float2 tex : TexCoord
     float3 camPos = worldPosition();
     camPos.z = -camPos.z;
     float3 sunDir = getSunDirection();
-    float3 rayDir = ViewRay_UpsideDown(tex);
+    float3 rayDir = worldDirection(uv);
+    rayDir.z = -rayDir.z;
     float4 cl = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples, camPos);
     cl.w = saturate(cl.w);
     return cl;
