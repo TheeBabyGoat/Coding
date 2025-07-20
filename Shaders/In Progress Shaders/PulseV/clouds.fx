@@ -53,6 +53,10 @@ void tex2Dstore(storage2D a, uint2 b, float4 c)
 	#define ADVANCED 0
 #endif
 
+#ifndef SOFT_EDGE
+    #define SOFT_EDGE 0
+#endif
+
 #define NOISE_W 256
 #define NOISE_H NOISE_W
 #define NOISE_D NOISE_W
@@ -431,7 +435,7 @@ uniform float cloudDepthEdgeThreshold <
     float ui_min = 1.0;
     float ui_max = 100.0;
     float ui_step = 0.1;
-> = 30.0;
+> = 8.0;
 
 uniform float auroraScale <
     string ui_category = "Aurora Settings";
@@ -1170,6 +1174,11 @@ float depthEdge(float2 uv, float width)
 
 float softDepthEdge(float2 uv)
 {
+    if (!SOFT_EDGE)
+    {
+        return depthEdge(uv, 1.0);
+    }
+    
     float result = depthEdge(uv, 0.25);
     for (int i = 0; i < GAUSSIAN_SAMPLE_COUNT; ++i)
     {
