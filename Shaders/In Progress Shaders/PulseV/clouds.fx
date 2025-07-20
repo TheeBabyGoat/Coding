@@ -56,11 +56,16 @@ void tex2Dstore(storage2D a, uint2 b, float4 c)
 #define NOISE_W 256
 #define NOISE_H NOISE_W
 #define NOISE_D NOISE_W
+#define AURORA_NOISE_W 512
+#define AURORA_NOISE_H AURORA_NOISE_W
+#define AURORA_NOISE_TX 8
+#define AURORA_NOISE_TY AURORA_NOISE_TX
 #define NOISE_TX 4
 #define NOISE_TY NOISE_TX
 #define NOISE_TZ 4
 #define NOISE_FREQ 8.0
 #define CURL_NOISE_FREQ 4.0
+#define AURORA_NOISE_FREQ 4.0
 #define BASE_NOISE_SCALE 0.000025
 #define DETAIL_NOISE_SCALE 0.00009375
 #define TIME_SCALE 0.00000005
@@ -102,6 +107,7 @@ static const float2 GAUSSIAN_DIRECTIONS[17] =
 };
 
 static const float3 NoiseTexel = 1.0 / float3(NOISE_W, NOISE_H, NOISE_D);
+static const float2 AuroraNoiseTexel = 1.0 / float2(AURORA_NOISE_W, AURORA_NOISE_H);
 
 
 /**
@@ -432,16 +438,33 @@ uniform float auroraScale <
     bool hidden = !ADVANCED;
     string ui_type = "drag";
     float ui_min = 0.01;
-    float ui_max = 8.0;
+    float ui_max = 16.0;
     float ui_step = 0.01;
-> = 4.5;
-uniform float auroraDistortion <
+> = 8.25;
+uniform float auroraHeightStretch <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "drag";
-    float ui_min = 0.00;
-    float ui_max = 1.0;
-> = 0.035;
+    float ui_min = 0.01;
+    float ui_max = 10.0;
+    float ui_step = 0.01;
+> = 4.0;
+uniform float3 auroraPositionCurlScale <
+    string ui_category = "Aurora Settings";
+    bool hidden = !ADVANCED;
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 2.0;
+    float ui_step = 0.01;
+> = 0.5;
+uniform float3 auroraPositionCurl <
+    string ui_category = "Aurora Settings";
+    bool hidden = !ADVANCED;
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 2.0;
+    float ui_step = 0.01;
+> = float3(0.05, 0.5, 0.09);
 uniform float auroraCurlScale <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
@@ -449,7 +472,7 @@ uniform float auroraCurlScale <
     float ui_min = 0.0;
     float ui_max = 2.0;
     float ui_step = 0.01;
-> = 0.25;
+> = 0.08;
 uniform float auroraCurl <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
@@ -457,76 +480,93 @@ uniform float auroraCurl <
     float ui_min = 0.0;
     float ui_max = 4.0;
     float ui_step = 0.01;
-> = 0.5;
+> = 0.19;
 uniform int auroraVolumeSamples <
     string ui_category = "Global Settings";
     string ui_type = "slider";
     int ui_min = 8;
     int ui_max = 128;
-> = 128;
-uniform float auroraHeightOffset <
+> = 64;
+uniform float auroraBottomHeightOffset <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "drag";
     float ui_min = 0.00;
     float ui_max = 10000.0;
-> = 1000.0;
+    float ui_step = 25.0;
+> = 450.0;
+uniform float auroraTopHeightOffset <
+    string ui_category = "Aurora Settings";
+    bool hidden = !ADVANCED;
+    string ui_type = "drag";
+    float ui_min = 0.00;
+    float ui_max = 10000.0;
+    float ui_step = 25.0;
+> = 1750.0;
 uniform float auroraHeight <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "drag";
     float ui_min = 0.00;
     float ui_max = 10000.0;
-> = 2000.0;
+    float ui_step = 25.0;
+> = 500.0;
 uniform float auroraTimeScale <
     string ui_category = "Aurora Settings";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 20.0;
     float ui_step = 0.1;
-> = 5.0;
+> = 1.0;
+uniform float auroraPower <
+    string ui_category = "Aurora Settings";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 100.0;
+    float ui_step = 0.01;
+> = 45.0;
 uniform float auroraBrightness <
     string ui_category = "Aurora Settings";
     string ui_type = "drag";
     float ui_min = 0.0;
-    float ui_max = 2.0;
+    float ui_max = 100.0;
     float ui_step = 0.01;
-> = 0.12;
+> = 0.6;
+uniform float auroraDensityMultiplier <
+    string ui_category = "Aurora Settings";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 100.0;
+    float ui_step = 0.01;
+> = 2.55;
 uniform float4 auroraBaseColor <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "color";
     float ui_min = 0.00;
     float ui_max = 10.0;
-> = float4(0.0, 1.0, 0.17, 2.0);
+> = float4(0.0, 0.66, 0.24, 0.31);
 uniform float4 auroraMidColor <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "color";
     float ui_min = 0.00;
     float ui_max = 10.0;
-> = float4(0.32, 0.27, 0.7, 0.1);
+> = float4(0.1, 0.3, 0.73, 0.0);
 uniform float4 auroraTopColor <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "color";
     float ui_min = 0.00;
     float ui_max = 10.0;
-> = float4(0.5, 0.2, 1.0, 0.5);
+> = float4(1.0, 0.0, 0.35, 0.12);
 uniform float2 auroraBlendPoints <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "drag";
     float ui_min = 0.00;
     float ui_max = 1.0;
-> = float2(0.1, 0.35);
-uniform float2 auroraRemap <
-    string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
-    string ui_type = "drag";
-    float ui_min = 0.00;
-    float ui_max = 2.0;
-> = float2(0.85, 1.5);
+> = float2(0.682, 0.781);
 
 /**
  * User-editable uniforms (Weather Presets)
@@ -621,8 +661,8 @@ storage3D NoiseStorage
 
 texture2D AuroraNoiseTexture
 {
-    Width = NOISE_W;
-    Height = NOISE_H;
+    Width = AURORA_NOISE_W;
+    Height = AURORA_NOISE_H;
     Format = R8;
 };
 
@@ -1042,7 +1082,7 @@ float depthToLinear(float depth, float near, float far)
     return near * far / (far + depth * (near - far));
 }
 
-float linearDepth(float2 uv, float near, float far)
+float rawDepth(float2 uv)
 {
     float depth = tex2D(ReShade::DepthBuffer, uv).r;
     
@@ -1051,7 +1091,12 @@ float linearDepth(float2 uv, float near, float far)
         depth = 1.0 - depth;
     }
     
-    return depthToLinear(depth, near, far);
+    return depth;
+}
+
+float linearDepth(float2 uv, float near, float far)
+{
+    return depthToLinear(rawDepth(uv), near, far);
 }
 
 float3 depthPreview(float depth)
@@ -1188,34 +1233,30 @@ float4 auroraColour(float height)
     );
 }
 
+float3 auroraPosition(float3 position)
+{
+    float time = frac(timer * TIME_SCALE * auroraTimeScale * 5.0);
+    float curl = tex3Dlod(CurlNoiseSampler, float4(position * BASE_NOISE_SCALE * auroraPositionCurlScale - time, 0.0)).r * 2.0 - 1.0;
+    float3 distortion = curl * auroraPositionCurl * 1000.0;
+    
+    return position + distortion;
+}
+
 float auroraDensity(float3 position, float height)
 {
     float time = frac(timer * TIME_SCALE * auroraTimeScale * 10.0);
     float3 samplePos = position * auroraScale * BASE_NOISE_SCALE;
-    samplePos.z *= 0.75;
-    samplePos.y *= 0.25;
-    float curl = tex3Dlod(CurlNoiseSampler, float4(samplePos * auroraCurlScale, 0.0)).r * 2.0 - 1.0;
-    float offset = curl * auroraCurl * 0.1;
-    float3 curlPos = samplePos + float3(offset, offset * 20.0, offset);
-    float auroraWaveSamplerDistortion = tex2D(AuroraNoiseSampler, float2(curlPos.x * 0.25, time * 0.5)).r * 2.0;
-    float auroraWaveSampler = (1.0 - curlPos.z) * 0.125 + sin(TAU * frac(curlPos.x * 8.0 * lerp(1.0, auroraWaveSamplerDistortion, 0.125)) + curlPos.x) * auroraDistortion * 0.25 * auroraWaveSamplerDistortion;
-    float auroraWave = tex2Dlod(AuroraNoiseSampler, float4(frac(auroraWaveSampler * 4.0), time * 2.0, 0.0, 0.0)).r * 0.5 + 0.5;
-    float auroraNoise = remap(auroraWave + tex2Dlod(AuroraNoiseSampler, float4(curlPos.x, curlPos.z + auroraWaveSampler, 0.0, 0.0)).r, auroraRemap.x, auroraRemap.y);
+    samplePos.y *= 0.25 * auroraHeightStretch;
     
-    float density = saturate(auroraNoise);
-    
-    return pow(density * (1.0 - height) * 1.12, 3.75);
-}
+    float curl = tex3Dlod(CurlNoiseSampler, float4(samplePos * auroraCurlScale + time, 0.0)).r * 2.0 - 1.0;
+    float distortion = curl * auroraCurl * 0.1;
+    float2 warpedPos = samplePos.xz + distortion + time * 2.5;
 
-float3 acesFilm(float3 x)
-{
-    float a = 2.51f;
-    float b = 0.03f;
-    float c = 2.43f;
-    float d = 0.59f;
-    float e = 0.14f;
+    float auroraNoise = tex2Dlod(AuroraNoiseSampler, float4(warpedPos, 0.0, 0.0)).r;
     
-    return saturate((x * (a * x + b)) / (x * (c * x + d) + e));
+    float density = saturate(lerp(auroraNoise * 1.5, auroraNoise * 0.9, height));
+    
+    return pow(density, auroraPower) * auroraDensityMultiplier;
 }
 
 float3 saturation(float3 color, float saturation)
@@ -1225,87 +1266,77 @@ float3 saturation(float3 color, float saturation)
     return lerp(luma.xxx, color, saturation);
 }
 
-float3 auroraTonemap(float3 color)
-{
-    float3 result = acesFilm(color);
-
-    const float3x3 ACES_ODT_SRGB = float3x3(
-        1.60475, -0.53108, -0.07367,
-        -0.10208, 1.10813, -0.00605,
-        -0.00327, -0.07276, 1.07602
-    );
-
-    result = mul(ACES_ODT_SRGB, result);
-    
-    result = saturation(result, 2.0);
-    
-    return saturate(result);
-}
-
 float4 renderAurora(float2 uv)
 {
+    const float renderDistance = 10000.0;
     const float jitter = blueNoise(uv);
-    const float range = inputFarClip - inputNearClip;
-    const float depth = linearDepth(uv, inputNearClip, inputFarClip);
-    const float far = min(cloudRenderDistance, depth);
-    const float hdrClamp = 8.0;
+    const float depth = rawDepth(uv);
+    
+    if (depth < 1.0)
+    {
+        return 0.0;
+    }
     
     Ray ray = cameraRay(uv);
     
-    float enter = (auroraHeightOffset - ray.origin.y) / ray.direction.y;
-    float exit = (auroraHeightOffset + auroraHeight - ray.origin.y) / ray.direction.y;
+    float viewFade = saturate(dot(ray.direction, float3(0.0, 1.0, 0.0)));
+    float distFade = smoothstep(0.0, 0.25, viewFade) * (1.0 - smoothstep(0.5, 0.9, viewFade));
+    
+    if (false)
+    {
+        return float4(distFade.xxx, 1.0);
+    }
+    
+    if (distFade <= 0.0)
+    {
+        return 0.0;
+    }
+    
+    float bottom = lerp(auroraBottomHeightOffset, auroraTopHeightOffset, viewFade);
+    float top = bottom + auroraHeight;
+    
+    float enter = (bottom - ray.origin.y) / ray.direction.y;
+    float exit = (bottom + auroraHeight - ray.origin.y) / ray.direction.y;
     float fullExit = exit;
     
     if (enter > exit)
     {
         enter = 0.0;
-        exit = far;
-        fullExit = cloudRenderDistance;
+        exit = renderDistance;
+        fullExit = renderDistance;
     }
     
     float minDistance = max(0.0, enter);
-    float maxDistance = min(far, exit);
+    float maxDistance = min(renderDistance, exit);
 
     float marchDistance = maxDistance - minDistance;
     float invSamples = 1.0 / float(auroraVolumeSamples);
-    float stepSize = (min(cloudRenderDistance, fullExit) - minDistance) * invSamples;
-    
-    float density = 0.0;
+    float stepSize = marchDistance * invSamples;
 
     float3 pos = ray.origin + ray.direction * (minDistance + jitter * stepSize);
-    float3 color = 0.0;
-    float alpha = 0.0;
+    float4 color = 0.0;
     
     for (int i = 0; i < auroraVolumeSamples; i++)
     {
-        float dist = length(pos - ray.origin);
+        float3 distortedPos = auroraPosition(pos);
+        bool hit = distortedPos.y > bottom && distortedPos.y < top;
         
-        bool hit = pos.y > auroraHeightOffset && pos.y < (auroraHeightOffset + auroraHeight);
-        
-        if (hit && dist < marchDistance)
+        if (hit)
         {
-            float altitude = (pos.y - auroraHeightOffset) / auroraHeight;
-            density = auroraDensity(pos, altitude);
-            float4 pointColor = density * auroraColour(altitude);
+            float altitude = clamp(distortedPos.y - bottom, 0.0, auroraHeight) / auroraHeight;
+            float density = auroraDensity(distortedPos, altitude) * distFade;
             
-            color += pointColor.rgb;
-            
-            float brightness = length(color.rgb) / 3.0;
-            if (brightness > hdrClamp)
-            {
-                color = normalize(color.rgb) * hdrClamp * 3.0;
-            }
-            
-            alpha += pointColor.a;
+            color += density * auroraColour(altitude);
         }
 
         pos += ray.direction * stepSize;
     }
     
-    color = max(0.0, auroraTonemap(color * auroraBrightness));
-    alpha = saturate(alpha * invSamples * 10.0);
+    color *= invSamples;
+    color.a = saturate(color.a * 4.0);
+    color.rgb = max(normalize(color.rgb), saturation(color.rgb, lerp(2.0, 3.5, remap(max(1.0, length(color.rgb)), 1.0, 3.0)))) * auroraBrightness;
     
-    return float4(color, alpha);
+    return color;
 }
 
 float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topLayer, int samples)
@@ -1369,8 +1400,8 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     
     if (auroraVisibility > 0.0)
     {
-        aurora = tex2Dlod(AuroraSampler, float4(uv, 0.0, 0.0));
-        sky += aurora.rgb * aurora.a * 0.25;
+        aurora = tex2Dlod(AuroraSampler, float4(uv, 0.0, 0.0)) * (1.0 - saturate(smoothstep(0.95, 1.0, moonCosTheta)));
+        sky += aurora.rgb * aurora.a * 0.05;
     }
 
     for (int i = 0; i < samples; i++)
@@ -1533,15 +1564,15 @@ void CS_GenerateCurlNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_Gr
     }
 }
 
-[numthreads(NOISE_TX, NOISE_TY, 1)]
+[numthreads(AURORA_NOISE_TX, AURORA_NOISE_TY, 1)]
 void CS_GenerateAuroraNoise(uint2 threadID: SV_GroupThreadID, uint2 groupID: SV_GroupID)
 {
-    uint2 globalThreadID = groupID * uint2(NOISE_TX, NOISE_TY) + threadID;
+    uint2 globalThreadID = groupID * uint2(AURORA_NOISE_TX, AURORA_NOISE_TY) + threadID;
 
-    if (globalThreadID.x < NOISE_W && globalThreadID.y < NOISE_H)
+    if (globalThreadID.x < AURORA_NOISE_W && globalThreadID.y < AURORA_NOISE_H)
     {
-        float2 uv = globalThreadID * NoiseTexel.xy;
-        float auroraValue = generateAuroraNoise(uv, 2.0);
+        float2 uv = globalThreadID * AuroraNoiseTexel.xy;
+        float auroraValue = generateAuroraNoise(uv, AURORA_NOISE_FREQ);
         tex2Dstore(AuroraNoiseStorage, globalThreadID, float4(auroraValue, 0.0.xxx));
     }
 }
@@ -1737,8 +1768,8 @@ float4 PS_DebugDepthEdge(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV
     return float4(softDepthEdge(uv).xxx, 0.0);
 }
 
-technique PulseV_VolumetricCloudsNoise <
-    string ui_label = "PulseV Volumetric Clouds - Noise Gen";
+technique RealityV_VolumetricCloudsNoise <
+    string ui_label = "RealityV Volumetric Clouds - Noise Gen";
     string ui_tooltip = "Regenerates the noise textures for clouds when reloading shaders (NOTE: reloading is mandatory, enabling this technique does nothing!)";
     bool enabled = true;
     int timeout = 1;
@@ -1763,13 +1794,13 @@ technique PulseV_VolumetricCloudsNoise <
     pass aurora
     {
         ComputeShader = CS_GenerateAuroraNoise;
-        DispatchSizeX = DISPATCH_SIZE(NOISE_W, NOISE_TX);
-        DispatchSizeY = DISPATCH_SIZE(NOISE_H, NOISE_TY);
+        DispatchSizeX = DISPATCH_SIZE(AURORA_NOISE_W, AURORA_NOISE_TX);
+        DispatchSizeY = DISPATCH_SIZE(AURORA_NOISE_H, AURORA_NOISE_TY);
     }
 }
 
-technique PulseV_VolumetricClouds <
-    string ui_label = "PulseV Volumetric Clouds";
+technique RealityV_VolumetricClouds <
+    string ui_label = "RealityV Volumetric Clouds";
     string ui_tooltip = "Main volumetric clouds shader";
 >
 {
@@ -1804,8 +1835,8 @@ technique PulseV_VolumetricClouds <
     }
 }
 
-technique PulseV_VolumetricClouds_DEBUG <
-    string ui_label = "PulseV Volumetric Clouds - DEBUGGING";
+technique RealityV_VolumetricClouds_DEBUG <
+    string ui_label = "RealityV Volumetric Clouds - DEBUGGING";
     string ui_tooltip = "Debugging mode for development";
     bool enabled = false;
 >
@@ -1817,8 +1848,8 @@ technique PulseV_VolumetricClouds_DEBUG <
     }
 }
 
-technique PulseV_VolumetricClouds_DEBUGSKY <
-    string ui_label = "PulseV Volumetric Clouds - SKY COLOR DEBUGGING";
+technique RealityV_VolumetricClouds_DEBUGSKY <
+    string ui_label = "RealityV Volumetric Clouds - SKY COLOR DEBUGGING";
     string ui_tooltip = "Debugging mode for development to check sky color";
     bool enabled = false;
 >
@@ -1830,8 +1861,8 @@ technique PulseV_VolumetricClouds_DEBUGSKY <
     }
 }
 
-technique PulseV_VolumetricClouds_DEBUGDEPTHEDGE <
-    string ui_label = "PulseV Volumetric Clouds - DEPTH EDGE DEBUGGING";
+technique RealityV_VolumetricClouds_DEBUGDEPTHEDGE <
+    string ui_label = "RealityV Volumetric Clouds - DEPTH EDGE DEBUGGING";
     string ui_tooltip = "Debugging mode for development to check depth edge detection";
     bool enabled = false;
 >
