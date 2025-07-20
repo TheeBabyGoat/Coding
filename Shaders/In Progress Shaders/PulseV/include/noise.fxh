@@ -146,6 +146,72 @@ float worleyNoise(float3 pos, float freq, int s)
     return 1.0 - minDist;
 }
 
+float3 mod289(float3 x)
+{
+    return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+
+float2 mod289(float2 x)
+{
+    return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+
+float3 permute(float3 x)
+{
+    return mod289((x * 34.0 + 1.0) * x);
+}
+
+float3 taylorInvSqrt(float3 r)
+{
+    return 1.79284291400159 - 0.85373472095314 * r;
+}
+
+float simplexNoise(float2 pos, float freq, int s)
+{
+    float2 v = pos * freq;
+    
+    const float4 C = float4(
+        0.211324865405187,
+        0.366025403784439,
+        -0.577350269189626,
+        0.024390243902439
+    );
+
+    float2 i = floor(v + dot(v, C.yy));
+    float2 x0 = v - i + dot(i, C.xx);
+
+    float2 i1;
+    i1.x = step(x0.y, x0.x);
+    i1.y = 1.0 - i1.x;
+
+    float2 x1 = x0 + C.xx - i1;
+    float2 x2 = x0 + C.zz;
+
+    i = mod289(i);
+    float3 p = permute(permute(i.y + float3(0.0, i1.y, 1.0)) + i.x + float3(0.0, i1.x, 1.0));
+    p = permute(p + (s % 289).xxx);
+
+    float3 m = max(0.5 - float3(dot(x0, x0), dot(x1, x1), dot(x2, x2)), 0.0);
+    
+    m = m * m;
+    m = m * m;
+
+    float3 x = 2.0 * frac(p * C.www) - 1.0;
+    float3 h = abs(x) - 0.5;
+    float3 ox = floor(x + 0.5);
+    float3 a0 = x - ox;
+
+    m *= taylorInvSqrt(a0 * a0 + h * h);
+
+    float3 g = float3(
+        a0.x * x0.x + h.x * x0.y,
+        a0.y * x1.x + h.y * x1.y,
+        a0.z * x2.x + h.z * x2.y
+    );
+    
+    return 130.0 * dot(m, g);
+}
+
 float perlinFbm(float3 pos, float freq, int octaves, int s)
 {
     float amp = 1.0;
@@ -159,6 +225,37 @@ float perlinFbm(float3 pos, float freq, int octaves, int s)
     }
 
     return noise;
+}
+
+float ridge(float h, float offset)
+{
+    h = abs(h);
+    h = offset - h;
+    h = h * h;
+    
+    return h;
+}
+
+float ridgedFbm(float2 pos, float freq, int octaves, int s)
+{
+    float lacunarity = 2.0;
+    float gain = 0.5;
+    float offset = 0.9;
+    float sum = 0.0;
+    float amp = 0.75;
+    float prev = 1.0;
+    
+    for (int i = 0; i < octaves; i++)
+    {
+        float noise = ridge(simplexNoise(pos, freq, seed), offset);
+        sum += noise * amp;
+        sum += noise * amp * prev;
+        prev = noise;
+        freq *= lacunarity;
+        amp *= PERLIN_GAIN;
+    }
+    
+    return sum;
 }
 
 float3 worleyPos(float3 pos, float freq)
@@ -215,5 +312,10 @@ float2 generateCurlNoise(float3 pos, float freq)
 
 float generateAuroraNoise(float2 uv, float freq)
 {
-    return curlNoise(float3(uv * 0.5, 0.5), freq, seed + 200);
+    float3 pos = float3(uv, 0.5);
+    float pfbm = abs(lerp(1.0, perlinFbm(pos, freq * 8.0, WORLEY_PERLIN_OCTAVES, seed + 210), 0.5) * 2.0 - 1.0);
+    float cutout = saturate(worleyFbm(pos, freq * 4.0) * 1.3);
+    cutout = pow(remap(pfbm, 0.0, 1.0, cutout, 1.0), 4.0);
+    
+    return ridgedFbm(uv, freq, 6, seed + 200) * cutout;
 }
