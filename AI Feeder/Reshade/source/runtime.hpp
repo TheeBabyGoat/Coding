@@ -406,6 +406,7 @@ namespace reshade
 		void draw_gui_vr();
 
 		void draw_gui_home();
+		void draw_gui_pulsev();
 		void draw_gui_settings();
 		void draw_gui_statistics();
 		void draw_gui_log();

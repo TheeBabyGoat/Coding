@@ -1379,6 +1379,7 @@ void reshade::runtime::draw_gui()
 
 		const std::pair<std::string, void(runtime::*)()> overlay_callbacks[] = {
 			{ _("Home###home"), &runtime::draw_gui_home },
+			{ "PulseV###pulsev", &runtime::draw_gui_pulsev },
 #if RESHADE_ADDON
 			{ _("Add-ons###addons"), &runtime::draw_gui_addons },
 #endif
@@ -4993,3 +4994,43 @@ bool reshade::runtime::open_overlay(bool open, api::input_source source)
 }
 
 #endif
+
+
+void reshade::runtime::draw_gui_pulsev()
+{
+	if (ImGui::CollapsingHeader("Volumetric Clouds", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		static bool enable_clouds = true;
+		static float cloud_density = 0.5f;
+		static float cloud_height = 1000.0f;
+
+		ImGui::Checkbox("Enable Clouds", &enable_clouds);
+		ImGui::SliderFloat("Cloud Density", &cloud_density, 0.0f, 1.0f);
+		ImGui::SliderFloat("Cloud Height", &cloud_height, 0.0f, 5000.0f);
+	}
+
+	if (ImGui::CollapsingHeader("Auroras", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		static float aurora_intensity = 1.0f;
+		static float aurora_speed = 0.2f;
+
+		ImGui::SliderFloat("Aurora Intensity", &aurora_intensity, 0.0f, 5.0f);
+		ImGui::SliderFloat("Aurora Speed", &aurora_speed, 0.0f, 1.0f);
+	}
+
+	if (ImGui::CollapsingHeader("Rain Lens", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		static bool enable_rain = true;
+		static float rain_density = 0.5f;
+		static float rain_speed = 1000.0f;
+
+		ImGui::Checkbox("Enable Rain Lens", &enable_rain);
+		ImGui::SliderFloat("Rain Density", &rain_density, 0.0f, 1.0f);
+		ImGui::SliderFloat("Rain Speed", &rain_speed, 0.0f, 5000.0f);
+	}
+
+	if (ImGui::CollapsingHeader("Extras", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::Text("Future features coming soon...");
+	}
+}
