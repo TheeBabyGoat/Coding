@@ -1,7 +1,9 @@
-/*
+﻿/*
  * Copyright (C) 2014 Patrick Mours
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+#include "data_reader.hpp"
 
 #if RESHADE_GUI
 
@@ -4995,42 +4997,436 @@ bool reshade::runtime::open_overlay(bool open, api::input_source source)
 
 #endif
 
+////////////////////////////////////////////////////////////////
+//
+//  UI STATE FOR PULSEV ADDON
+// 
+////////////////////////////////////////////////////////////////
 
 void reshade::runtime::draw_gui_pulsev()
 {
-	if (ImGui::CollapsingHeader("Volumetric Clouds", ImGuiTreeNodeFlags_DefaultOpen))
+////////////////////////////////////////////////////////////////
+//
+//  UI STATE DEFAULTS
+// 
+////////////////////////////////////////////////////////////////
+	static float aurora_speed_default = 0.2f;
+	static float aurora_intensity_default = 1.0f;
+	static float cloud_height_default = 1000.0f;
+	static float cloud_density_default = 0.5f;
+	static float rain_intensity_default = 1.0f;
+	static float refraction_strength_default = 3.0f;
+	static float chromatic_aberration_default = 0.01f;
+	static float drop_scale_x_default = 0.1f;
+	static float drop_scale_y_default = 0.2f;
+	static int drop_count_default = 40;
+	static int slow_drip_count_default = 5;
+	static float drop_speed_default = 0.01f;
+	static float drop_speed_var_default = 1.5f;
+	static float fadeout_default = 0.0f;
+	static float trail_len_default = 0.02f;
+	static float trail_width_default = 3.0f;
+	static float bulge_strength_default = 0.01f;
+	static float bulge_stretch_default = 0.5f;
+	static float wind_default[2] = { 0.15f, 1.0f };
+	static float rgb_speed_default = 1.0f;
+	static float rgb_intensity_default = 1.0f;
+	static int rgb_preset_default = 0;
+	static float manual_rgb_color_default[3] = { 1.0f, 1.0f, 1.0f };
+
+////////////////////////////////////////////////////////////////
+//
+//  UI RENDERING LOGIC VOLUMETRIC CLOUDS
+// 
+////////////////////////////////////////////////////////////////
+
+	if (ImGui::CollapsingHeader("Volumetric Clouds", ImGuiTreeNodeFlags_OpenOnArrow))
 	{
 		static bool enable_clouds = true;
 		static float cloud_density = 0.5f;
 		static float cloud_height = 1000.0f;
 
 		ImGui::Checkbox("Enable Clouds", &enable_clouds);
+		ImGui::PushID("CloudDensity");
 		ImGui::SliderFloat("Cloud Density", &cloud_density, 0.0f, 1.0f);
+		ImGui::SameLine();
+		if (ImGui::SmallButton(ICON_FK_UNDO)) cloud_density = cloud_density_default;
+		ImGui::PopID();
+		ImGui::PushID("CloudHeight");
 		ImGui::SliderFloat("Cloud Height", &cloud_height, 0.0f, 5000.0f);
+		ImGui::SameLine();
+		if (ImGui::SmallButton(ICON_FK_UNDO)) cloud_height = cloud_height_default;
+		ImGui::PopID();
 	}
 
-	if (ImGui::CollapsingHeader("Auroras", ImGuiTreeNodeFlags_DefaultOpen))
+	////////////////////////////////////////////////////////////////
+	//
+	//  UI RENDERING LOGIC VOLUMETRIC AURORAS
+	// 
+	////////////////////////////////////////////////////////////////
+
+	if (ImGui::CollapsingHeader("Auroras", ImGuiTreeNodeFlags_OpenOnArrow))
 	{
 		static float aurora_intensity = 1.0f;
 		static float aurora_speed = 0.2f;
 
+		ImGui::PushID("AuroraIntensity");
 		ImGui::SliderFloat("Aurora Intensity", &aurora_intensity, 0.0f, 5.0f);
+		ImGui::SameLine();
+		if (ImGui::SmallButton(ICON_FK_UNDO)) aurora_intensity = aurora_intensity_default;
+		ImGui::PopID();
+		ImGui::PushID("AuroraSpeed");
 		ImGui::SliderFloat("Aurora Speed", &aurora_speed, 0.0f, 1.0f);
+		ImGui::SameLine();
+		if (ImGui::SmallButton(ICON_FK_UNDO)) aurora_speed = aurora_speed_default;
+		ImGui::PopID();
 	}
 
-	if (ImGui::CollapsingHeader("Rain Lens", ImGuiTreeNodeFlags_DefaultOpen))
+	////////////////////////////////////////////////////////////////
+	//  UI RENDERING LOGIC RAIN LENS (Weather Gated)
+	////////////////////////////////////////////////////////////////
+
+	const int weather = DataReader::get_to_weather_type();
+	const bool is_rainy_weather = (weather == 3 || weather == 4 || weather == 5);
+
+	if (is_rainy_weather)
 	{
-		static bool enable_rain = true;
-		static float rain_density = 0.5f;
-		static float rain_speed = 1000.0f;
+		////////////////////////////////////////////////////////////////
+	//
+	//  UI RENDERING LOGIC RAIN LENS
+	// 
+	////////////////////////////////////////////////////////////////
 
-		ImGui::Checkbox("Enable Rain Lens", &enable_rain);
-		ImGui::SliderFloat("Rain Density", &rain_density, 0.0f, 1.0f);
-		ImGui::SliderFloat("Rain Speed", &rain_speed, 0.0f, 5000.0f);
+		if (ImGui::CollapsingHeader("Rain Lens", ImGuiTreeNodeFlags_OpenOnArrow))
+		{
+			static float rain_intensity = 1.0f;
+			ImGui::PushID("RainIntensity");
+			ImGui::DragFloat("Rain Intensity", &rain_intensity, 0.01f, 0.0f, 10.0f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "RainIntensity"); h.handle != 0)
+					this->set_uniform_value_float(h, &rain_intensity, 1, 0);
+			}
+			if (rain_intensity != rain_intensity_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					rain_intensity = rain_intensity_default;
+			}
+			ImGui::PopID();
+
+			static float refraction_strength = 3.0f;
+			ImGui::PushID("RefractionStrength");
+			ImGui::DragFloat("Refraction Strength", &refraction_strength, 0.05f, 0.0f, 10.0f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "RefractionStrength"); h.handle != 0)
+					this->set_uniform_value_float(h, &refraction_strength, 1, 0);
+			}
+			if (refraction_strength != refraction_strength_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					refraction_strength = refraction_strength_default;
+			}
+			ImGui::PopID();
+
+			static float chromatic_aberration = 0.01f;
+			ImGui::PushID("ChromaticAberration");
+			ImGui::DragFloat("Chromatic Aberration Strength", &chromatic_aberration, 0.001f, 0.0f, 1.0f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "ChromaticAmount"); h.handle != 0)
+					this->set_uniform_value_float(h, &chromatic_aberration, 1, 0);
+			}
+			if (chromatic_aberration != chromatic_aberration_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					chromatic_aberration = chromatic_aberration_default;
+			}
+			ImGui::PopID();
+
+			ImGui::Separator();
+
+			static float drop_scale_x = 0.1f;
+			ImGui::PushID("DropScaleX");
+			ImGui::DragFloat("Drop Scale X", &drop_scale_x, 0.01f, 0.01f, 0.5f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropScaleX"); h.handle != 0)
+					this->set_uniform_value_float(h, &drop_scale_x, 1, 0);
+			}
+			if (drop_scale_x != drop_scale_x_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					drop_scale_x = drop_scale_x_default;
+			}
+			ImGui::PopID();
+
+			static float drop_scale_y = 0.2f;
+			ImGui::PushID("DropScaleY");
+			ImGui::DragFloat("Drop Scale Y", &drop_scale_y, 0.01f, 0.01f, 0.5f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropScaleY"); h.handle != 0)
+					this->set_uniform_value_float(h, &drop_scale_y, 1, 0);
+			}
+			if (drop_scale_y != drop_scale_y_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					drop_scale_y = drop_scale_y_default;
+			}
+			ImGui::PopID();
+
+			static int drop_count = 40;
+			ImGui::PushID("DropCount");
+			ImGui::DragInt("Drop Count", &drop_count, 1, 1, 200);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropCount"); h.handle != 0)
+					this->set_uniform_value_int(h, &drop_count, 1, 0);
+			}
+			if (drop_count != drop_count_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					drop_count = drop_count_default;
+			}
+			ImGui::PopID();
+
+			static int slow_drip_count = 5;
+			ImGui::PushID("SlowDripCount");
+			ImGui::DragInt("Slow Drip Count", &slow_drip_count, 1, 0, 10);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "SlowDripCount"); h.handle != 0)
+					this->set_uniform_value_int(h, &slow_drip_count, 1, 0);
+			}
+			if (slow_drip_count != slow_drip_count_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					slow_drip_count = slow_drip_count_default;
+			}
+			ImGui::PopID();
+
+			static float drop_speed = 0.01f;
+			ImGui::PushID("DropSpeed");
+			ImGui::DragFloat("Base Drop Speed", &drop_speed, 0.0001f, 0.0001f, 1.0f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropSpeed"); h.handle != 0)
+					this->set_uniform_value_float(h, &drop_speed, 1, 0);
+			}
+			if (drop_speed != drop_speed_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					drop_speed = drop_speed_default;
+			}
+			ImGui::PopID();
+
+			static float drop_speed_var = 1.5f;
+			ImGui::PushID("DropSpeedVariation");
+			ImGui::DragFloat("Drop Speed Variation", &drop_speed_var, 0.01f, 0.0f, 2.0f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropSpeedVariation"); h.handle != 0)
+					this->set_uniform_value_float(h, &drop_speed_var, 1, 0);
+			}
+			if (drop_speed_var != drop_speed_var_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					drop_speed_var = drop_speed_var_default;
+			}
+			ImGui::PopID();
+
+			ImGui::Separator();
+
+			static bool enable_trails = true;
+			if (ImGui::Checkbox("Enable Rain Trails", &enable_trails))
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "EnableTrails"); h.handle != 0)
+					this->set_uniform_value_bool(h, &enable_trails, 1, 0);
+
+			static float fadeout = 0.0f;
+			ImGui::PushID("Fadeout Strength");
+			if (ImGui::DragFloat("Fadeout Strength", &fadeout, 0.01f, 0.0f, 5.0f))
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "FadeoutStrength"); h.handle != 0)
+					this->set_uniform_value_float(h, &fadeout, 1, 0);
+			}
+			if (fadeout != fadeout_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					fadeout = fadeout_default;
+			}
+			ImGui::PopID();
+
+			static float trail_len = 0.02f;
+			ImGui::PushID("TrailLength");
+			ImGui::DragFloat("Trail Length", &trail_len, 0.01f, 0.0f, 0.05f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "TrailLength"); h.handle != 0)
+					this->set_uniform_value_float(h, &trail_len, 1, 0);
+			}
+			if (trail_len != trail_len_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					trail_len = trail_len_default;
+			}
+			ImGui::PopID();
+
+			static float trail_width = 3.0f;
+			ImGui::PushID("TrailWidth");
+			ImGui::DragFloat("Trail Width", &trail_width, 0.01f, 0.1f, 3.0f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "TrailWidth"); h.handle != 0)
+					this->set_uniform_value_float(h, &trail_width, 1, 0);
+			}
+			if (trail_width != trail_width_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					trail_width = trail_width_default;
+			}
+			ImGui::PopID();
+
+			ImGui::Separator();
+
+			static float bulge_strength = 0.01f;
+			ImGui::PushID("BulgeStrength");
+			ImGui::DragFloat("Bulge Strength", &bulge_strength, 0.0001f, 0.0f, 0.01f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "BulgeStrength"); h.handle != 0)
+					this->set_uniform_value_float(h, &bulge_strength, 1, 0);
+			}
+			if (bulge_strength != bulge_strength_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					bulge_strength = bulge_strength_default;
+			}
+			ImGui::PopID();
+
+			static float bulge_stretch = 0.5f;
+			ImGui::PushID("BulgeStretch");
+			ImGui::DragFloat("Bulge Stretch Intensity", &bulge_stretch, 0.1f, 0.0f, 2.0f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "BulgeStretchIntensity"); h.handle != 0)
+					this->set_uniform_value_float(h, &bulge_strength, 1, 0);
+			}
+			if (bulge_stretch != bulge_stretch_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					bulge_stretch = bulge_stretch_default;
+			}
+			ImGui::PopID();
+
+			ImGui::Separator();
+
+			static float wind[2] = { 0.15f, 1.0f };
+			if (ImGui::DragFloat2("Wind Direction", wind, 0.001f, -0.1f, 0.1f))
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "Wind"); h.handle != 0)
+					this->set_uniform_value_float(h, wind, 2, 0);
+
+			ImGui::Separator();
+
+			static bool enable_rgb = false;
+			if (ImGui::Checkbox("Enable RGB Color Cycle", &enable_rgb))
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "EnableRGB"); h.handle != 0)
+					this->set_uniform_value_bool(h, &enable_rgb, 1, 0);
+
+			static float rgb_speed = 1.0f;
+			ImGui::PushID("RGBSpeed");
+			ImGui::DragFloat("RGB Speed", &rgb_speed, 0.1f, 0.1f, 10.0f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "RGBSpeed"); h.handle != 0)
+					this->set_uniform_value_float(h, &rgb_speed, 1, 0);
+			}
+			if (rgb_speed != rgb_speed_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					rgb_speed = rgb_speed_default;
+			}
+			ImGui::PopID();
+
+			static float rgb_intensity = 1.0f;
+			ImGui::PushID("RGBIntensity");
+			ImGui::DragFloat("RGB Intensity", &rgb_intensity, 0.01f, 0.0f, 2.0f);
+			{
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "RGBSIntensity"); h.handle != 0)
+					this->set_uniform_value_float(h, &rgb_intensity, 1, 0);
+			}
+			if (rgb_intensity != rgb_intensity_default) // Only show restore if changed
+			{
+				ImGui::SameLine();
+				if (ImGui::SmallButton(ICON_FK_UNDO))
+					rgb_intensity = rgb_intensity_default;
+			}
+			ImGui::PopID();
+
+			static int rgb_preset = 0;
+			if (ImGui::Combo("RGB Color Preset", &rgb_preset, "Rainbow\0Pastel\0Neon\0Warm\0Cool\0"))
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "RGBPreset"); h.handle != 0)
+					this->set_uniform_value_int(h, &rgb_preset, 1, 0);
+
+			static bool use_manual_rgb = false;
+			if (ImGui::Checkbox("Use Manual RGB Color", &use_manual_rgb))
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "UseManualRGB"); h.handle != 0)
+					this->set_uniform_value_bool(h, &use_manual_rgb, 1, 0);
+
+			static float manual_rgb_color[3] = { 1.0f, 1.0f, 1.0f };
+			if (ImGui::ColorEdit3("Manual RGB Color", manual_rgb_color))
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "ManualRGBColor"); h.handle != 0)
+					this->set_uniform_value_float(h, manual_rgb_color, 3, 0);
+
+			ImGui::Separator();
+
+			static bool enable_weather = true;
+			if (ImGui::Checkbox("Enable Weather Detection", &enable_weather))
+				if (auto h = find_uniform_variable("NGVRaindrops.fx", "EnableWeatherDetection"); h.handle != 0)
+					this->set_uniform_value_bool(h, &enable_weather, 1, 0);
+		}
+
+		////////////////////////////////////////////////////////////////
+		//
+		//  UI RENDERING LOGIC EXTRAS
+		// 
+		////////////////////////////////////////////////////////////////
+
+		if (ImGui::CollapsingHeader("Extras", ImGuiTreeNodeFlags_OpenOnArrow))
+		{
+			ImGui::Text("Future features coming soon...");
+		}
 	}
-
-	if (ImGui::CollapsingHeader("Extras", ImGuiTreeNodeFlags_DefaultOpen))
+	else
 	{
-		ImGui::Text("Future features coming soon...");
+		// Weather does not match — disable the shader via uniforms
+		float off = 0.0f;
+		int zero = 0;
+		bool disable = false;
+
+		const char *uniforms_to_zero[] = {
+			"RainIntensity", "RefractionStrength", "ChromaticAmount", "DropScaleX", "DropScaleY",
+			"DropSpeed", "DropSpeedVariation", "FadeoutStrength", "TrailLength", "TrailWidth",
+			"BulgeStrength", "BulgeStretchIntensity", "RGBSpeed", "RGBSIntensity"
+		};
+		for (const char *name : uniforms_to_zero)
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", name); h.handle != 0)
+				this->set_uniform_value_float(h, &off, 1, 0);
+
+		const char *uniforms_to_zero_int[] = { "DropCount", "SlowDripCount", "RGBPreset" };
+		for (const char *name : uniforms_to_zero_int)
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", name); h.handle != 0)
+				this->set_uniform_value_int(h, &zero, 1, 0);
+
+		const char *uniforms_to_disable[] = { "EnableTrails", "EnableRGB", "UseManualRGB", "EnableWeatherDetection" };
+		for (const char *name : uniforms_to_disable)
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", name); h.handle != 0)
+				this->set_uniform_value_bool(h, &disable, 1, 0);
 	}
+
+	ImGui::End();
 }
+
+
+	
