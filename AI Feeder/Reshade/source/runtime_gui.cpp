@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "data_reader.hpp"
-
 #if RESHADE_GUI
 
 #include "runtime.hpp"
@@ -26,6 +24,29 @@
 #include <cstdlib> // std::lldiv, std::strtol
 #include <cstring> // std::memcmp, std::memcpy
 #include <algorithm> // std::any_of, std::count_if, std::find, std::find_if, std::max, std::min, std::replace, std::rotate, std::search, std::swap, std::transform
+
+#include "..\source\depends\shared_data.hpp"
+#include "..\source\depends\addon_api.hpp"
+#include <Windows.h>
+
+using GetGameStateDataFunc = const GameStateData *(*)();
+
+const GameStateData *get_game_state_data()
+{
+	static GetGameStateDataFunc func = nullptr;
+
+	if (func == nullptr)
+	{
+		HMODULE mod = GetModuleHandleA("PulseV_gtav.addon64");
+		if (mod)
+		{
+			func = reinterpret_cast<GetGameStateDataFunc>(
+				GetProcAddress(mod, "get_game_state_data"));
+		}
+	}
+
+	return func ? func() : nullptr;
+}
 
 extern bool resolve_path(std::filesystem::path &path, std::error_code &ec);
 
@@ -161,38 +182,38 @@ void reshade::runtime::build_font_atlas()
 		_default_font_path = L"C:\\Windows\\Fonts\\calibri.ttf";
 	}
 	else
-	if (language.find("ja") == 0)
-	{
-		glyph_ranges = atlas->GetGlyphRangesJapanese();
+		if (language.find("ja") == 0)
+		{
+			glyph_ranges = atlas->GetGlyphRangesJapanese();
 
-		// Morisawa BIZ UDGothic Regular, available since Windows 10 October 2018 Update (1809) Build 17763.1
-		_default_font_path = L"C:\\Windows\\Fonts\\BIZ-UDGothicR.ttc";
-		if (!std::filesystem::exists(_default_font_path, ec))
-			_default_font_path = L"C:\\Windows\\Fonts\\msgothic.ttc"; // MS Gothic
-	}
-	else
-	if (language.find("ko") == 0)
-	{
-		glyph_ranges = atlas->GetGlyphRangesKorean();
+			// Morisawa BIZ UDGothic Regular, available since Windows 10 October 2018 Update (1809) Build 17763.1
+			_default_font_path = L"C:\\Windows\\Fonts\\BIZ-UDGothicR.ttc";
+			if (!std::filesystem::exists(_default_font_path, ec))
+				_default_font_path = L"C:\\Windows\\Fonts\\msgothic.ttc"; // MS Gothic
+		}
+		else
+			if (language.find("ko") == 0)
+			{
+				glyph_ranges = atlas->GetGlyphRangesKorean();
 
-		_default_font_path = L"C:\\Windows\\Fonts\\malgun.ttf"; // Malgun Gothic
-	}
-	else
-	if (language.find("zh") == 0)
-	{
-		glyph_ranges = GetGlyphRangesChineseSimplifiedGB2312();
+				_default_font_path = L"C:\\Windows\\Fonts\\malgun.ttf"; // Malgun Gothic
+			}
+			else
+				if (language.find("zh") == 0)
+				{
+					glyph_ranges = GetGlyphRangesChineseSimplifiedGB2312();
 
-		_default_font_path = L"C:\\Windows\\Fonts\\msyh.ttc"; // Microsoft YaHei
-		if (!std::filesystem::exists(_default_font_path, ec))
-			_default_font_path = L"C:\\Windows\\Fonts\\simsun.ttc"; // SimSun
-	}
-	else
+					_default_font_path = L"C:\\Windows\\Fonts\\msyh.ttc"; // Microsoft YaHei
+					if (!std::filesystem::exists(_default_font_path, ec))
+						_default_font_path = L"C:\\Windows\\Fonts\\simsun.ttc"; // SimSun
+				}
+				else
 #endif
-	{
-		glyph_ranges = atlas->GetGlyphRangesDefault();
+				{
+					glyph_ranges = atlas->GetGlyphRangesDefault();
 
-		_default_font_path.clear();
-	}
+					_default_font_path.clear();
+				}
 
 	const auto add_font_from_file = [atlas](std::filesystem::path &font_path, ImFontConfig cfg, const ImWchar *glyph_ranges, std::error_code &ec) -> bool {
 		if (font_path.empty())
@@ -222,7 +243,7 @@ void reshade::runtime::build_font_atlas()
 		}
 
 		return false;
-	};
+		};
 
 	ImFontConfig cfg;
 	cfg.GlyphOffset.y = std::floor(_font_size / 13.0f); // Not used in AddFontDefault()
@@ -333,8 +354,8 @@ void reshade::runtime::build_font_atlas()
 
 	// Create font atlas texture and upload it
 	if (!_device->create_resource(
-			api::resource_desc(width, height, 1, 1, api::format::r8g8b8a8_unorm, 1, api::memory_heap::gpu_only, api::resource_usage::shader_resource),
-			&initial_data, api::resource_usage::shader_resource, &_font_atlas_tex))
+		api::resource_desc(width, height, 1, 1, api::format::r8g8b8a8_unorm, 1, api::memory_heap::gpu_only, api::resource_usage::shader_resource),
+		&initial_data, api::resource_usage::shader_resource, &_font_atlas_tex))
 	{
 		log::message(log::level::error, "Failed to create front atlas resource!");
 		return;
@@ -364,7 +385,7 @@ void reshade::runtime::load_config_gui(const ini_file &config)
 			return true;
 		// Fall back to global configuration when an entry does not exist in the local configuration
 		return global_config().get(section, key, values);
-	};
+		};
 
 	config_get("INPUT", "KeyOverlay", _overlay_key_data);
 	config_get("INPUT", "KeyFPS", _fps_key_data);
@@ -414,7 +435,7 @@ void reshade::runtime::load_config_gui(const ini_file &config)
 
 	// For compatibility with older versions, set the alpha value if it is missing
 	if (_fps_col[3] == 0.0f)
-		_fps_col[3]  = 1.0f;
+		_fps_col[3] = 1.0f;
 
 	load_custom_style();
 
@@ -809,7 +830,7 @@ void reshade::runtime::load_custom_style()
 		ImVec4 value;
 		for (ImGuiCol i = 0; i < imgui::code_editor::color_palette_max; i++)
 			value = ImGui::ColorConvertU32ToFloat4(_editor_palette[i]), // Get default value first
-			config.get("STYLE",  imgui::code_editor::get_palette_color_name(i), (float(&)[4])value),
+			config.get("STYLE", imgui::code_editor::get_palette_color_name(i), (float(&)[4])value),
 			_editor_palette[i] = ImGui::ColorConvertFloat4ToU32(value);
 		break;
 	}
@@ -829,7 +850,7 @@ void reshade::runtime::save_custom_style() const
 		ImVec4 value;
 		for (ImGuiCol i = 0; i < imgui::code_editor::color_palette_max; i++)
 			value = ImGui::ColorConvertU32ToFloat4(_editor_palette[i]),
-			config.set("STYLE",  imgui::code_editor::get_palette_color_name(i), (const float(&)[4])value);
+			config.set("STYLE", imgui::code_editor::get_palette_color_name(i), (const float(&)[4])value);
 	}
 }
 
@@ -1272,7 +1293,7 @@ void reshade::runtime::draw_gui()
 		// Get last calculated window size (because of 'ImGuiWindowFlags_AlwaysAutoResize')
 		if (ImGuiWindow *const fps_window = ImGui::FindWindowByName("OSD"))
 		{
-			fps_window_size  = fps_window->Size;
+			fps_window_size = fps_window->Size;
 			fps_window_size.y = std::max(fps_window_size.y, _imgui_context->Style.FramePadding.y * 4.0f + _imgui_context->Style.ItemSpacing.y +
 				(_imgui_context->Style.ItemSpacing.y + _imgui_context->FontBaseSize * _fps_scale) * ((show_clock ? 1 : 0) + (show_fps ? 1 : 0) + (show_frametime ? 1 : 0) + (show_preset_name ? 1 : 0)));
 		}
@@ -1379,7 +1400,7 @@ void reshade::runtime::draw_gui()
 			ImGui::PopStyleVar();
 		}
 
-		const std::pair<std::string, void(runtime::*)()> overlay_callbacks[] = {
+		const std::pair<std::string, void(runtime:: *)()> overlay_callbacks[] = {
 			{ _("Home###home"), &runtime::draw_gui_home },
 			{ "PulseV###pulsev", &runtime::draw_gui_pulsev },
 #if RESHADE_ADDON
@@ -1407,7 +1428,7 @@ void reshade::runtime::draw_gui()
 			ImGui::DockBuilderSplitNode(root_space_id, ImGuiDir_Left, 0.35f, &main_space_id, &right_space_id);
 
 			// Attach most windows to the main dock space
-			for (const std::pair<std::string, void(runtime::*)()> &widget : overlay_callbacks)
+			for (const std::pair<std::string, void(runtime:: *)()> &widget : overlay_callbacks)
 				ImGui::DockBuilderDockWindow(widget.first.c_str(), main_space_id);
 
 			// Attach editor window to the remaining dock space
@@ -1687,9 +1708,9 @@ void reshade::runtime::draw_gui_home()
 		const bool was_auto_save_preset = _auto_save_preset;
 
 		if (imgui::toggle_button(
-				(was_auto_save_preset ? _("Auto Save on") : _("Auto Save")) + "###auto_save",
-				_auto_save_preset,
-				(was_auto_save_preset ? 0.0f : auto_save_button_spacing) + button_width - (button_spacing + button_height) * (was_auto_save_preset ? 2 : 3)))
+			(was_auto_save_preset ? _("Auto Save on") : _("Auto Save")) + "###auto_save",
+			_auto_save_preset,
+			(was_auto_save_preset ? 0.0f : auto_save_button_spacing) + button_width - (button_spacing + button_height) * (was_auto_save_preset ? 2 : 3)))
 		{
 			if (!was_auto_save_preset)
 				save_current_preset();
@@ -2304,9 +2325,9 @@ void reshade::runtime::draw_gui_settings()
 				lang_index = static_cast<int>(std::distance(languages.begin(), it) + 1);
 
 			if (ImGui::Combo(_("Language"), &lang_index,
-					[](void *data, int idx) -> const char * {
-						return idx == 0 ? "System Default" : (*static_cast<const std::vector<std::string> *>(data))[idx - 1].c_str();
-					}, &languages, static_cast<int>(languages.size() + 1)))
+				[](void *data, int idx) -> const char *{
+					return idx == 0 ? "System Default" : (*static_cast<const std::vector<std::string> *>(data))[idx - 1].c_str();
+				}, &languages, static_cast<int>(languages.size() + 1)))
 			{
 				modified = true;
 				if (lang_index == 0)
@@ -2335,7 +2356,7 @@ void reshade::runtime::draw_gui_settings()
 
 		modified |= ImGui::Checkbox(_("Group effect files with tabs instead of a tree"), &_variable_editor_tabs);
 
-		#pragma region Style
+#pragma region Style
 		if (ImGui::Combo(_("Global style"), &_style_index, "Dark\0Light\0Default\0Custom Simple\0Custom Advanced\0Solarized Dark\0Solarized Light\0"))
 		{
 			modified = true;
@@ -2425,9 +2446,9 @@ void reshade::runtime::draw_gui_settings()
 			}
 			ImGui::EndChild();
 		}
-		#pragma endregion
+#pragma endregion
 
-		#pragma region Editor Style
+#pragma region Editor Style
 		if (ImGui::Combo(_("Text editor style"), &_editor_style_index, "Dark\0Light\0Custom\0Solarized Dark\0Solarized Light\0"))
 		{
 			modified = true;
@@ -2453,7 +2474,7 @@ void reshade::runtime::draw_gui_settings()
 			}
 			ImGui::EndChild();
 		}
-		#pragma endregion
+#pragma endregion
 
 		if (imgui::font_input_box(_("Global font"), _default_font_path.empty() ? "ProggyClean.ttf" : _default_font_path.u8string().c_str(), _font_path, _file_selection_path, _font_size))
 		{
@@ -2803,7 +2824,7 @@ void reshade::runtime::draw_gui_statistics()
 			case reshadefx::texture_format::rg11b10f:
 				return { "RG11B10F", 4 };
 			}
-		};
+			};
 
 		const float total_width = ImGui::GetContentRegionAvail().x;
 		int texture_index = 0;
@@ -2819,7 +2840,7 @@ void reshade::runtime::draw_gui_statistics()
 		{
 			if (tex.resource == 0 || !tex.semantic.empty() ||
 				!std::any_of(tex.shared.cbegin(), tex.shared.cend(),
-					[this](size_t effect_index) { return _effects[effect_index].rendering; }))
+				[this](size_t effect_index) { return _effects[effect_index].rendering; }))
 				continue;
 
 			ImGui::PushID(texture_index);
@@ -3092,7 +3113,7 @@ void reshade::runtime::draw_gui_log()
 					_log_editor.insert_text(line);
 
 					imgui::code_editor::color col = imgui::code_editor::color_default;
-					     if (line.find("ERROR |") != std::string_view::npos)
+					if (line.find("ERROR |") != std::string_view::npos)
 						col = imgui::code_editor::color_error_marker;
 					else if (line.find("WARN  |") != std::string_view::npos)
 						col = imgui::code_editor::color_warning_marker;
@@ -3423,7 +3444,7 @@ void reshade::runtime::draw_variable_editor()
 		ImGui::SetWindowPos(popup_pos);
 
 		bool global_modified = false, preset_modified = false;
-		float popup_height = (std::max(_global_preprocessor_definitions.size(), _preset_preprocessor_definitions[{}].size()) + 2) * ImGui::GetFrameHeightWithSpacing();
+		float popup_height = (std::max(_global_preprocessor_definitions.size(), _preset_preprocessor_definitions[{}].size()) + 2) *ImGui::GetFrameHeightWithSpacing();
 		popup_height = std::min(popup_height, ImGui::GetWindowViewport()->Size.y - popup_pos.y - 20.0f);
 		popup_height = std::max(popup_height, 42.0f); // Ensure window always has a minimum height
 		const float button_size = ImGui::GetFrameHeight();
@@ -3577,9 +3598,9 @@ void reshade::runtime::draw_variable_editor()
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(_imgui_context->Style.FramePadding.x, 0));
 		if (imgui::confirm_button(
-				ICON_FK_UNDO " " + _("Reset all to default"),
-				_variable_editor_tabs ? ImGui::GetContentRegionAvail().x : ImGui::CalcItemWidth(),
-				_("Do you really want to reset all values in '%s' to their defaults?"), effect_name.c_str()))
+			ICON_FK_UNDO " " + _("Reset all to default"),
+			_variable_editor_tabs ? ImGui::GetContentRegionAvail().x : ImGui::CalcItemWidth(),
+			_("Do you really want to reset all values in '%s' to their defaults?"), effect_name.c_str()))
 		{
 			// Reset all uniform variables
 			for (uniform &variable_it : effect.uniforms)
@@ -3593,7 +3614,7 @@ void reshade::runtime::draw_variable_editor()
 				for (const std::pair<std::string, std::string> &definition : effect.definitions)
 				{
 					if (const auto it = std::remove_if(preset_it->second.begin(), preset_it->second.end(),
-							[&definition](const std::pair<std::string, std::string> &preset_definition) { return preset_definition.first == definition.first; });
+						[&definition](const std::pair<std::string, std::string> &preset_definition) { return preset_definition.first == definition.first; });
 						it != preset_it->second.end())
 					{
 						preset_it->second.erase(it, preset_it->second.end());
@@ -3675,9 +3696,9 @@ void reshade::runtime::draw_variable_editor()
 							ImFormatString(label, IM_ARRAYSIZE(label), ICON_FK_UNDO " " + _("Reset all in '%s' to default"), current_category.c_str());
 
 							if (imgui::confirm_button(
-									label,
-									ImGui::GetContentRegionAvail().x,
-									_("Do you really want to reset all values in '%s' to their defaults?"), current_category.c_str()))
+								label,
+								ImGui::GetContentRegionAvail().x,
+								_("Do you really want to reset all values in '%s' to their defaults?"), current_category.c_str()))
 							{
 								for (uniform &variable_it : effect.uniforms)
 									if (variable_it.special == special_uniform::none && !variable_it.annotation_as_uint("noreset") &&
@@ -3736,7 +3757,7 @@ void reshade::runtime::draw_variable_editor()
 			}
 
 #if RESHADE_ADDON
-			if (invoke_addon_event<addon_event::reshade_overlay_uniform_variable>(this, api::effect_uniform_variable{ reinterpret_cast<uintptr_t>(&variable) }))
+			if (invoke_addon_event<addon_event::reshade_overlay_uniform_variable>(this, api::effect_uniform_variable { reinterpret_cast<uintptr_t>(&variable) }))
 			{
 				reshadefx::constant new_value;
 				switch (variable.type.base)
@@ -3783,100 +3804,100 @@ void reshade::runtime::draw_variable_editor()
 
 				switch (variable.type.base)
 				{
-					case reshadefx::type::t_bool:
+				case reshadefx::type::t_bool:
+				{
+					if (ui_type == "button")
 					{
-						if (ui_type == "button")
+						if (ImGui::Button(label.data(), ImVec2(ImGui::CalcItemWidth(), 0)))
 						{
-							if (ImGui::Button(label.data(), ImVec2(ImGui::CalcItemWidth(), 0)))
-							{
-								value.as_uint[0] = 1;
-								modified = true;
-							}
-							else if (value.as_uint[0] != 0)
-							{
-								// Reset value again next frame after button was pressed
-								value.as_uint[0] = 0;
-								modified = true;
-							}
+							value.as_uint[0] = 1;
+							modified = true;
 						}
-						else if (ui_type == "combo")
-							modified = imgui::combo_with_buttons(label.data(), reinterpret_cast<bool *>(&value.as_uint[0]));
-						else
-							modified = imgui::checkbox_list(label.data(), get_localized_annotation(variable, "ui_items", _current_language), value.as_uint, variable.type.components());
-
-						if (modified)
-							set_uniform_value(variable, value.as_uint, variable.type.components());
-						break;
+						else if (value.as_uint[0] != 0)
+						{
+							// Reset value again next frame after button was pressed
+							value.as_uint[0] = 0;
+							modified = true;
+						}
 					}
-					case reshadefx::type::t_int:
-					case reshadefx::type::t_uint:
-					{
-						const int ui_min_val = variable.annotation_as_int("ui_min", 0, ui_type == "slider" ? 0 : std::numeric_limits<int>::lowest());
-						const int ui_max_val = variable.annotation_as_int("ui_max", 0, ui_type == "slider" ? 1 : std::numeric_limits<int>::max());
-						const int ui_stp_val = variable.annotation_as_int("ui_step", 0, 1);
+					else if (ui_type == "combo")
+						modified = imgui::combo_with_buttons(label.data(), reinterpret_cast<bool *>(&value.as_uint[0]));
+					else
+						modified = imgui::checkbox_list(label.data(), get_localized_annotation(variable, "ui_items", _current_language), value.as_uint, variable.type.components());
 
-						// Append units
-						std::string format = "%d";
-						format += get_localized_annotation(variable, "ui_units", _current_language);
+					if (modified)
+						set_uniform_value(variable, value.as_uint, variable.type.components());
+					break;
+				}
+				case reshadefx::type::t_int:
+				case reshadefx::type::t_uint:
+				{
+					const int ui_min_val = variable.annotation_as_int("ui_min", 0, ui_type == "slider" ? 0 : std::numeric_limits<int>::lowest());
+					const int ui_max_val = variable.annotation_as_int("ui_max", 0, ui_type == "slider" ? 1 : std::numeric_limits<int>::max());
+					const int ui_stp_val = variable.annotation_as_int("ui_step", 0, 1);
 
-						if (ui_type == "slider")
-							modified = imgui::slider_with_buttons(label.data(), variable.type.is_signed() ? ImGuiDataType_S32 : ImGuiDataType_U32, value.as_int, variable.type.rows, &ui_stp_val, &ui_min_val, &ui_max_val, format.c_str());
-						else if (ui_type == "drag")
-							modified = variable.annotation_as_int("ui_step") == 0 ?
-								ImGui::DragScalarN(label.data(), variable.type.is_signed() ? ImGuiDataType_S32 : ImGuiDataType_U32, value.as_int, variable.type.rows, 1.0f, &ui_min_val, &ui_max_val, format.c_str()) :
-								imgui::drag_with_buttons(label.data(), variable.type.is_signed() ? ImGuiDataType_S32 : ImGuiDataType_U32, value.as_int, variable.type.rows, &ui_stp_val, &ui_min_val, &ui_max_val, format.c_str());
-						else if (ui_type == "list")
-							modified = imgui::list_with_buttons(label.data(), get_localized_annotation(variable, "ui_items", _current_language), &value.as_int[0]);
-						else if (ui_type == "combo")
-							modified = imgui::combo_with_buttons(label.data(), get_localized_annotation(variable, "ui_items", _current_language), &value.as_int[0]);
-						else if (ui_type == "radio")
-							modified = imgui::radio_list(label.data(), get_localized_annotation(variable, "ui_items", _current_language), &value.as_int[0]);
-						else if (variable.type.is_matrix())
-							for (unsigned int row = 0; row < variable.type.rows; ++row)
-								modified |= ImGui::InputScalarN((std::string(label) + " [row " + std::to_string(row) + ']').c_str(), variable.type.is_signed() ? ImGuiDataType_S32 : ImGuiDataType_U32, &value.as_int[variable.type.cols * row], variable.type.cols) || modified;
-						else
-							modified = ImGui::InputScalarN(label.data(), variable.type.is_signed() ? ImGuiDataType_S32 : ImGuiDataType_U32, value.as_int, variable.type.rows);
+					// Append units
+					std::string format = "%d";
+					format += get_localized_annotation(variable, "ui_units", _current_language);
 
-						if (modified)
-							set_uniform_value(variable, value.as_int, variable.type.components());
-						break;
-					}
-					case reshadefx::type::t_float:
-					{
-						const float ui_min_val = variable.annotation_as_float("ui_min", 0, ui_type == "slider" ? 0.0f : std::numeric_limits<float>::lowest());
-						const float ui_max_val = variable.annotation_as_float("ui_max", 0, ui_type == "slider" ? 1.0f : std::numeric_limits<float>::max());
-						const float ui_stp_val = variable.annotation_as_float("ui_step", 0, 0.001f);
+					if (ui_type == "slider")
+						modified = imgui::slider_with_buttons(label.data(), variable.type.is_signed() ? ImGuiDataType_S32 : ImGuiDataType_U32, value.as_int, variable.type.rows, &ui_stp_val, &ui_min_val, &ui_max_val, format.c_str());
+					else if (ui_type == "drag")
+						modified = variable.annotation_as_int("ui_step") == 0 ?
+						ImGui::DragScalarN(label.data(), variable.type.is_signed() ? ImGuiDataType_S32 : ImGuiDataType_U32, value.as_int, variable.type.rows, 1.0f, &ui_min_val, &ui_max_val, format.c_str()) :
+						imgui::drag_with_buttons(label.data(), variable.type.is_signed() ? ImGuiDataType_S32 : ImGuiDataType_U32, value.as_int, variable.type.rows, &ui_stp_val, &ui_min_val, &ui_max_val, format.c_str());
+					else if (ui_type == "list")
+						modified = imgui::list_with_buttons(label.data(), get_localized_annotation(variable, "ui_items", _current_language), &value.as_int[0]);
+					else if (ui_type == "combo")
+						modified = imgui::combo_with_buttons(label.data(), get_localized_annotation(variable, "ui_items", _current_language), &value.as_int[0]);
+					else if (ui_type == "radio")
+						modified = imgui::radio_list(label.data(), get_localized_annotation(variable, "ui_items", _current_language), &value.as_int[0]);
+					else if (variable.type.is_matrix())
+						for (unsigned int row = 0; row < variable.type.rows; ++row)
+							modified |= ImGui::InputScalarN((std::string(label) + " [row " + std::to_string(row) + ']').c_str(), variable.type.is_signed() ? ImGuiDataType_S32 : ImGuiDataType_U32, &value.as_int[variable.type.cols * row], variable.type.cols) || modified;
+					else
+						modified = ImGui::InputScalarN(label.data(), variable.type.is_signed() ? ImGuiDataType_S32 : ImGuiDataType_U32, value.as_int, variable.type.rows);
 
-						// Calculate display precision based on step value
-						std::string precision_format = "%.0f";
-						for (float x = 1.0f; x * ui_stp_val < 1.0f && precision_format[2] < '9'; x *= 10.0f)
-							++precision_format[2]; // This changes the text to "%.1f", "%.2f", "%.3f", ...
+					if (modified)
+						set_uniform_value(variable, value.as_int, variable.type.components());
+					break;
+				}
+				case reshadefx::type::t_float:
+				{
+					const float ui_min_val = variable.annotation_as_float("ui_min", 0, ui_type == "slider" ? 0.0f : std::numeric_limits<float>::lowest());
+					const float ui_max_val = variable.annotation_as_float("ui_max", 0, ui_type == "slider" ? 1.0f : std::numeric_limits<float>::max());
+					const float ui_stp_val = variable.annotation_as_float("ui_step", 0, 0.001f);
 
-						// Append units
-						precision_format += get_localized_annotation(variable, "ui_units", _current_language);
+					// Calculate display precision based on step value
+					std::string precision_format = "%.0f";
+					for (float x = 1.0f; x * ui_stp_val < 1.0f && precision_format[2] < '9'; x *= 10.0f)
+						++precision_format[2]; // This changes the text to "%.1f", "%.2f", "%.3f", ...
 
-						if (ui_type == "slider")
-							modified = imgui::slider_with_buttons(label.data(), ImGuiDataType_Float, value.as_float, variable.type.rows, &ui_stp_val, &ui_min_val, &ui_max_val, precision_format.c_str());
-						else if (ui_type == "drag")
-							modified = variable.annotation_as_float("ui_step") == 0.0f ?
-								ImGui::DragScalarN(label.data(), ImGuiDataType_Float, value.as_float, variable.type.rows, ui_stp_val, &ui_min_val, &ui_max_val, precision_format.c_str()) :
-								imgui::drag_with_buttons(label.data(), ImGuiDataType_Float, value.as_float, variable.type.rows, &ui_stp_val, &ui_min_val, &ui_max_val, precision_format.c_str());
-						else if (ui_type == "color" && variable.type.rows == 1)
-							modified = imgui::slider_for_alpha_value(label.data(), value.as_float);
-						else if (ui_type == "color" && variable.type.rows == 3)
-							modified = ImGui::ColorEdit3(label.data(), value.as_float, ImGuiColorEditFlags_NoOptions);
-						else if (ui_type == "color" && variable.type.rows == 4)
-							modified = ImGui::ColorEdit4(label.data(), value.as_float, ImGuiColorEditFlags_NoOptions | ImGuiColorEditFlags_AlphaBar);
-						else if (variable.type.is_matrix())
-							for (unsigned int row = 0; row < variable.type.rows; ++row)
-								modified |= ImGui::InputScalarN((std::string(label) + " [row " + std::to_string(row) + ']').c_str(), ImGuiDataType_Float, &value.as_float[variable.type.cols * row], variable.type.cols) || modified;
-						else
-							modified = ImGui::InputScalarN(label.data(), ImGuiDataType_Float, value.as_float, variable.type.rows);
+					// Append units
+					precision_format += get_localized_annotation(variable, "ui_units", _current_language);
 
-						if (modified)
-							set_uniform_value(variable, value.as_float, variable.type.components());
-						break;
-					}
+					if (ui_type == "slider")
+						modified = imgui::slider_with_buttons(label.data(), ImGuiDataType_Float, value.as_float, variable.type.rows, &ui_stp_val, &ui_min_val, &ui_max_val, precision_format.c_str());
+					else if (ui_type == "drag")
+						modified = variable.annotation_as_float("ui_step") == 0.0f ?
+						ImGui::DragScalarN(label.data(), ImGuiDataType_Float, value.as_float, variable.type.rows, ui_stp_val, &ui_min_val, &ui_max_val, precision_format.c_str()) :
+						imgui::drag_with_buttons(label.data(), ImGuiDataType_Float, value.as_float, variable.type.rows, &ui_stp_val, &ui_min_val, &ui_max_val, precision_format.c_str());
+					else if (ui_type == "color" && variable.type.rows == 1)
+						modified = imgui::slider_for_alpha_value(label.data(), value.as_float);
+					else if (ui_type == "color" && variable.type.rows == 3)
+						modified = ImGui::ColorEdit3(label.data(), value.as_float, ImGuiColorEditFlags_NoOptions);
+					else if (ui_type == "color" && variable.type.rows == 4)
+						modified = ImGui::ColorEdit4(label.data(), value.as_float, ImGuiColorEditFlags_NoOptions | ImGuiColorEditFlags_AlphaBar);
+					else if (variable.type.is_matrix())
+						for (unsigned int row = 0; row < variable.type.rows; ++row)
+							modified |= ImGui::InputScalarN((std::string(label) + " [row " + std::to_string(row) + ']').c_str(), ImGuiDataType_Float, &value.as_float[variable.type.cols * row], variable.type.cols) || modified;
+					else
+						modified = ImGui::InputScalarN(label.data(), ImGuiDataType_Float, value.as_float, variable.type.rows);
+
+					if (modified)
+						set_uniform_value(variable, value.as_float, variable.type.components());
+					break;
+				}
 				}
 
 				ImGui::EndDisabled();
@@ -4495,7 +4516,7 @@ void reshade::runtime::draw_technique_editor()
 				else // Down
 					for (size_t i = from_index; i < to_index; ++i)
 						std::swap(technique_indices[i], technique_indices[i + 1]);
-			};
+				};
 
 			move_technique(_selected_technique, hovered_technique_index);
 
@@ -4544,9 +4565,9 @@ void reshade::runtime::open_code_editor(size_t effect_index, size_t permutation_
 	const std::filesystem::path &path = _effects[effect_index].source_file;
 
 	if (const auto it = std::find_if(_editors.begin(), _editors.end(),
-			[effect_index, permutation_index, &path, &entry_point](const editor_instance &instance) {
-				return instance.effect_index == effect_index && instance.permutation_index == permutation_index && instance.file_path == path && instance.generated && instance.entry_point_name == entry_point;
-			});
+		[effect_index, permutation_index, &path, &entry_point](const editor_instance &instance) {
+			return instance.effect_index == effect_index && instance.permutation_index == permutation_index && instance.file_path == path && instance.generated && instance.entry_point_name == entry_point;
+		});
 		it != _editors.end())
 	{
 		it->selected = true;
@@ -4564,9 +4585,9 @@ void reshade::runtime::open_code_editor(size_t effect_index, const std::filesyst
 	assert(effect_index < _effects.size());
 
 	if (const auto it = std::find_if(_editors.begin(), _editors.end(),
-			[effect_index, &path](const editor_instance &instance) {
-				return instance.effect_index == effect_index && instance.file_path == path && !instance.generated;
-			});
+		[effect_index, &path](const editor_instance &instance) {
+			return instance.effect_index == effect_index && instance.file_path == path && !instance.generated;
+		});
 		it != _editors.end())
 	{
 		it->selected = true;
@@ -4629,7 +4650,7 @@ void reshade::runtime::draw_code_editor(editor_instance &instance)
 {
 	if (!instance.generated &&
 		(ImGui::Button(ICON_FK_FLOPPY " " + _("Save"), ImVec2(ImGui::GetContentRegionAvail().x, 0)) ||
-			(_input != nullptr && _input->is_key_pressed('S', true, false, false))))
+		(_input != nullptr && _input->is_key_pressed('S', true, false, false))))
 	{
 		// Write current editor text to file
 		if (FILE *const file = _wfsopen(instance.file_path.c_str(), L"wb", SH_DENYWR))
@@ -4737,7 +4758,7 @@ bool reshade::runtime::init_imgui_resources()
 
 	const api::input_element input_layout[3] = {
 		{ 0, "POSITION", 0, api::format::r32g32_float,   0, offsetof(ImDrawVert, pos), sizeof(ImDrawVert), 0 },
-		{ 1, "TEXCOORD", 0, api::format::r32g32_float,   0, offsetof(ImDrawVert, uv ), sizeof(ImDrawVert), 0 },
+		{ 1, "TEXCOORD", 0, api::format::r32g32_float,   0, offsetof(ImDrawVert, uv), sizeof(ImDrawVert), 0 },
 		{ 2, "COLOR",    0, api::format::r8g8b8a8_unorm, 0, offsetof(ImDrawVert, col), sizeof(ImDrawVert), 0 }
 	};
 	subobjects.push_back({ api::pipeline_subobject_type::input_layout, 3, (void *)input_layout });
@@ -4887,10 +4908,10 @@ void reshade::runtime::render_imgui_draw_data(api::command_list *cmd_list, ImDra
 		},
 		_hdr_overlay_overwrite_color_space != api::color_space::unknown ?
 			_hdr_overlay_overwrite_color_space :
-			// Workaround for early HDR games, RGBA16F without a color space defined is pretty much guaranteed to be HDR for games
-			_back_buffer_format == api::format::r16g16b16a16_float ?
-				api::color_space::extended_srgb_linear : _back_buffer_color_space,
-		_hdr_overlay_brightness
+		// Workaround for early HDR games, RGBA16F without a color space defined is pretty much guaranteed to be HDR for games
+		_back_buffer_format == api::format::r16g16b16a16_float ?
+			api::color_space::extended_srgb_linear : _back_buffer_color_space,
+	_hdr_overlay_brightness
 	};
 
 	const bool has_combined_sampler_and_view = _device->check_capability(api::device_caps::sampler_with_resource_view);
@@ -5003,13 +5024,17 @@ bool reshade::runtime::open_overlay(bool open, api::input_source source)
 // 
 ////////////////////////////////////////////////////////////////
 
+
+#include "..\source\depends\shared_data.hpp"
+#include "..\source\depends\addon_api.hpp"
+
 void reshade::runtime::draw_gui_pulsev()
 {
-////////////////////////////////////////////////////////////////
-//
-//  UI STATE DEFAULTS
-// 
-////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	//
+	//  UI STATE DEFAULTS
+	// 
+	////////////////////////////////////////////////////////////////
 	static float aurora_speed_default = 0.2f;
 	static float aurora_intensity_default = 1.0f;
 	static float cloud_height_default = 1000.0f;
@@ -5034,11 +5059,11 @@ void reshade::runtime::draw_gui_pulsev()
 	static int rgb_preset_default = 0;
 	static float manual_rgb_color_default[3] = { 1.0f, 1.0f, 1.0f };
 
-////////////////////////////////////////////////////////////////
-//
-//  UI RENDERING LOGIC VOLUMETRIC CLOUDS
-// 
-////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	//
+	//  UI RENDERING LOGIC VOLUMETRIC CLOUDS
+	// 
+	////////////////////////////////////////////////////////////////
 
 	if (ImGui::CollapsingHeader("Volumetric Clouds", ImGuiTreeNodeFlags_OpenOnArrow))
 	{
@@ -5083,350 +5108,349 @@ void reshade::runtime::draw_gui_pulsev()
 	}
 
 	////////////////////////////////////////////////////////////////
-	//  UI RENDERING LOGIC RAIN LENS (Weather Gated)
-	////////////////////////////////////////////////////////////////
-
-	const int weather = DataReader::get_to_weather_type();
-	const bool is_rainy_weather = (weather == 3 || weather == 4 || weather == 5);
-
-	if (is_rainy_weather)
-	{
-		////////////////////////////////////////////////////////////////
 	//
 	//  UI RENDERING LOGIC RAIN LENS
 	// 
 	////////////////////////////////////////////////////////////////
 
-		if (ImGui::CollapsingHeader("Rain Lens", ImGuiTreeNodeFlags_OpenOnArrow))
+	if (ImGui::CollapsingHeader("Rain Lens", ImGuiTreeNodeFlags_OpenOnArrow))
+	{
+		static float rain_intensity = 1.0f;
+		ImGui::PushID("RainIntensity");
+		ImGui::DragFloat("Rain Intensity", &rain_intensity, 0.01f, 0.0f, 10.0f);
 		{
-			static float rain_intensity = 1.0f;
-			ImGui::PushID("RainIntensity");
-			ImGui::DragFloat("Rain Intensity", &rain_intensity, 0.01f, 0.0f, 10.0f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "RainIntensity"); h.handle != 0)
-					this->set_uniform_value_float(h, &rain_intensity, 1, 0);
-			}
-			if (rain_intensity != rain_intensity_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					rain_intensity = rain_intensity_default;
-			}
-			ImGui::PopID();
-
-			static float refraction_strength = 3.0f;
-			ImGui::PushID("RefractionStrength");
-			ImGui::DragFloat("Refraction Strength", &refraction_strength, 0.05f, 0.0f, 10.0f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "RefractionStrength"); h.handle != 0)
-					this->set_uniform_value_float(h, &refraction_strength, 1, 0);
-			}
-			if (refraction_strength != refraction_strength_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					refraction_strength = refraction_strength_default;
-			}
-			ImGui::PopID();
-
-			static float chromatic_aberration = 0.01f;
-			ImGui::PushID("ChromaticAberration");
-			ImGui::DragFloat("Chromatic Aberration Strength", &chromatic_aberration, 0.001f, 0.0f, 1.0f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "ChromaticAmount"); h.handle != 0)
-					this->set_uniform_value_float(h, &chromatic_aberration, 1, 0);
-			}
-			if (chromatic_aberration != chromatic_aberration_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					chromatic_aberration = chromatic_aberration_default;
-			}
-			ImGui::PopID();
-
-			ImGui::Separator();
-
-			static float drop_scale_x = 0.1f;
-			ImGui::PushID("DropScaleX");
-			ImGui::DragFloat("Drop Scale X", &drop_scale_x, 0.01f, 0.01f, 0.5f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropScaleX"); h.handle != 0)
-					this->set_uniform_value_float(h, &drop_scale_x, 1, 0);
-			}
-			if (drop_scale_x != drop_scale_x_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					drop_scale_x = drop_scale_x_default;
-			}
-			ImGui::PopID();
-
-			static float drop_scale_y = 0.2f;
-			ImGui::PushID("DropScaleY");
-			ImGui::DragFloat("Drop Scale Y", &drop_scale_y, 0.01f, 0.01f, 0.5f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropScaleY"); h.handle != 0)
-					this->set_uniform_value_float(h, &drop_scale_y, 1, 0);
-			}
-			if (drop_scale_y != drop_scale_y_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					drop_scale_y = drop_scale_y_default;
-			}
-			ImGui::PopID();
-
-			static int drop_count = 40;
-			ImGui::PushID("DropCount");
-			ImGui::DragInt("Drop Count", &drop_count, 1, 1, 200);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropCount"); h.handle != 0)
-					this->set_uniform_value_int(h, &drop_count, 1, 0);
-			}
-			if (drop_count != drop_count_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					drop_count = drop_count_default;
-			}
-			ImGui::PopID();
-
-			static int slow_drip_count = 5;
-			ImGui::PushID("SlowDripCount");
-			ImGui::DragInt("Slow Drip Count", &slow_drip_count, 1, 0, 10);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "SlowDripCount"); h.handle != 0)
-					this->set_uniform_value_int(h, &slow_drip_count, 1, 0);
-			}
-			if (slow_drip_count != slow_drip_count_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					slow_drip_count = slow_drip_count_default;
-			}
-			ImGui::PopID();
-
-			static float drop_speed = 0.01f;
-			ImGui::PushID("DropSpeed");
-			ImGui::DragFloat("Base Drop Speed", &drop_speed, 0.0001f, 0.0001f, 1.0f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropSpeed"); h.handle != 0)
-					this->set_uniform_value_float(h, &drop_speed, 1, 0);
-			}
-			if (drop_speed != drop_speed_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					drop_speed = drop_speed_default;
-			}
-			ImGui::PopID();
-
-			static float drop_speed_var = 1.5f;
-			ImGui::PushID("DropSpeedVariation");
-			ImGui::DragFloat("Drop Speed Variation", &drop_speed_var, 0.01f, 0.0f, 2.0f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropSpeedVariation"); h.handle != 0)
-					this->set_uniform_value_float(h, &drop_speed_var, 1, 0);
-			}
-			if (drop_speed_var != drop_speed_var_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					drop_speed_var = drop_speed_var_default;
-			}
-			ImGui::PopID();
-
-			ImGui::Separator();
-
-			static bool enable_trails = true;
-			if (ImGui::Checkbox("Enable Rain Trails", &enable_trails))
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "EnableTrails"); h.handle != 0)
-					this->set_uniform_value_bool(h, &enable_trails, 1, 0);
-
-			static float fadeout = 0.0f;
-			ImGui::PushID("Fadeout Strength");
-			if (ImGui::DragFloat("Fadeout Strength", &fadeout, 0.01f, 0.0f, 5.0f))
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "FadeoutStrength"); h.handle != 0)
-					this->set_uniform_value_float(h, &fadeout, 1, 0);
-			}
-			if (fadeout != fadeout_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					fadeout = fadeout_default;
-			}
-			ImGui::PopID();
-
-			static float trail_len = 0.02f;
-			ImGui::PushID("TrailLength");
-			ImGui::DragFloat("Trail Length", &trail_len, 0.01f, 0.0f, 0.05f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "TrailLength"); h.handle != 0)
-					this->set_uniform_value_float(h, &trail_len, 1, 0);
-			}
-			if (trail_len != trail_len_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					trail_len = trail_len_default;
-			}
-			ImGui::PopID();
-
-			static float trail_width = 3.0f;
-			ImGui::PushID("TrailWidth");
-			ImGui::DragFloat("Trail Width", &trail_width, 0.01f, 0.1f, 3.0f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "TrailWidth"); h.handle != 0)
-					this->set_uniform_value_float(h, &trail_width, 1, 0);
-			}
-			if (trail_width != trail_width_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					trail_width = trail_width_default;
-			}
-			ImGui::PopID();
-
-			ImGui::Separator();
-
-			static float bulge_strength = 0.01f;
-			ImGui::PushID("BulgeStrength");
-			ImGui::DragFloat("Bulge Strength", &bulge_strength, 0.0001f, 0.0f, 0.01f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "BulgeStrength"); h.handle != 0)
-					this->set_uniform_value_float(h, &bulge_strength, 1, 0);
-			}
-			if (bulge_strength != bulge_strength_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					bulge_strength = bulge_strength_default;
-			}
-			ImGui::PopID();
-
-			static float bulge_stretch = 0.5f;
-			ImGui::PushID("BulgeStretch");
-			ImGui::DragFloat("Bulge Stretch Intensity", &bulge_stretch, 0.1f, 0.0f, 2.0f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "BulgeStretchIntensity"); h.handle != 0)
-					this->set_uniform_value_float(h, &bulge_strength, 1, 0);
-			}
-			if (bulge_stretch != bulge_stretch_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					bulge_stretch = bulge_stretch_default;
-			}
-			ImGui::PopID();
-
-			ImGui::Separator();
-
-			static float wind[2] = { 0.15f, 1.0f };
-			if (ImGui::DragFloat2("Wind Direction", wind, 0.001f, -0.1f, 0.1f))
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "Wind"); h.handle != 0)
-					this->set_uniform_value_float(h, wind, 2, 0);
-
-			ImGui::Separator();
-
-			static bool enable_rgb = false;
-			if (ImGui::Checkbox("Enable RGB Color Cycle", &enable_rgb))
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "EnableRGB"); h.handle != 0)
-					this->set_uniform_value_bool(h, &enable_rgb, 1, 0);
-
-			static float rgb_speed = 1.0f;
-			ImGui::PushID("RGBSpeed");
-			ImGui::DragFloat("RGB Speed", &rgb_speed, 0.1f, 0.1f, 10.0f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "RGBSpeed"); h.handle != 0)
-					this->set_uniform_value_float(h, &rgb_speed, 1, 0);
-			}
-			if (rgb_speed != rgb_speed_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					rgb_speed = rgb_speed_default;
-			}
-			ImGui::PopID();
-
-			static float rgb_intensity = 1.0f;
-			ImGui::PushID("RGBIntensity");
-			ImGui::DragFloat("RGB Intensity", &rgb_intensity, 0.01f, 0.0f, 2.0f);
-			{
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "RGBSIntensity"); h.handle != 0)
-					this->set_uniform_value_float(h, &rgb_intensity, 1, 0);
-			}
-			if (rgb_intensity != rgb_intensity_default) // Only show restore if changed
-			{
-				ImGui::SameLine();
-				if (ImGui::SmallButton(ICON_FK_UNDO))
-					rgb_intensity = rgb_intensity_default;
-			}
-			ImGui::PopID();
-
-			static int rgb_preset = 0;
-			if (ImGui::Combo("RGB Color Preset", &rgb_preset, "Rainbow\0Pastel\0Neon\0Warm\0Cool\0"))
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "RGBPreset"); h.handle != 0)
-					this->set_uniform_value_int(h, &rgb_preset, 1, 0);
-
-			static bool use_manual_rgb = false;
-			if (ImGui::Checkbox("Use Manual RGB Color", &use_manual_rgb))
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "UseManualRGB"); h.handle != 0)
-					this->set_uniform_value_bool(h, &use_manual_rgb, 1, 0);
-
-			static float manual_rgb_color[3] = { 1.0f, 1.0f, 1.0f };
-			if (ImGui::ColorEdit3("Manual RGB Color", manual_rgb_color))
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "ManualRGBColor"); h.handle != 0)
-					this->set_uniform_value_float(h, manual_rgb_color, 3, 0);
-
-			ImGui::Separator();
-
-			static bool enable_weather = true;
-			if (ImGui::Checkbox("Enable Weather Detection", &enable_weather))
-				if (auto h = find_uniform_variable("NGVRaindrops.fx", "EnableWeatherDetection"); h.handle != 0)
-					this->set_uniform_value_bool(h, &enable_weather, 1, 0);
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "RainIntensity"); h.handle != 0)
+				this->set_uniform_value_float(h, &rain_intensity, 1, 0);
 		}
-
-		////////////////////////////////////////////////////////////////
-		//
-		//  UI RENDERING LOGIC EXTRAS
-		// 
-		////////////////////////////////////////////////////////////////
-
-		if (ImGui::CollapsingHeader("Extras", ImGuiTreeNodeFlags_OpenOnArrow))
+		if (rain_intensity != rain_intensity_default) // Only show restore if changed
 		{
-			ImGui::Text("Future features coming soon...");
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				rain_intensity = rain_intensity_default;
+		}
+		ImGui::PopID();
+
+		static float refraction_strength = 3.0f;
+		ImGui::PushID("RefractionStrength");
+		ImGui::DragFloat("Refraction Strength", &refraction_strength, 0.05f, 0.0f, 10.0f);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "RefractionStrength"); h.handle != 0)
+				this->set_uniform_value_float(h, &refraction_strength, 1, 0);
+		}
+		if (refraction_strength != refraction_strength_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				refraction_strength = refraction_strength_default;
+		}
+		ImGui::PopID();
+
+		static float chromatic_aberration = 0.01f;
+		ImGui::PushID("ChromaticAberration");
+		ImGui::DragFloat("Chromatic Aberration Strength", &chromatic_aberration, 0.001f, 0.0f, 1.0f);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "ChromaticAmount"); h.handle != 0)
+				this->set_uniform_value_float(h, &chromatic_aberration, 1, 0);
+		}
+		if (chromatic_aberration != chromatic_aberration_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				chromatic_aberration = chromatic_aberration_default;
+		}
+		ImGui::PopID();
+
+		ImGui::Separator();
+
+		static float drop_scale_x = 0.1f;
+		ImGui::PushID("DropScaleX");
+		ImGui::DragFloat("Drop Scale X", &drop_scale_x, 0.01f, 0.01f, 0.5f);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropScaleX"); h.handle != 0)
+				this->set_uniform_value_float(h, &drop_scale_x, 1, 0);
+		}
+		if (drop_scale_x != drop_scale_x_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				drop_scale_x = drop_scale_x_default;
+		}
+		ImGui::PopID();
+
+		static float drop_scale_y = 0.2f;
+		ImGui::PushID("DropScaleY");
+		ImGui::DragFloat("Drop Scale Y", &drop_scale_y, 0.01f, 0.01f, 0.5f);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropScaleY"); h.handle != 0)
+				this->set_uniform_value_float(h, &drop_scale_y, 1, 0);
+		}
+		if (drop_scale_y != drop_scale_y_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				drop_scale_y = drop_scale_y_default;
+		}
+		ImGui::PopID();
+
+		static int drop_count = 40;
+		ImGui::PushID("DropCount");
+		ImGui::DragInt("Drop Count", &drop_count, 1, 1, 200);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropCount"); h.handle != 0)
+				this->set_uniform_value_int(h, &drop_count, 1, 0);
+		}
+		if (drop_count != drop_count_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				drop_count = drop_count_default;
+		}
+		ImGui::PopID();
+
+		static int slow_drip_count = 5;
+		ImGui::PushID("SlowDripCount");
+		ImGui::DragInt("Slow Drip Count", &slow_drip_count, 1, 0, 10);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "SlowDripCount"); h.handle != 0)
+				this->set_uniform_value_int(h, &slow_drip_count, 1, 0);
+		}
+		if (slow_drip_count != slow_drip_count_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				slow_drip_count = slow_drip_count_default;
+		}
+		ImGui::PopID();
+
+		static float drop_speed = 0.01f;
+		ImGui::PushID("DropSpeed");
+		ImGui::DragFloat("Base Drop Speed", &drop_speed, 0.0001f, 0.0001f, 1.0f);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropSpeed"); h.handle != 0)
+				this->set_uniform_value_float(h, &drop_speed, 1, 0);
+		}
+		if (drop_speed != drop_speed_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				drop_speed = drop_speed_default;
+		}
+		ImGui::PopID();
+
+		static float drop_speed_var = 1.5f;
+		ImGui::PushID("DropSpeedVariation");
+		ImGui::DragFloat("Drop Speed Variation", &drop_speed_var, 0.01f, 0.0f, 2.0f);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "DropSpeedVariation"); h.handle != 0)
+				this->set_uniform_value_float(h, &drop_speed_var, 1, 0);
+		}
+		if (drop_speed_var != drop_speed_var_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				drop_speed_var = drop_speed_var_default;
+		}
+		ImGui::PopID();
+
+		ImGui::Separator();
+
+		static bool enable_trails = true;
+		if (ImGui::Checkbox("Enable Rain Trails", &enable_trails))
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "EnableTrails"); h.handle != 0)
+				this->set_uniform_value_bool(h, &enable_trails, 1, 0);
+
+		static float fadeout = 0.0f;
+		ImGui::PushID("Fadeout Strength");
+		if (ImGui::DragFloat("Fadeout Strength", &fadeout, 0.01f, 0.0f, 5.0f))
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "FadeoutStrength"); h.handle != 0)
+				this->set_uniform_value_float(h, &fadeout, 1, 0);
+		}
+		if (fadeout != fadeout_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				fadeout = fadeout_default;
+		}
+		ImGui::PopID();
+
+		static float trail_len = 0.02f;
+		ImGui::PushID("TrailLength");
+		ImGui::DragFloat("Trail Length", &trail_len, 0.01f, 0.0f, 0.05f);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "TrailLength"); h.handle != 0)
+				this->set_uniform_value_float(h, &trail_len, 1, 0);
+		}
+		if (trail_len != trail_len_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				trail_len = trail_len_default;
+		}
+		ImGui::PopID();
+
+		static float trail_width = 3.0f;
+		ImGui::PushID("TrailWidth");
+		ImGui::DragFloat("Trail Width", &trail_width, 0.01f, 0.1f, 3.0f);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "TrailWidth"); h.handle != 0)
+				this->set_uniform_value_float(h, &trail_width, 1, 0);
+		}
+		if (trail_width != trail_width_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				trail_width = trail_width_default;
+		}
+		ImGui::PopID();
+
+		ImGui::Separator();
+
+		static float bulge_strength = 0.01f;
+		ImGui::PushID("BulgeStrength");
+		ImGui::DragFloat("Bulge Strength", &bulge_strength, 0.0001f, 0.0f, 0.01f);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "BulgeStrength"); h.handle != 0)
+				this->set_uniform_value_float(h, &bulge_strength, 1, 0);
+		}
+		if (bulge_strength != bulge_strength_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				bulge_strength = bulge_strength_default;
+		}
+		ImGui::PopID();
+
+		static float bulge_stretch = 0.5f;
+		ImGui::PushID("BulgeStretch");
+		ImGui::DragFloat("Bulge Stretch Intensity", &bulge_stretch, 0.1f, 0.0f, 2.0f);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "BulgeStretchIntensity"); h.handle != 0)
+				this->set_uniform_value_float(h, &bulge_strength, 1, 0);
+		}
+		if (bulge_stretch != bulge_stretch_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				bulge_stretch = bulge_stretch_default;
+		}
+		ImGui::PopID();
+
+		ImGui::Separator();
+
+		static float wind[2] = { 0.15f, 1.0f };
+		if (ImGui::DragFloat2("Wind Direction", wind, 0.001f, -0.1f, 0.1f))
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "Wind"); h.handle != 0)
+				this->set_uniform_value_float(h, wind, 2, 0);
+
+		ImGui::Separator();
+
+		static bool enable_rgb = false;
+		if (ImGui::Checkbox("Enable RGB Color Cycle", &enable_rgb))
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "EnableRGB"); h.handle != 0)
+				this->set_uniform_value_bool(h, &enable_rgb, 1, 0);
+
+		static float rgb_speed = 1.0f;
+		ImGui::PushID("RGBSpeed");
+		ImGui::DragFloat("RGB Speed", &rgb_speed, 0.1f, 0.1f, 10.0f);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "RGBSpeed"); h.handle != 0)
+				this->set_uniform_value_float(h, &rgb_speed, 1, 0);
+		}
+		if (rgb_speed != rgb_speed_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				rgb_speed = rgb_speed_default;
+		}
+		ImGui::PopID();
+
+		static float rgb_intensity = 1.0f;
+		ImGui::PushID("RGBIntensity");
+		ImGui::DragFloat("RGB Intensity", &rgb_intensity, 0.01f, 0.0f, 2.0f);
+		{
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "RGBSIntensity"); h.handle != 0)
+				this->set_uniform_value_float(h, &rgb_intensity, 1, 0);
+		}
+		if (rgb_intensity != rgb_intensity_default) // Only show restore if changed
+		{
+			ImGui::SameLine();
+			if (ImGui::SmallButton(ICON_FK_UNDO))
+				rgb_intensity = rgb_intensity_default;
+		}
+		ImGui::PopID();
+
+		static int rgb_preset = 0;
+		if (ImGui::Combo("RGB Color Preset", &rgb_preset, "Rainbow\0Pastel\0Neon\0Warm\0Cool\0"))
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "RGBPreset"); h.handle != 0)
+				this->set_uniform_value_int(h, &rgb_preset, 1, 0);
+
+		static bool use_manual_rgb = false;
+		if (ImGui::Checkbox("Use Manual RGB Color", &use_manual_rgb))
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "UseManualRGB"); h.handle != 0)
+				this->set_uniform_value_bool(h, &use_manual_rgb, 1, 0);
+
+		static float manual_rgb_color[3] = { 1.0f, 1.0f, 1.0f };
+		if (ImGui::ColorEdit3("Manual RGB Color", manual_rgb_color))
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "ManualRGBColor"); h.handle != 0)
+				this->set_uniform_value_float(h, manual_rgb_color, 3, 0);
+
+		ImGui::Separator();
+
+		static bool enable_weather = true;
+		if (ImGui::Checkbox("Enable Weather Detection", &enable_weather))
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "EnableWeatherDetection"); h.handle != 0)
+				this->set_uniform_value_bool(h, &enable_weather, 1, 0);
+
+		// Override for weather detection
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetTooltip("Overrides weather detection to allow rain lens in all weathers.");
 		}
 	}
-	else
+
+	////////////////////////////////////////////////////////////////
+	//
+	//  UI RENDERING LOGIC EXTRAS
+	// 
+	////////////////////////////////////////////////////////////////
+
+	if (ImGui::CollapsingHeader("Extras", ImGuiTreeNodeFlags_OpenOnArrow))
 	{
-		// Weather does not match — disable the shader via uniforms
-		float off = 0.0f;
-		int zero = 0;
-		bool disable = false;
+		ImGui::Text("Future features coming soon...");
+	}
+	////////////////////////////////////////////////////////////////
+	//
+	//  UI RENDERING LOGIC GAME DATA
+	// 
+	////////////////////////////////////////////////////////////////
 
-		const char *uniforms_to_zero[] = {
-			"RainIntensity", "RefractionStrength", "ChromaticAmount", "DropScaleX", "DropScaleY",
-			"DropSpeed", "DropSpeedVariation", "FadeoutStrength", "TrailLength", "TrailWidth",
-			"BulgeStrength", "BulgeStretchIntensity", "RGBSpeed", "RGBSIntensity"
-		};
-		for (const char *name : uniforms_to_zero)
-			if (auto h = find_uniform_variable("NGVRaindrops.fx", name); h.handle != 0)
-				this->set_uniform_value_float(h, &off, 1, 0);
+	if (ImGui::CollapsingHeader("Game Data", ImGuiTreeNodeFlags_OpenOnArrow))
+	{
+		const GameStateData *data = get_game_state_data();
+		if (data)
+		{
+			// Weather check logic
+			bool weather_check = (data->current_weather == 2 /*RAIN*/) ||
+				(data->current_weather == 5 /*CLEARING*/) ||
+				(data->current_weather == 7 /*THUNDER*/);
 
-		const char *uniforms_to_zero_int[] = { "DropCount", "SlowDripCount", "RGBPreset" };
-		for (const char *name : uniforms_to_zero_int)
-			if (auto h = find_uniform_variable("NGVRaindrops.fx", name); h.handle != 0)
-				this->set_uniform_value_int(h, &zero, 1, 0);
+			if (auto h = find_uniform_variable("NGVRaindrops.fx", "EnableWeather"); h.handle != 0)
+				this->set_uniform_value_bool(h, &weather_check, 1, 0);
 
-		const char *uniforms_to_disable[] = { "EnableTrails", "EnableRGB", "UseManualRGB", "EnableWeatherDetection" };
-		for (const char *name : uniforms_to_disable)
-			if (auto h = find_uniform_variable("NGVRaindrops.fx", name); h.handle != 0)
-				this->set_uniform_value_bool(h, &disable, 1, 0);
+			ImGui::Text("Current Weather ID: %d", data->current_weather);
+			ImGui::Text("Target Weather ID: %d", data->target_weather);
+			ImGui::Text("Transition Factor: %.2f", data->transition_factor);
+			ImGui::Text("Game Time: %.2f", data->game_time);
+		}
+		else
+		{
+			ImGui::TextColored(ImVec4(1, 0, 0, 1), "Weather data unavailable (addon not loaded?)");
+		}
 	}
 
 	ImGui::End();
 }
 
 
-	
+
