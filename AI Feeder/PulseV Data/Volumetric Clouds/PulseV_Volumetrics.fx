@@ -1,13 +1,77 @@
+// ============================================================================
+//  PulseV Volumetric Clouds Shader
+//  Version: 1.0.0
+//  Author: Matthew Burrows (anti-matt-er)
+//  License: MIT (Open Source) 
+// ============================================================================
+//
+//  DESCRIPTION:
+//  --------------------------------------------------------------------------
+//  The PulseV Volumetric Clouds shader is a next-generation, real-time 
+//  atmospheric rendering solution tailored specifically for PulseV. 
+//  Built on modern rendering principles, it delivers photorealistic 
+//  volumetric cloudscapes with dynamic lighting, multi-layer simulation, 
+//  and seamless integration with weather-driven systems.
+//
+//  This shader provides robust tools for artists and developers to achieve 
+//  cinematic-quality skies in open-world environments. It supports adjustable 
+//  parameters for density, coverage, scale, lighting multipliers, noise 
+//  evolution, and volumetric detail—giving you full creative control over 
+//  the mood and tone of your scene.
+//
+//  FEATURES:
+//  --------------------------------------------------------------------------
+//  • True volumetric rendering of multi-layer cloud formations.
+//  • Dynamic integration with PulseV's weather systems for real-time transitions.
+//  • Adjustable density, height, coverage, and lighting parameters.
+//  • Noise-based procedural detail for natural variation.
+//  • Scalable performance settings for multiple hardware tiers.
+//  • Artist-friendly parameter exposure for rapid iteration.
+//
+//  TECHNICAL DETAILS:
+//  --------------------------------------------------------------------------
+//  This shader employs a physically-inspired volumetric lighting model 
+//  paired with optimized ray-marching techniques for real-time performance. 
+//  Multi-octave 3D noise ensures naturalistic structure, while temporal 
+//  evolution simulates drifting and morphing cloud masses. 
+//
+//  USAGE:
+//  --------------------------------------------------------------------------
+//  1. Integrate this shader into your graphics pipeline.
+//  2. Adjust the provided parameters in the UI or via scripting hooks (You need to source methods of doing this).
+//  the shader is open source, so you can modify it to suit your needs however you still need to know how to modify GTA.
+//  3. Sync with your weather presets for context-aware atmospheric effects.
+//
+//  NOTES:
+//  --------------------------------------------------------------------------
+//  • Optimized for GTA V modding via Reshades rendering pipeline.
+//  • Exposed parameters in the ReShade UI for easy tuning.
+//  • Designed for both cinematics and gameplay scenarios.
+//
+// ============================================================================
+//
+
+
+// ============================================================================
+//  
+//  
 //#define RSDEV // Uncomment when developing
+//  
+//
+// ============================================================================
+
 
 #include "ReShade.fxh"
 #include "PulseV/noise.fxh"
 
-
 #ifdef RSDEV
-/**
- * Hacks to get VS to stop complaining about ReShade syntax
- **/
+// ============================================================================
+//  
+//  
+// Reshade VS Syntax Bypass
+//  
+//
+// ============================================================================
 
 #error ">>> Comment out `#define RSDEV` in line 1 before loading in ReShade! <<<"
 
@@ -41,9 +105,9 @@ void tex2Dstore(storage2D a, uint2 b, float4 c)
 #include "rdr1.fxh"
 #endif
 
-/**
- * Constants
- **/
+// ============================================================================ 
+//                          CONSTANTS & DEFINITIONS
+// ============================================================================
 
 #ifndef RENDER_SCALE
 	#define RENDER_SCALE 0.5
@@ -113,10 +177,9 @@ static const float2 GAUSSIAN_DIRECTIONS[17] =
 static const float3 NoiseTexel = 1.0 / float3(NOISE_W, NOISE_H, NOISE_D);
 static const float2 AuroraNoiseTexel = 1.0 / float2(AURORA_NOISE_W, AURORA_NOISE_H);
 
-
-/**
- * Uniforms provided by addon
- **/
+// ============================================================================ 
+//                      UNIFORMS SUPPLIED BY PULSEV API
+// ============================================================================
 
 uniform bool inputEnabled <
     string source = "enabled";
@@ -185,9 +248,9 @@ uniform float inputTimeOfDay <
     string source = "time_of_day";
 >;
 
-/**
- * Reshade uniforms
- **/
+// ============================================================================ 
+//                              RESHADE UNIFORMS
+// ============================================================================
 
 uniform int framecount <
     string source = "framecount";
@@ -196,15 +259,20 @@ uniform float timer <
     string source = "timer";
 >;
 
-/**
- * User-editable uniforms (Global Settings)
- **/
+// ============================================================================ 
+//                      UI UNIFORMS (Preset Settings)
+// ============================================================================
 
 uniform int qualityPreset <
-    string ui_category = "Global Settings";
+    string ui_category = "Preset Settings";
     string ui_type = "combo";
     string ui_items = "Low\0Medium\0High\0Ultra\0Extreme\0";
 > = 1;
+
+// ============================================================================ 
+//                      UI UNIFORMS (Global Settings)
+// ============================================================================
+
 uniform float cloudRenderDistance <
     string ui_category = "Global Settings";
     string ui_type = "drag";
@@ -212,12 +280,6 @@ uniform float cloudRenderDistance <
     float ui_max = 100000.0;
     float ui_step = 10.0;
 > = 10000.0;
-uniform int cloudVolumeSamples <
-    string ui_category = "Global Settings";
-    string ui_type = "slider";
-    int ui_min = 10;
-    int ui_max = 2048;
-> = 64;
 uniform float cloudTimescale <
     string ui_category = "Global Settings";
     string ui_type = "drag";
@@ -237,9 +299,9 @@ uniform float cloudWindSpeed <
     float ui_step = 0.01;
 > = 2.0;
 
-/**
- * User-editable uniforms (Advanced Global Settings)
- **/
+// ============================================================================ 
+//                      UI UNIFORMS (Advanced Global Settings)
+// ============================================================================
 
 uniform float cloudScale <
     string ui_category = "Advanced Global Settings";
@@ -577,15 +639,15 @@ uniform float2 auroraBlendPoints <
     float ui_max = 1.0;
 > = float2(0.682, 0.781);
 
-/**
- * User-editable uniforms (Weather Presets)
- **/
+// ============================================================================ 
+//                      UI UNIFORMS (Weather Settings)
+// ============================================================================
 
 #include "weathers.fxh"
 
-/**
- * Textures & samplers
- **/
+// ============================================================================ 
+//                           TEXTURES & SAMPLERS
+// ============================================================================
 
 texture CloudsLowResTexture
 {
@@ -748,6 +810,9 @@ sampler BlueNoiseSampler
     AddressV = REPEAT;
 };
 
+// ============================================================================ 
+//                      SHADER CONSTANTS & STRUCTURES
+// ============================================================================
 
 struct Ray
 {
@@ -785,6 +850,10 @@ float4x4 inverseProjectionMatrix()
     );
 }
 
+// ============================================================================ 
+//                          HELPER FUNCTIONS
+// ============================================================================
+
 float3 worldDirection(float2 uv)
 {
     float4 clipSpace = float4(float2(1.0 - uv.x, uv.y) * 2.0 - 1.0, 1.0, 1.0);
@@ -810,6 +879,10 @@ Ray cameraRay(float2 uv)
 
     return ray;
 }
+
+// ============================================================================ 
+//                      LAYER PARAMETERS STRUCTURE
+// ============================================================================
 
 LayerParameters getWeather(int weatherType, int layerIndex)
 {
@@ -1021,6 +1094,10 @@ float3 cloudExtents(float inBottom, float inTop)
     return float3(bottom, top, height);
 }
 
+// ============================================================================ 
+//                              NOISE FUNCTIONS
+// ============================================================================
+
 float cloudNoise(float3 pos, float3 wind, LayerParameters layer)
 {
     const float curl_amount = 0.1;
@@ -1085,6 +1162,10 @@ float cloudLightMarch(float3 pos, LayerParameters layer, float3 lightDirection, 
     
     return transmittance;
 }
+
+// ============================================================================ 
+//                      DEPTH FUNCTIONS
+// ============================================================================
 
 float depthToLinear(float depth, float near, float far)
 {
@@ -1194,12 +1275,20 @@ float softDepthEdge(float2 uv)
     return saturate(result);
 }
 
+// ============================================================================ 
+//                      BLUE NOISE FUNCTIONS
+// ============================================================================
+
 float blueNoise(float2 uv)
 {
     uv = uv / 1024.0 / BUFFER_PIXEL_SIZE;
     
     return tex2D(BlueNoiseSampler, uv).x * 2.0 - 1.0;
 }
+
+// ============================================================================ 
+//                      NIGHT & DAY FUNCTIONS
+// ============================================================================
 
 float nightTimeAmount()
 {
@@ -1228,6 +1317,10 @@ float dayTimeAmount()
         return saturate(1.0 - smoothstep(DAY_DUSK_START, DAY_DUSK_END, time));
     }
 }
+
+// ============================================================================ 
+//                      AROURA FUNCTIONS
+// ============================================================================
 
 float auroraAmount()
 {
@@ -1352,6 +1445,10 @@ float4 renderAurora(float2 uv)
     
     return color;
 }
+
+// ============================================================================ 
+//                      MAIN RENDER FUNCTION
+// ============================================================================
 
 float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topLayer, int samples)
 {
@@ -1496,6 +1593,10 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     return output;
 }
 
+// ============================================================================ 
+//                      DEBUG SUN FUNCTIONS
+// ============================================================================
+
 float debugDrawSun(float3 rayDirection, float3 sunDirection)
 {
     const float radius = 0.01;
@@ -1552,6 +1653,10 @@ float4 drawTextureRect3D(sampler3D tex, float2 uv, float2 position, float2 size,
     return color;
 }
 
+// ============================================================================ 
+//                      PROCEDURAL NOISE FUNCTIONS
+// ============================================================================
+
 [numthreads(NOISE_TX, NOISE_TY, NOISE_TZ)]
 void CS_GenerateNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_GroupID)
 {
@@ -1591,6 +1696,10 @@ void CS_GenerateAuroraNoise(uint2 threadID: SV_GroupThreadID, uint2 groupID: SV_
     }
 }
 
+// ============================================================================ 
+//                      DENOISE FUNCTIONS
+// ============================================================================
+
 float4 denoise(sampler2D tex, float2 uv, float2 size, float sigma, float strength, float threshold)
 {
     float sigmaExponent = 0.5 / (sigma * sigma);
@@ -1623,6 +1732,10 @@ float4 denoise(sampler2D tex, float2 uv, float2 size, float sigma, float strengt
     
     return color / divisor;
 }
+
+// ============================================================================ 
+//                      SHADER ENTRY POINTS
+// ============================================================================
 
 float4 PS_Aurora(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
 {
@@ -1661,7 +1774,7 @@ int getQualityPresetSamples()
     return 64;
 }
 
-float4 PS_VolumetricCloudsLow(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_VolumetricCloudsLow(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (!inputEnabled)
     {
@@ -1671,7 +1784,7 @@ float4 PS_VolumetricCloudsLow(float4 fragcoord: SV_Position, float2 uv: TexCoord
     return renderClouds(uv, getWeatherParams(0), getWeatherParams(1), getQualityPresetSamples());
 }
 
-float4 PS_VolumetricCloudsIntermediate(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_VolumetricCloudsIntermediate(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (!inputEnabled)
     {
@@ -1801,6 +1914,10 @@ float4 PS_DebugDepthEdge(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV
     return float4(softDepthEdge(uv).xxx, 0.0);
 }
 
+// ============================================================================ 
+//                      RESHADE INJECTION TECHNIQUES
+// ============================================================================
+
 technique PulseV_VolumetricCloudsNoise <
     string ui_label = "PulseV Volumetric Clouds - Noise Gen";
     string ui_tooltip = "Regenerates the noise textures for clouds when reloading shaders (NOTE: reloading is mandatory, enabling this technique does nothing!)";
@@ -1856,7 +1973,7 @@ technique PulseV_VolumetricClouds <
     pass clouds_intermediate
     {
         VertexShader = PostProcessVS;
-        PixelShader = PS_VolumetricCloudsIntermediate; 
+        PixelShader = PS_VolumetricCloudsIntermediate;
         GenerateMipMaps = true;
         RenderTarget = CloudsIntermediateTexture;
     }
