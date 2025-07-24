@@ -1,6 +1,6 @@
 //#define RSDEV // Uncomment when developing
 
-#include "ReShade.fxh"
+#include "PulseV/ReShade.fxh"
 #include "PulseV/noise.fxh"
 
 #ifdef RSDEV
