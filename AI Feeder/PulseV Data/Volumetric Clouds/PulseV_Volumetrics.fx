@@ -200,6 +200,11 @@ uniform float timer <
  * User-editable uniforms (Global Settings)
  **/
 
+uniform int qualityPreset <
+    string ui_category = "Global Settings";
+    string ui_type = "combo";
+    string ui_items = "Low\0Medium\0High\0Ultra\0Extreme\0";
+> = 1;
 uniform float cloudRenderDistance <
     string ui_category = "Global Settings";
     string ui_type = "drag";
@@ -211,7 +216,7 @@ uniform int cloudVolumeSamples <
     string ui_category = "Global Settings";
     string ui_type = "slider";
     int ui_min = 10;
-    int ui_max = 200;
+    int ui_max = 2048;
 > = 64;
 uniform float cloudTimescale <
     string ui_category = "Global Settings";
@@ -1637,6 +1642,25 @@ float4 PS_Aurora(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
     return output;
 }
 
+int getQualityPresetSamples()
+{
+    switch (qualityPreset)
+    {
+        case 0:
+            return 128;
+        case 1:
+            return 256;
+        case 2:
+            return 512;
+        case 3:
+            return 1024;
+        case 4:
+            return 2048;
+    }
+
+    return 64;
+}
+
 float4 PS_VolumetricCloudsLow(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
 {
     if (!inputEnabled)
@@ -1644,7 +1668,7 @@ float4 PS_VolumetricCloudsLow(float4 fragcoord: SV_Position, float2 uv: TexCoord
         discard;
     }
     
-    return renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples);
+    return renderClouds(uv, getWeatherParams(0), getWeatherParams(1), getQualityPresetSamples());
 }
 
 float4 PS_VolumetricCloudsIntermediate(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
@@ -1664,7 +1688,7 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord: SV_Position, float2 uv:
     
     if (!RENDER_LOW || edge > 0.0)
     {
-        clouds = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples);
+        clouds = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), getQualityPresetSamples());
     }
     else
     {
