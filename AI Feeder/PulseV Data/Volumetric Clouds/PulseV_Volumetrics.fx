@@ -1856,7 +1856,7 @@ technique PulseV_VolumetricClouds <
     pass clouds_intermediate
     {
         VertexShader = PostProcessVS;
-        PixelShader = PS_VolumetricCloudsIntermediate;
+        PixelShader = PS_VolumetricCloudsIntermediate; 
         GenerateMipMaps = true;
         RenderTarget = CloudsIntermediateTexture;
     }
