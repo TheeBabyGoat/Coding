@@ -153,51 +153,6 @@ void reshade::runtime::deinit_gui()
 	ImGui::DestroyContext(_imgui_context);
 }
 
-extern "C" {
-#include "../deps/stb/stb_image.h"
-}
-
-extern "C" unsigned char *stbi_load(const char *filename, int *x, int *y, int *channels_in_file, int desired_channels);
-extern "C" void stbi_image_free(void *retval_from_stbi_load);
-
-bool reshade::runtime::load_pulsev_image()
-{
-	int width, height, channels;
-	unsigned char *data = stbi_load("..reshade\source\depends\pulse_v_logo.png", &width, &height, &channels, 4);
-	if (!data)
-		return false;
-
-	const uint32_t target_width = 522;
-	const uint32_t target_height = 522;
-
-	const api::subresource_data initial_data = { data, static_cast<uint32_t>(width * 4), static_cast<uint32_t>(width * height * 4) };
-
-	if (!_device->create_resource(
-		api::resource_desc(target_width, target_height, 1, 1, api::format::r8g8b8a8_unorm, 1, api::memory_heap::gpu_only, api::resource_usage::shader_resource),
-		&initial_data, api::resource_usage::shader_resource, &_pulsev_image_tex))
-	{
-		stbi_image_free(data);
-		return false;
-	}
-
-	stbi_image_free(data);
-
-	if (!_device->create_resource_view(_pulsev_image_tex, api::resource_usage::shader_resource, api::resource_view_desc(api::format::r8g8b8a8_unorm), &_pulsev_image_srv))
-	{
-		_device->destroy_resource(_pulsev_image_tex);
-		_pulsev_image_tex = {};
-		return false;
-	}
-
-	_device->set_resource_name(_pulsev_image_tex, "PulseV Tab Image");
-	return true;
-}
-
-
-
-
-
-
 void reshade::runtime::build_font_atlas()
 {
 	ImFontAtlas *const atlas = _imgui_context->IO.Fonts;

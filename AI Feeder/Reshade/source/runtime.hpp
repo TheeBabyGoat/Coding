@@ -52,11 +52,6 @@ namespace reshade
 		uint32_t get_back_buffer_count() const final { return _swapchain->get_back_buffer_count(); }
 		uint32_t get_current_back_buffer_index() const final { return _swapchain->get_current_back_buffer_index(); }
 
-		bool load_pulsev_image();
-
-		api::resource_view _pulsev_image_srv = {};
-		api::resource _pulsev_image_tex = {};
-
 		/// <summary>
 		/// Gets the path to the configuration file used by this effect runtime.
 		/// </summary>
