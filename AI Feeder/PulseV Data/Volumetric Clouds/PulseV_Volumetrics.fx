@@ -1502,9 +1502,9 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float moonCosTheta = dot(ray.direction, moonDirection);
     float sunPhase = phase(cloudForwardScatter, sunCosTheta);
     float moonPhase = phase(cloudForwardScatter, moonCosTheta);
-    float3 sunLightBase = doDayLighting ? (cloudSunLightPower * sunPhase).xxx : 0.0;
-    float3 moonLightBase = doNightLighting ? (cloudMoonLightPower * moonPhase).xxx : 0.0;
-    float3 skyLightBase = cloudSkyLightPower.xxx;
+    float3 sunLightBase = doDayLighting ? (cloudSunLightPower * sunPhase).xxx : float3(0.0, 0.0, 0.0);
+    float3 moonLightBase = doNightLighting ? (cloudMoonLightPower * moonPhase).xxx : float3(0.0, 0.0, 0.0);
+    float3 skyLightBase = float3(cloudSkyLightPower, cloudSkyLightPower, cloudSkyLightPower);
     
     float auroraVisibility = auroraAmount();
     float4 aurora;

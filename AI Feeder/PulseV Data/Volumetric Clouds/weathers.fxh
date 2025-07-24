@@ -1016,8 +1016,8 @@ struct LayerParameters
     float extinction;
     float ambientAmount;
     float absorption;
-    float luminance;
-    float sunLightPower;
+    float3 luminance;
+    float3 sunLightPower;
     float skyLightPower;
     float bottomDensity;
     float middleDensity;
