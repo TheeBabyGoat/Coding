@@ -110,15 +110,15 @@ void tex2Dstore(storage2D a, uint2 b, float4 c)
 // ============================================================================
 
 #ifndef RENDER_SCALE
-	#define RENDER_SCALE 0.5
+#define RENDER_SCALE 0.5
 #endif
 
 #ifndef ADVANCED
-	#define ADVANCED 0
+#define ADVANCED 0
 #endif
 
 #ifndef SOFT_EDGE
-    #define SOFT_EDGE 0
+#define SOFT_EDGE 0
 #endif
 
 #define NOISE_W 256
@@ -867,7 +867,7 @@ float3 worldPosition()
 {
     float4x4 inverseView = inverseViewMatrix();
 
-    return float3(inverseView._14, inverseView._24, inverseView._34); 
+    return float3(inverseView._14, inverseView._24, inverseView._34);
 }
 
 Ray cameraRay(float2 uv)
@@ -1037,7 +1037,7 @@ LayerParameters getWeather(int weatherType, int layerIndex)
     }
     
     params.bottom += cloudHeightOffset;
-    params.top +=  cloudHeightOffset;
+    params.top += cloudHeightOffset;
     
     return params;
 }
@@ -1063,6 +1063,7 @@ LayerParameters mixLayerParams(LayerParameters fromParams, LayerParameters toPar
     params.absorption = lerp(fromParams.absorption, toParams.absorption, ratio);
     params.luminance = lerp(fromParams.luminance, toParams.luminance, ratio);
     params.sunLightPower = lerp(fromParams.sunLightPower, toParams.sunLightPower, ratio);
+    params.moonLightPower = lerp(fromParams.moonLightPower, toParams.moonLightPower, ratio);
     params.skyLightPower = lerp(fromParams.skyLightPower, toParams.skyLightPower, ratio);
     params.bottomDensity = lerp(fromParams.bottomDensity, toParams.bottomDensity, ratio);
     params.middleDensity = lerp(fromParams.middleDensity, toParams.middleDensity, ratio);
@@ -1553,7 +1554,7 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
             float skyTransmittance = cloudLightMarch(pos, layer, float3(0.0, 1.0, 0.0), lightStepSize, skyAbsorption, layerAltitude, altitudeDensity);
 
             float3 sunContribution = dayAmount * sunBaseColor * sunLightBase * layer.sunLightPower * altitudeLighting * (sunTransmittance + cloudAmbientAmount * layer.ambientAmount);
-            float3 moonContribution = nightAmount * moonBaseColor * moonLightBase * altitudeLighting * (moonTransmittance + cloudAmbientAmount * layer.ambientAmount);
+            float3 moonContribution = nightAmount * moonBaseColor * moonLightBase * layer.moonLightPower * altitudeLighting * (moonTransmittance + cloudAmbientAmount * layer.ambientAmount);
             float3 skyContribution = sky * skyLightBase * layer.skyLightPower * (skyTransmittance + cloudAmbientAmount * layer.ambientAmount);
        
             float3 contribution = sunContribution + moonContribution + skyContribution;
@@ -1658,7 +1659,7 @@ float4 drawTextureRect3D(sampler3D tex, float2 uv, float2 position, float2 size,
 // ============================================================================
 
 [numthreads(NOISE_TX, NOISE_TY, NOISE_TZ)]
-void CS_GenerateNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_GroupID)
+void CS_GenerateNoise(uint3 threadID : SV_GroupThreadID, uint3 groupID : SV_GroupID)
 {
     uint3 globalThreadID = groupID * uint3(NOISE_TX, NOISE_TY, NOISE_TZ) + threadID;
 
@@ -1671,7 +1672,7 @@ void CS_GenerateNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_GroupI
 }
 
 [numthreads(NOISE_TX, NOISE_TY, NOISE_TZ)]
-void CS_GenerateCurlNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_GroupID)
+void CS_GenerateCurlNoise(uint3 threadID : SV_GroupThreadID, uint3 groupID : SV_GroupID)
 {
     uint3 globalThreadID = groupID * uint3(NOISE_TX, NOISE_TY, NOISE_TZ) + threadID;
 
@@ -1684,7 +1685,7 @@ void CS_GenerateCurlNoise(uint3 threadID: SV_GroupThreadID, uint3 groupID: SV_Gr
 }
 
 [numthreads(AURORA_NOISE_TX, AURORA_NOISE_TY, 1)]
-void CS_GenerateAuroraNoise(uint2 threadID: SV_GroupThreadID, uint2 groupID: SV_GroupID)
+void CS_GenerateAuroraNoise(uint2 threadID : SV_GroupThreadID, uint2 groupID : SV_GroupID)
 {
     uint2 globalThreadID = groupID * uint2(AURORA_NOISE_TX, AURORA_NOISE_TY) + threadID;
 
@@ -1737,7 +1738,7 @@ float4 denoise(sampler2D tex, float2 uv, float2 size, float sigma, float strengt
 //                      SHADER ENTRY POINTS
 // ============================================================================
 
-float4 PS_Aurora(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_Aurora(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (!inputEnabled)
     {
@@ -1820,7 +1821,7 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord : SV_Position, float2 uv
     return clouds;
 }
 
-float4 PS_VolumetricClouds(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_VolumetricClouds(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (!inputEnabled)
     {
@@ -1850,7 +1851,7 @@ float4 PS_VolumetricClouds(float4 fragcoord: SV_Position, float2 uv: TexCoord): 
     return float4(lerp(back.rgb, clouds.rgb, clouds.a * uiMask(uv)), 1.0);
 }
 
-float4 PS_Debug(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_Debug(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
 #define UVT (1.0 / 48.0) // Units in UV screen width space
     float2 uvtSquare = float2(UVT, UVT * BUFFER_ASPECT_RATIO);
@@ -1899,7 +1900,7 @@ float4 PS_Debug(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
     return float4(lerp(screen.rgb, final.rgb, final.a), 1.0);
 }
 
-float4 PS_DebugSky(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_DebugSky(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     if (uv.y < 0.125)
     {
@@ -1909,7 +1910,7 @@ float4 PS_DebugSky(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Targe
     return uv.x < 0.5 ? float4(getSkyColor(worldDirection(uv), 1.0, nightTimeAmount()), 1.0) : tex2D(ReShade::BackBuffer, uv);
 }
 
-float4 PS_DebugDepthEdge(float4 fragcoord: SV_Position, float2 uv: TexCoord): SV_Target
+float4 PS_DebugDepthEdge(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
     return float4(softDepthEdge(uv).xxx, 0.0);
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#define CLOUD_LAYER_PRESET(PRESET, BOTTOM_SCALE, BOTTOM_DETAIL_SCALE, BOTTOM_STRETCH, BOTTOM_BASE_CURL, BOTTOM_DETAIL_CURL, BOTTOM_BASE_CURL_SCALE, BOTTOM_DETAIL_CURL_SCALE, BOTTOM_SMOOTHNESS, BOTTOM_SOFTNESS, BOTTOM_BOTTOM, BOTTOM_TOP, BOTTOM_COVER, BOTTOM_EXTINCTION, BOTTOM_AMBIENT, BOTTOM_ABSORPTION, BOTTOM_LUMINANCE, BOTTOM_SUNLIGHT_POWER, BOTTOM_SKYLIGHT_POWER, BOTTOM_BOTTOM_DENSITY, BOTTOM_MIDDLE_DENSITY, BOTTOM_TOP_DENSITY, TOP_SCALE, TOP_DETAIL_SCALE, TOP_STRETCH, TOP_BASE_CURL, TOP_DETAIL_CURL, TOP_BASE_CURL_SCALE, TOP_DETAIL_CURL_SCALE, TOP_SMOOTHNESS, TOP_SOFTNESS, TOP_BOTTOM, TOP_TOP, TOP_COVER, TOP_EXTINCTION, TOP_AMBIENT, TOP_ABSORPTION, TOP_LUMINANCE, TOP_SUNLIGHT_POWER, TOP_SKYLIGHT_POWER, TOP_BOTTOM_DENSITY, TOP_MIDDLE_DENSITY, TOP_TOP_DENSITY) \
+#define CLOUD_LAYER_PRESET(PRESET, BOTTOM_SCALE, BOTTOM_DETAIL_SCALE, BOTTOM_STRETCH, BOTTOM_BASE_CURL, BOTTOM_DETAIL_CURL, BOTTOM_BASE_CURL_SCALE, BOTTOM_DETAIL_CURL_SCALE, BOTTOM_SMOOTHNESS, BOTTOM_SOFTNESS, BOTTOM_BOTTOM, BOTTOM_TOP, BOTTOM_COVER, BOTTOM_EXTINCTION, BOTTOM_AMBIENT, BOTTOM_ABSORPTION, BOTTOM_LUMINANCE, BOTTOM_SUNLIGHT_POWER, BOTTOM_MOONLIGHT_POWER, BOTTOM_SKYLIGHT_POWER, BOTTOM_BOTTOM_DENSITY, BOTTOM_MIDDLE_DENSITY, BOTTOM_TOP_DENSITY, TOP_SCALE, TOP_DETAIL_SCALE, TOP_STRETCH, TOP_BASE_CURL, TOP_DETAIL_CURL, TOP_BASE_CURL_SCALE, TOP_DETAIL_CURL_SCALE, TOP_SMOOTHNESS, TOP_SOFTNESS, TOP_BOTTOM, TOP_TOP, TOP_COVER, TOP_EXTINCTION, TOP_AMBIENT, TOP_ABSORPTION, TOP_LUMINANCE, TOP_SUNLIGHT_POWER, TOP_MOONLIGHT_POWER, TOP_SKYLIGHT_POWER, TOP_BOTTOM_DENSITY, TOP_MIDDLE_DENSITY, TOP_TOP_DENSITY) \
 uniform float PRESET##BottomScale < \
     string ui_category = #PRESET " Bottom Layer"; \
     bool ui_category_closed = true; \
@@ -163,6 +163,15 @@ uniform float PRESET##BottomSkyLightPower < \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
 > = BOTTOM_SKYLIGHT_POWER; \
+uniform float PRESET##BottomMoonLightPower < \
+    string ui_category = #PRESET " Bottom Layer"; \
+    bool ui_category_closed = true; \
+    string ui_label = "Moon Light Power"; \
+    string ui_type = "drag"; \
+    float ui_min = 0.00; \
+    float ui_max = 2.00; \
+    float ui_step = 0.01; \
+> = 1.0; \
 uniform float PRESET##BottomBottomDensity < \
     string ui_category = #PRESET " Bottom Layer"; \
     bool ui_category_closed = true; \
@@ -352,6 +361,15 @@ uniform float PRESET##TopSkyLightPower < \
     float ui_max = 2.00; \
     float ui_step = 0.01; \
 > = TOP_SKYLIGHT_POWER; \
+uniform float PRESET##TopMoonLightPower < \
+    string ui_category = #PRESET " Top Layer"; \
+    bool ui_category_closed = true; \
+    string ui_label = "Moon Light Power"; \
+    string ui_type = "drag"; \
+    float ui_min = 0.00; \
+    float ui_max = 2.00; \
+    float ui_step = 0.01; \
+> = 1.0; \
 uniform float PRESET##TopBottomDensity < \
     string ui_category = #PRESET " Top Layer"; \
     bool ui_category_closed = true; \
@@ -398,6 +416,7 @@ params.ambientAmount = PRESET##BottomAmbientAmount; \
 params.absorption = PRESET##BottomAbsorption; \
 params.luminance = PRESET##BottomLuminance; \
 params.sunLightPower = PRESET##BottomSunLightPower; \
+params.moonLightPower = PRESET##BottomMoonLightPower; \
 params.skyLightPower = PRESET##BottomSkyLightPower; \
 params.bottomDensity = PRESET##BottomBottomDensity; \
 params.middleDensity = PRESET##BottomMiddleDensity; \
@@ -421,6 +440,7 @@ params.ambientAmount = PRESET##TopAmbientAmount; \
 params.absorption = PRESET##TopAbsorption; \
 params.luminance = PRESET##TopLuminance; \
 params.sunLightPower = PRESET##TopSunLightPower; \
+params.moonLightPower = PRESET##TopMoonLightPower; \
 params.skyLightPower = PRESET##TopSkyLightPower; \
 params.bottomDensity = PRESET##TopBottomDensity; \
 params.middleDensity = PRESET##TopMiddleDensity; \
@@ -444,6 +464,7 @@ CLOUD_LAYER_PRESET(Clear,
     1.0, // bottom absorption
     1.0, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     2.0, // bottom bottomDensity
     1.0, // bottom middleDensity
@@ -465,6 +486,7 @@ CLOUD_LAYER_PRESET(Clear,
     0.75, // top absorption
     1.0, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
     1.0, // top middleDensity
@@ -488,6 +510,7 @@ CLOUD_LAYER_PRESET(ExtraSunny,
     1.0, // bottom absorption
     1.0, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     2.0, // bottom bottomDensity
     1.0, // bottom middleDensity
@@ -509,6 +532,7 @@ CLOUD_LAYER_PRESET(ExtraSunny,
     0.75, // top absorption
     1.0, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
     1.0, // top middleDensity
@@ -532,6 +556,7 @@ CLOUD_LAYER_PRESET(Clouds,
     1.25, // bottom absorption
     1.25, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     2.0, // bottom bottomDensity
     1.0, // bottom middleDensity
@@ -553,6 +578,7 @@ CLOUD_LAYER_PRESET(Clouds,
     0.75, // top absorption
     1.0, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
     1.0, // top middleDensity
@@ -576,6 +602,7 @@ CLOUD_LAYER_PRESET(Overcast,
     0.75, // bottom absorption
     1.0, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     1.5, // bottom bottomDensity
     0.5, // bottom middleDensity
@@ -597,6 +624,7 @@ CLOUD_LAYER_PRESET(Overcast,
     0.75, // top absorption
     1.0, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
     1.0, // top middleDensity
@@ -620,6 +648,7 @@ CLOUD_LAYER_PRESET(Rain,
     1.5, // bottom absorption
     1.5, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     2.0, // bottom bottomDensity
     1.5, // bottom middleDensity
@@ -641,6 +670,7 @@ CLOUD_LAYER_PRESET(Rain,
     0.75, // top absorption
     1.0, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
     1.0, // top middleDensity
@@ -664,6 +694,7 @@ CLOUD_LAYER_PRESET(Clearing,
     1.15, // bottom absorption
     0.6, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     1.75, // bottom bottomDensity
     1.25, // bottom middleDensity
@@ -685,6 +716,7 @@ CLOUD_LAYER_PRESET(Clearing,
     1.0, // top absorption
     0.6, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     0.85, // top bottomDensity
     1.0, // top middleDensity
@@ -708,6 +740,7 @@ CLOUD_LAYER_PRESET(Thunder,
     1.5, // bottom absorption
     1.5, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     2.5, // bottom bottomDensity
     1.25, // bottom middleDensity
@@ -729,6 +762,7 @@ CLOUD_LAYER_PRESET(Thunder,
     0.35, // top absorption
     1.0, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
     1.0, // top middleDensity
@@ -752,6 +786,7 @@ CLOUD_LAYER_PRESET(Smog,
     1.25, // bottom absorption
     0.5, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     1.5, // bottom bottomDensity
     0.5, // bottom middleDensity
@@ -773,6 +808,7 @@ CLOUD_LAYER_PRESET(Smog,
     0.75, // top absorption
     0.45, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
     1.0, // top middleDensity
@@ -796,6 +832,7 @@ CLOUD_LAYER_PRESET(Foggy,
     2.0, // bottom absorption
     0.5, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     1.1, // bottom bottomDensity
     0.25, // bottom middleDensity
@@ -817,6 +854,7 @@ CLOUD_LAYER_PRESET(Foggy,
     0.75, // top absorption
     1.0, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
     1.0, // top middleDensity
@@ -840,6 +878,7 @@ CLOUD_LAYER_PRESET(Snow,
     1.25, // bottom absorption
     0.6, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     0.5, // bottom bottomDensity
     1.0, // bottom middleDensity
@@ -861,6 +900,7 @@ CLOUD_LAYER_PRESET(Snow,
     1.15, // top absorption
     0.75, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     1.75, // top bottomDensity
     1.25, // top middleDensity
@@ -884,6 +924,7 @@ CLOUD_LAYER_PRESET(Blizzard,
     1.25, // bottom absorption
     0.7, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     1.5, // bottom bottomDensity
     1.0, // bottom middleDensity
@@ -905,6 +946,7 @@ CLOUD_LAYER_PRESET(Blizzard,
     1.15, // top absorption
     0.75, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     1.0, // top bottomDensity
     0.5, // top middleDensity
@@ -928,6 +970,7 @@ CLOUD_LAYER_PRESET(SnowLight,
     1.25, // bottom absorption
     1.0, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     0.5, // bottom bottomDensity
     1.0, // bottom middleDensity
@@ -949,6 +992,7 @@ CLOUD_LAYER_PRESET(SnowLight,
     1.15, // top absorption
     1.0, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     1.75, // top bottomDensity
     1.25, // top middleDensity
@@ -972,6 +1016,7 @@ CLOUD_LAYER_PRESET(Halloween,
     1.25, // bottom absorption
     1.25, // bottom luminance
     1.0, // bottom sunLightPower
+    1.0, // bottom moonLightPower
     1.0, // bottom skyLightPower
     2.0, // bottom bottomDensity
     1.0, // bottom middleDensity
@@ -993,6 +1038,7 @@ CLOUD_LAYER_PRESET(Halloween,
     0.75, // top absorption
     1.0, // top luminance
     1.0, // top sunLightPower
+    1.0, // top moonLightPower
     1.0, // top skyLightPower
     0.75, // top bottomDensity
     1.0, // top middleDensity
@@ -1018,6 +1064,7 @@ struct LayerParameters
     float absorption;
     float3 luminance;
     float3 sunLightPower;
+    float moonLightPower;
     float skyLightPower;
     float bottomDensity;
     float middleDensity;
