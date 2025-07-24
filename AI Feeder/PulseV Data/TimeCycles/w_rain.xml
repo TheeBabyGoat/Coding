@@ -1,5 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- QuantV 3.0.0 BETA -->
+<!--
+==================================================================================
+                                PulseV 1.0.0 Weather Modifier File
+                         Grand Theft Auto V - Rainy Weather Enhancement
+==================================================================================
+
+FILE NAME: w_rain.xml
+VERSION: PulseV 1.0.0
+AUTHOR: BabyGoatVisuals
+DATE: [Insert Date]
+COPYRIGHT: © 2025 BabyGoatVisuals. All Rights Reserved.
+
+==================================================================================
+                                FILE DESCRIPTION
+==================================================================================
+
+This file is part of **PulseV 1.0.0**, refining **rainy weather conditions** 
+to enhance **wet surface reflections, fog diffusion, and stormy lighting** 
+in **Grand Theft Auto V (GTA V)**.
+
+**Key Features:**
+- **Improved rain density and water interaction with surfaces**.
+- **Enhanced puddle reflections and wet ground shader effects**.
+- **Balanced lighting conditions for stormy environments**.
+- **Dynamic fog and mist implementation for heavy rain scenarios**.
+
+==================================================================================
+                              INTENDED USE
+==================================================================================
+
+This **weather modifier** is designed for **realistic rainstorms**, providing 
+**natural water reflections, storm lighting, and heavy downpour atmospherics**.
+
+==================================================================================
+                              COPYRIGHT NOTICE
+==================================================================================
+
+© 2025 **BabyGoatVisuals**. All Rights Reserved.
+
+This file is part of **PulseV 1.0.0** and is the intellectual property of 
+**BabyGoatVisuals**. Redistribution, modification, or reproduction of this 
+file without explicit permission is strictly prohibited.
+
+Unauthorized use of this file, in part or in whole, for commercial purposes, 
+reverse engineering, or inclusion in third-party mods **without crediting 
+BabyGoatVisuals** is a violation of copyright law.
+
+For licensing or usage permissions, please contact:
+📧 Email: [Insert Contact Email]
+🌍 Website: [Insert Website URL]
+
+==================================================================================
+                             END OF HEADER
+==================================================================================
+-->
 <timecycle_keyframe_data version="1">
 <cycle name="RAIN" regions="2">
 <region name="GLOBAL">

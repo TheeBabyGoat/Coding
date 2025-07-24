@@ -1,5 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- QuantV 3.0.0 BETA -->
+<!--
+==================================================================================
+                                PulseV 1.0.0 Weather Modifier File
+                         Grand Theft Auto V - Halloween Weather Enhancement
+==================================================================================
+
+FILE NAME: w_halloween.xml
+VERSION: PulseV 1.0.0
+AUTHOR: BabyGoatVisuals
+DATE: [Insert Date]
+COPYRIGHT: © 2025 BabyGoatVisuals. All Rights Reserved.
+
+==================================================================================
+                                FILE DESCRIPTION
+==================================================================================
+
+This file is part of **PulseV 1.0.0**, a **special event weather modifier** 
+that creates **an eerie, atmospheric environment** with **dark lighting, 
+ominous fog, and cinematic horror elements** in **Grand Theft Auto V (GTA V)**.
+
+**Key Features:**
+- **Dark and desaturated color grading for a horror aesthetic**.
+- **Enhanced volumetric fog for an eerie atmosphere**.
+- **Modified ambient occlusion and lighting for spooky shadows**.
+- **Cinematic vignetting and desaturation effects**.
+
+==================================================================================
+                              INTENDED USE
+==================================================================================
+
+This **weather modifier** is ideal for **Halloween-themed events, horror-based 
+cinematic sequences, and eerie, unsettling environments**.
+
+==================================================================================
+                              COPYRIGHT NOTICE
+==================================================================================
+
+© 2025 **BabyGoatVisuals**. All Rights Reserved.
+
+This file is part of **PulseV 1.0.0** and is the intellectual property of 
+**BabyGoatVisuals**. Redistribution, modification, or reproduction of this 
+file without explicit permission is strictly prohibited.
+
+Unauthorized use of this file, in part or in whole, for commercial purposes, 
+reverse engineering, or inclusion in third-party mods **without crediting 
+BabyGoatVisuals** is a violation of copyright law.
+
+For licensing or usage permissions, please contact:
+📧 Email: [Insert Contact Email]
+🌍 Website: [Insert Website URL]
+
+==================================================================================
+                             END OF HEADER
+==================================================================================
+-->
 <timecycle_keyframe_data version="1">
 <cycle name="HALLOWEEN" regions="2">
 <region name="GLOBAL">

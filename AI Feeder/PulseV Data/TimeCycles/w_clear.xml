@@ -1,5 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- QuantV 3.0.0 BETA -->
+<!--
+==================================================================================
+                                PulseV 1.0.0 Weather Modifier File
+                         Grand Theft Auto V - Clear Weather Enhancement
+==================================================================================
+
+FILE NAME: w_clear.xml
+VERSION: PulseV 1.0.0
+AUTHOR: BabyGoatVisuals
+DATE: [Insert Date]
+COPYRIGHT: © 2025 BabyGoatVisuals. All Rights Reserved.
+
+==================================================================================
+                                FILE DESCRIPTION
+==================================================================================
+
+This file is part of **PulseV 1.0.0**, optimizing **clear weather conditions** 
+for maximum visual fidelity in **Grand Theft Auto V (GTA V)**.
+
+**Key Features:**
+- **Improved direct sunlight intensity** and **HDR balancing**.
+- **Enhanced color grading** for vibrant skies.
+- **Optimized ambient lighting** for crisp and realistic day-time visuals.
+- **Fine-tuned reflections and shadows** to complement bright environments.
+
+==================================================================================
+                              INTENDED USE
+==================================================================================
+
+This **weather modifier** is tailored for **clear, sunny days**, providing a 
+**sharp, well-balanced lighting system** for an immersive, high-definition 
+visual experience.
+
+==================================================================================
+                              COPYRIGHT NOTICE
+==================================================================================
+
+© 2025 **BabyGoatVisuals**. All Rights Reserved.
+
+This file is part of **PulseV 1.0.0** and is the intellectual property of 
+**BabyGoatVisuals**. Redistribution, modification, or reproduction of this 
+file without explicit permission is strictly prohibited.
+
+Unauthorized use of this file, in part or in whole, for commercial purposes, 
+reverse engineering, or inclusion in third-party mods **without crediting 
+BabyGoatVisuals** is a violation of copyright law.
+
+For licensing or usage permissions, please contact:
+📧 Email: [Insert Contact Email]
+🌍 Website: [Insert Website URL]
+
+==================================================================================
+                             END OF HEADER
+==================================================================================
+-->
 <timecycle_keyframe_data version="1">
 <cycle name="CLEAR" regions="2">
 <region name="GLOBAL">

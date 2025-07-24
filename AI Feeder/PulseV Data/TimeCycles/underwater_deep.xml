@@ -1,5 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+==================================================================================
+                                PulseV 1.0.0 TimeCycle Modifier File
+                        Grand Theft Auto V - Underwater Deep Environment
+==================================================================================
 
+FILE NAME: underwater_deep.xml
+VERSION: PulseV 1.0.0
+AUTHOR: BabyGoatVisuals
+DATE: [Insert Date]
+COPYRIGHT: © 2025 BabyGoatVisuals. All Rights Reserved.
+
+==================================================================================
+                                FILE DESCRIPTION
+==================================================================================
+
+This file is a part of **PulseV 1.0.0**, a next-generation **TimeCycle Modifier** 
+system designed to **enhance and refine underwater visuals** in Grand Theft Auto V (GTA V). 
+
+This modifier specifically focuses on **deep underwater environments**, controlling:
+- **Underwater lighting behavior**
+- **Light scattering and volumetric absorption**
+- **Fog intensity and color grading**
+- **Post-processing effects such as vignetting, desaturation, and filmic tonemapping**
+- **Refraction, bloom, and caustics simulations for realistic underwater immersion**
+
+**Key Features:**
+- **Realistic deep-sea atmosphere**, with accurate **light attenuation and water turbidity**.
+- **Enhanced underwater fog behavior** to simulate **depth-based light scattering**.
+- **Adjustable visibility and contrast ratios** for different times of day.
+- **Dynamic post-processing effects** such as **chromatic aberration, desaturation, and noise simulation**.
+- **Fine-tuned color grading** to reflect **realistic deep-sea hues**.
+
+==================================================================================
+                              INTENDED USE
+==================================================================================
+
+This **TimeCycle Modifier File** is designed to be used alongside **PulseV 1.0.0**, 
+enhancing the **deep underwater experience** by improving **lighting, depth 
+perception, and atmospheric effects**.
+
+**Primary Applications:**
+1. **Realistic Deep-Sea Lighting & Visibility:**
+   - Implements **gradual light falloff and depth-based visibility reduction**.
+   - Adjusts **light diffusion and fog density** to simulate **deep ocean 
+     environments**.
+   - Enhances **water refraction and color shift behavior** for authenticity.
+
+2. **Post-Processing Enhancements:**
+   - **Filmic tonemapping**, **bloom intensity adjustments**, and **chromatic aberration** 
+     for enhanced **cinematic underwater visuals**.
+   - **Dynamic vignetting and desaturation scaling** for a **natural water filter effect**.
+   - **Refraction distortion** to simulate **real-world underwater light bending**.
+
+3. **Environmental Optimization:**
+   - Adjusts **deep-sea fog density and horizon falloff** to balance **visibility 
+     and realism**.
+   - Enhances **light shafts and scattering effects** for **underwater realism**.
+   - Modifies **submerged objects' shading and reflection behavior** for a more 
+     convincing underwater world.
+
+==================================================================================
+                               MODIFICATION GUIDELINES
+==================================================================================
+
+- Modify **only the numerical values** within the XML structure while preserving 
+  tag names. Example:
+
+  `<light_ray_mult>0.0 0.25 0.5 1.75 0.5</light_ray_mult>`  
+  _(_Adjust values but do not rename tags._)_
+
+- Ensure **smooth visibility transitions** to avoid **abrupt shifts in underwater 
+  lighting and color grading**.
+
+- Avoid **overexposing bloom or fog settings**, as it may create **unnatural light 
+  scattering and unrealistic water visibility**.
+
+==================================================================================
+                              COPYRIGHT NOTICE
+==================================================================================
+
+© 2025 **BabyGoatVisuals**. All Rights Reserved.
+
+This file is part of **PulseV 1.0.0** and is the intellectual property of 
+**BabyGoatVisuals**. Redistribution, modification, or reproduction of this 
+file without explicit permission is strictly prohibited.
+
+Unauthorized use of this file, in part or in whole, for commercial purposes, 
+reverse engineering, or inclusion in third-party mods **without crediting 
+BabyGoatVisuals** is a violation of copyright law.
+
+For licensing or usage permissions, please contact:
+📧 Email: [Insert Contact Email]
+🌍 Website: [Insert Website URL]
+==================================================================================
+                             END OF HEADER
+==================================================================================
+-->
 <timecycle_keyframe_data version="1">
 <cycle name="underwater_deep" regions="2">
 <region name="GLOBAL">

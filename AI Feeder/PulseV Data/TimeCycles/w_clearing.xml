@@ -1,6 +1,58 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- QuantV 3.0.0 BETA -->
+<!--
+==================================================================================
+                                PulseV 1.0.0 Weather Modifier File
+                         Grand Theft Auto V - Clearing Weather Enhancement
+==================================================================================
+
+FILE NAME: w_clearing.xml
+VERSION: PulseV 1.0.0
+AUTHOR: BabyGoatVisuals
+DATE: [Insert Date]
+COPYRIGHT: © 2025 BabyGoatVisuals. All Rights Reserved.
+
+==================================================================================
+                                FILE DESCRIPTION
+==================================================================================
+
+This file is part of **PulseV 1.0.0**, specifically designed to **enhance the 
+transitional clearing weather effects** in **Grand Theft Auto V (GTA V)**.
+
+**Key Features:**
+- **Dynamic fog dissipation** and **gradual lighting adjustments**.
+- **Improved cloud transparency and scattering**.
+- **Balanced ambient occlusion for natural depth perception**.
+- **Smooth transition from stormy to clear weather**.
+
+==================================================================================
+                              INTENDED USE
+==================================================================================
+
+This **weather modifier** is optimized for **transitioning weather conditions**, 
+providing **realistic post-rain visuals** and **soft cloud movements**.
+
+==================================================================================
+                              COPYRIGHT NOTICE
+==================================================================================
+
+© 2025 **BabyGoatVisuals**. All Rights Reserved.
+
+This file is part of **PulseV 1.0.0** and is the intellectual property of 
+**BabyGoatVisuals**. Redistribution, modification, or reproduction of this 
+file without explicit permission is strictly prohibited.
+
+Unauthorized use of this file, in part or in whole, for commercial purposes, 
+reverse engineering, or inclusion in third-party mods **without crediting 
+BabyGoatVisuals** is a violation of copyright law.
+
+For licensing or usage permissions, please contact:
+📧 Email: [Insert Contact Email]
+🌍 Website: [Insert Website URL]
+
+==================================================================================
+                             END OF HEADER
+==================================================================================
+-->
 <timecycle_keyframe_data version="1">
 <cycle name="CLEARING" regions="2">
 <region name="GLOBAL">

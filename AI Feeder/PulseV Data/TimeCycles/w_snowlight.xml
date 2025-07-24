@@ -1,5 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- QuantV 3.0.0 BETA -->
+<!--
+==================================================================================
+                                PulseV 1.0.0 Weather Modifier File
+                        Grand Theft Auto V - Light Snow Weather Enhancement
+==================================================================================
+
+FILE NAME: w_snowlight.xml
+VERSION: PulseV 1.0.0
+AUTHOR: BabyGoatVisuals
+DATE: [Insert Date]
+COPYRIGHT: © 2025 BabyGoatVisuals. All Rights Reserved.
+
+==================================================================================
+                                FILE DESCRIPTION
+==================================================================================
+
+This file is part of **PulseV 1.0.0**, enhancing **light snowfall conditions** 
+in **Grand Theft Auto V (GTA V)** by refining **atmospheric effects, snow density, 
+and lighting interactions**.
+
+**Key Features:**
+- **Light and subtle snowfall effects for realism**.
+- **Improved fog blending and ambient occlusion** for enhanced depth perception.
+- **Balanced post-processing and HDR settings for soft lighting transitions**.
+- **Enhanced reflections and shading to complement snowy landscapes**.
+
+==================================================================================
+                              INTENDED USE
+==================================================================================
+
+This **weather modifier** is optimized for **light snowfall settings**, 
+providing a **subtle winter ambiance with delicate snow particles and 
+balanced atmospheric depth**.
+
+Ideal for:
+- **Cinematic captures and photorealistic scenes**.
+- **Snowy environments without extreme storm effects**.
+- **Blending with urban and natural landscapes seamlessly**.
+
+==================================================================================
+                              COPYRIGHT NOTICE
+==================================================================================
+
+© 2025 **BabyGoatVisuals**. All Rights Reserved.
+
+This file is part of **PulseV 1.0.0** and is the intellectual property of 
+**BabyGoatVisuals**. Redistribution, modification, or reproduction of this 
+file without explicit permission is strictly prohibited.
+
+Unauthorized use of this file, in part or in whole, for commercial purposes, 
+reverse engineering, or inclusion in third-party mods **without crediting 
+BabyGoatVisuals** is a violation of copyright law.
+
+For licensing or usage permissions, please contact:
+📧 Email: [Insert Contact Email]
+🌍 Website: [Insert Website URL]
+
+==================================================================================
+                             END OF HEADER
+==================================================================================
+-->
 <timecycle_keyframe_data version="1">
 <cycle name="SNOWLIGHT" regions="2">
 <region name="GLOBAL">
