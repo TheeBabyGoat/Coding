@@ -1,4 +1,34 @@
+
+
+
 #pragma once
+
+// Aurora Quality Settings
+struct AuroraQualitySettings
+{
+    int samples;
+    float stepSize;
+    float noiseDetail;
+};
+
+// Aurora Global Overrides
+uniform float auroraStepSizeOverride <
+    string ui_category = "Aurora Settings";
+    string ui_type = "drag";
+    string ui_label = "Aurora Step Size Override";
+    float ui_min = 0.1;
+    float ui_max = 5.0;
+    float ui_step = 0.05;
+> = -1.0;
+
+uniform float auroraNoiseDetailOverride <
+    string ui_category = "Aurora Settings";
+    string ui_type = "drag";
+    string ui_label = "Aurora Noise Detail Override";
+    float ui_min = 0.1;
+    float ui_max = 2.0;
+    float ui_step = 0.05;
+> = -1.0;
 
 #define CLOUD_LAYER_PRESET(PRESET, BOTTOM_SCALE, BOTTOM_DETAIL_SCALE, BOTTOM_STRETCH, BOTTOM_BASE_CURL, BOTTOM_DETAIL_CURL, BOTTOM_BASE_CURL_SCALE, BOTTOM_DETAIL_CURL_SCALE, BOTTOM_SMOOTHNESS, BOTTOM_SOFTNESS, BOTTOM_BOTTOM, BOTTOM_TOP, BOTTOM_COVER, BOTTOM_EXTINCTION, BOTTOM_AMBIENT, BOTTOM_ABSORPTION, BOTTOM_LUMINANCE, BOTTOM_SUNLIGHT_POWER, BOTTOM_MOONLIGHT_POWER, BOTTOM_SKYLIGHT_POWER, BOTTOM_BOTTOM_DENSITY, BOTTOM_MIDDLE_DENSITY, BOTTOM_TOP_DENSITY, TOP_SCALE, TOP_DETAIL_SCALE, TOP_STRETCH, TOP_BASE_CURL, TOP_DETAIL_CURL, TOP_BASE_CURL_SCALE, TOP_DETAIL_CURL_SCALE, TOP_SMOOTHNESS, TOP_SOFTNESS, TOP_BOTTOM, TOP_TOP, TOP_COVER, TOP_EXTINCTION, TOP_AMBIENT, TOP_ABSORPTION, TOP_LUMINANCE, TOP_SUNLIGHT_POWER, TOP_MOONLIGHT_POWER, TOP_SKYLIGHT_POWER, TOP_BOTTOM_DENSITY, TOP_MIDDLE_DENSITY, TOP_TOP_DENSITY) \
 uniform float PRESET##BottomScale < \
