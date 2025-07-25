@@ -62,10 +62,7 @@
 
 
 #include "ReShade.fxh"
-#include "weathers.fxh"
 #include "PulseV/noise.fxh"
-
-// ============================================================================
 
 #ifdef RSDEV
 // ============================================================================
@@ -266,31 +263,23 @@ uniform float timer <
 //                      UI UNIFORMS (Preset Settings)
 // ============================================================================
 
-uniform int cloudqualityPreset <
+uniform int qualityPreset <
     string ui_category = "Preset Settings";
     string ui_type = "combo";
-    string ui_label = "Cloud Quality Preset";
     string ui_items = "Low\0Medium\0High\0Ultra\0Extreme\0";
 > = 1;
-uniform int auroraqualityPreset <
-    string ui_category = "Preset Settings";
-    string ui_type = "combo";
-    string ui_label = "Aurora Quality"; 
-    string ui_items = "Low\0Medium\0High\0Ultra\0Extreme\0";
-> = 1;
-uniform float cloudRenderDistance <
-    string ui_category = "Preset Settings";
-    string ui_type = "drag";
-    string ui_label = "Cloud Render Distance";
-    float ui_min = 10.0;
-    float ui_max = 100000.0;
-    float ui_step = 10.0;
-> = 10000.0;
 
 // ============================================================================ 
 //                      UI UNIFORMS (Global Settings)
 // ============================================================================
 
+uniform float cloudRenderDistance <
+    string ui_category = "Global Settings";
+    string ui_type = "drag";
+    float ui_min = 10.0;
+    float ui_max = 100000.0;
+    float ui_step = 10.0;
+> = 10000.0;
 uniform float cloudTimescale <
     string ui_category = "Global Settings";
     string ui_type = "drag";
@@ -482,6 +471,18 @@ uniform float cloudMoonLightPower <
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 0.3;
+uniform float3 MoonColor <
+    string ui_category = "Advanced Global Settings";
+    string ui_type = "color";
+> = float3(1.0, 1.0, 1.0); // default white
+
+uniform float MoonlightBoost <
+    string ui_category = "Advanced Global Settings";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 5.0;
+    float ui_step = 0.01;
+> = 1.0;
 uniform float cloudSkyLightPower <
     string ui_category = "Advanced Global Settings";
     bool hidden = !ADVANCED;
@@ -515,15 +516,10 @@ uniform float cloudDepthEdgeThreshold <
     float ui_step = 0.1;
 > = 8.0;
 
-// ============================================================================ 
-//                      UI UNIFORMS (Aurora Settings)
-// ============================================================================
-
 uniform float auroraScale <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "drag";
-    string ui_label = "Scale";
     float ui_min = 0.01;
     float ui_max = 16.0;
     float ui_step = 0.01;
@@ -532,7 +528,6 @@ uniform float auroraHeightStretch <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "drag";
-    string ui_label = "Height Strech";
     float ui_min = 0.01;
     float ui_max = 10.0;
     float ui_step = 0.01;
@@ -541,7 +536,6 @@ uniform float3 auroraPositionCurlScale <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "drag";
-    string ui_label = "Position Curl Scale";
     float ui_min = 0.0;
     float ui_max = 2.0;
     float ui_step = 0.01;
@@ -550,7 +544,6 @@ uniform float3 auroraPositionCurl <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "drag";
-    string ui_label = "Position Curl";
     float ui_min = 0.0;
     float ui_max = 2.0;
     float ui_step = 0.01;
@@ -559,7 +552,6 @@ uniform float auroraCurlScale <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "drag";
-    string ui_label = "Curl Scale";
     float ui_min = 0.0;
     float ui_max = 2.0;
     float ui_step = 0.01;
@@ -568,12 +560,16 @@ uniform float auroraCurl <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
     string ui_type = "drag";
-    string ui_label = "Curl";
     float ui_min = 0.0;
     float ui_max = 4.0;
     float ui_step = 0.01;
 > = 0.19;
-
+uniform int auroraVolumeSamples <
+    string ui_category = "Global Settings";
+    string ui_type = "slider";
+    int ui_min = 8;
+    int ui_max = 128;
+> = 64;
 uniform float auroraBottomHeightOffset <
     string ui_category = "Aurora Settings";
     bool hidden = !ADVANCED;
@@ -659,6 +655,7 @@ uniform float2 auroraBlendPoints <
 //                      UI UNIFORMS (Weather Settings)
 // ============================================================================
 
+#include "weathers.fxh"
 
 // ============================================================================ 
 //                           TEXTURES & SAMPLERS
@@ -893,49 +890,6 @@ Ray cameraRay(float2 uv)
     ray.direction = worldDirection(uv);
 
     return ray;
-}
-
-AuroraQualitySettings getAuroraQualitySettings()
-{
-    AuroraQualitySettings settings;
-    switch (auroraqualityPreset)
-    {
-        case 0:
-            settings.samples = 64;
-            settings.stepSize = 2.0;
-            settings.noiseDetail = 0.5;
-            break;
-        case 1:
-            settings.samples = 128;
-            settings.stepSize = 1.5;
-            settings.noiseDetail = 0.65;
-            break;
-        case 2:
-            settings.samples = 256;
-            settings.stepSize = 1.0;
-            settings.noiseDetail = 0.8;
-            break;
-        case 3:
-            settings.samples = 512;
-            settings.stepSize = 0.75;
-            settings.noiseDetail = 1.0;
-            break;
-        case 4:
-            settings.samples = 1024;
-            settings.stepSize = 0.5;
-            settings.noiseDetail = 1.25;
-            break;
-        default:
-            settings.samples = 32;
-            settings.stepSize = 2.5;
-            settings.noiseDetail = 0.4;
-            break;
-    }
-    if (auroraStepSizeOverride > 0.0)
-        settings.stepSize = auroraStepSizeOverride;
-    if (auroraNoiseDetailOverride > 0.0)
-        settings.noiseDetail = auroraNoiseDetailOverride;
-    return settings;
 }
 
 // ============================================================================ 
@@ -1434,61 +1388,76 @@ float3 saturation(float3 color, float saturation)
 
 float4 renderAurora(float2 uv)
 {
-    AuroraQualitySettings settings = getAuroraQualitySettings();
-    int sampleCount = max(settings.samples, 32); // Ensure no zero division
-    float invSamples = 1.0 / float(sampleCount);
-
     const float renderDistance = 10000.0;
     const float jitter = blueNoise(uv);
     const float depth = rawDepth(uv);
+    
     if (depth < 1.0)
+    {
         return 0.0;
-
+    }
+    
     Ray ray = cameraRay(uv);
-
+    
     float viewFade = saturate(dot(ray.direction, float3(0.0, 1.0, 0.0)));
     float distFade = smoothstep(0.0, 0.25, viewFade) * (1.0 - smoothstep(0.5, 0.9, viewFade));
+    
+    if (false)
+    {
+        return float4(distFade.xxx, 1.0);
+    }
+    
     if (distFade <= 0.0)
+    {
         return 0.0;
-
+    }
+    
     float bottom = lerp(auroraBottomHeightOffset, auroraTopHeightOffset, viewFade);
     float top = bottom + auroraHeight;
-
+    
     float enter = (bottom - ray.origin.y) / ray.direction.y;
     float exit = (bottom + auroraHeight - ray.origin.y) / ray.direction.y;
+    float fullExit = exit;
+    
     if (enter > exit)
     {
         enter = 0.0;
         exit = renderDistance;
+        fullExit = renderDistance;
     }
-
+    
     float minDistance = max(0.0, enter);
     float maxDistance = min(renderDistance, exit);
+
     float marchDistance = maxDistance - minDistance;
-    float stepSize = settings.stepSize * (marchDistance / sampleCount);
+    float invSamples = 1.0 / float(auroraVolumeSamples);
+    float stepSize = marchDistance * invSamples;
 
     float3 pos = ray.origin + ray.direction * (minDistance + jitter * stepSize);
     float4 color = 0.0;
-
-    for (int i = 0; i < sampleCount; i++)
+    
+    for (int i = 0; i < auroraVolumeSamples; i++)
     {
         float3 distortedPos = auroraPosition(pos);
         bool hit = distortedPos.y > bottom && distortedPos.y < top;
+        
         if (hit)
         {
             float altitude = clamp(distortedPos.y - bottom, 0.0, auroraHeight) / auroraHeight;
             float density = auroraDensity(distortedPos, altitude) * distFade;
+            
             color += density * auroraColour(altitude);
         }
+
         pos += ray.direction * stepSize;
     }
-
+    
     color *= invSamples;
     color.a = saturate(color.a * 4.0);
     color.rgb = max(normalize(color.rgb), saturation(color.rgb, lerp(2.0, 3.5, remap(max(1.0, length(color.rgb)), 1.0, 3.0)))) * auroraBrightness;
+    
     return color;
 }
-
 
 // ============================================================================ 
 //                      MAIN RENDER FUNCTION
@@ -1580,11 +1549,12 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
         }
         
         float layerAltitude = remap(pos.y, layer.bottom, layer.top);
-        float altitudeDensity = (
-            layerAltitude < 0.5 ?
-            lerp(layer.bottomDensity, layer.middleDensity, layerAltitude * 2.0) :
-            lerp(layer.middleDensity, layer.topDensity, (layerAltitude - 0.5) * 2.0)
-        );
+        float3 altitudeDensity = (
+    layerAltitude < 0.5 ?
+    lerp(layer.bottomDensity.xxx, layer.middleDensity.xxx, layerAltitude * 2.0) :
+    lerp(layer.middleDensity.xxx, layer.topDensity.xxx, (layerAltitude - 0.5) * 2.0)
+);
+
         float altitudeLighting = pow(min(1.0 / altitudeDensity, 1.0), 1.5);
         
         float fade = smoothstep(0.0, cloudYFade, layerAltitude) * smoothstep(0.0, cloudYFade, 1.0 - layerAltitude);
@@ -1597,7 +1567,7 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
             float skyTransmittance = cloudLightMarch(pos, layer, float3(0.0, 1.0, 0.0), lightStepSize, skyAbsorption, layerAltitude, altitudeDensity);
 
             float3 sunContribution = dayAmount * sunBaseColor * sunLightBase * layer.sunLightPower * altitudeLighting * (sunTransmittance + cloudAmbientAmount * layer.ambientAmount);
-            float3 moonContribution = nightAmount * moonBaseColor * moonLightBase * layer.moonLightPower * altitudeLighting * (moonTransmittance + cloudAmbientAmount * layer.ambientAmount);
+            float3 moonContribution = nightAmount * moonBaseColor * MoonColor * MoonlightBoost * moonLightBase * layer.moonLightPower * altitudeLighting * (moonTransmittance + cloudAmbientAmount * layer.ambientAmount);
             float3 skyContribution = sky * skyLightBase * layer.skyLightPower * (skyTransmittance + cloudAmbientAmount * layer.ambientAmount);
        
             float3 contribution = sunContribution + moonContribution + skyContribution;
@@ -1801,7 +1771,7 @@ float4 PS_Aurora(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Targ
 
 int getQualityPresetSamples()
 {
-    switch (cloudqualityPreset)
+    switch (qualityPreset)
     {
         case 0:
             return 128;
@@ -1814,6 +1784,7 @@ int getQualityPresetSamples()
         case 4:
             return 2048;
     }
+
     return 64;
 }
 
