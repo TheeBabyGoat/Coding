@@ -264,7 +264,8 @@ uniform float timer <
 // ============================================================================
 
 uniform int qualityPreset <
-    string ui_category = "Preset Settings";
+    string ui_category = "Global Settings";
+    string ui_label = "Quality Preset";
     string ui_type = "combo";
     string ui_items = "Low\0Medium\0High\0Ultra\0Extreme\0";
 > = 1;
@@ -275,6 +276,7 @@ uniform int qualityPreset <
 
 uniform float cloudRenderDistance <
     string ui_category = "Global Settings";
+    string ui_label = "Render Distance";
     string ui_type = "drag";
     float ui_min = 10.0;
     float ui_max = 100000.0;
@@ -282,6 +284,7 @@ uniform float cloudRenderDistance <
 > = 10000.0;
 uniform float cloudTimescale <
     string ui_category = "Global Settings";
+    string ui_label = "Time Scale";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 8.0;
@@ -289,227 +292,242 @@ uniform float cloudTimescale <
 > = 0.25;
 uniform float3 cloudWind <
     string ui_category = "Global Settings";
+    string ui_label = "Wind Direction";
     float ui_step = 0.01;
 > = float3(0.4, 0.1, 1.0);
 uniform float cloudWindSpeed <
     string ui_category = "Global Settings";
+    string ui_label = "Wind Speed";
     string ui_type = "drag";
     float ui_min = 0.00;
     float ui_max = 10.0;
     float ui_step = 0.01;
 > = 2.0;
+uniform int auroraVolumeSamples <
+    string ui_category = "Global Settings";
+    string ui_label = "Aurora Volume Samples";
+    string ui_type = "slider";
+    int ui_min = 8;
+    int ui_max = 128;
+> = 64;
 
 // ============================================================================ 
 //                      UI UNIFORMS (Advanced Global Settings)
 // ============================================================================
 
 uniform float cloudScale <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Shape";
+    bool ui_category_closed = true;
+    string ui_label = "Scale";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 3.25;
 uniform float cloudDetailScale <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Shape";
+    string ui_label = "Detail Scale";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 0.8;
 uniform float cloudStretch <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Shape";
+    string ui_label = "Stretch";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 2.00;
 uniform float cloudHeightOffset <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Shape";
+    string ui_label = "Height Offset";
     string ui_type = "drag";
     float ui_min = -1000.0;
     float ui_max = 1000.0;
     float ui_step = 1.0;
 > = CLOUD_HEIGHT_OFFSET;
 uniform float cloudBaseCurl <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Shape";
+    string ui_label = "Base Curl";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 4.0;
     float ui_step = 0.01;
 > = 1.0;
 uniform float cloudDetailCurl <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Shape";
+    string ui_label = "Detail Curl";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 4.0;
     float ui_step = 0.01;
 > = 0.25;
 uniform float cloudBaseCurlScale <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Shape";
+    string ui_label = "Base Curl Scale";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 2.0;
     float ui_step = 0.01;
 > = 0.25;
 uniform float cloudDetailCurlScale <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Shape";
+    string ui_label = "Detail Curl Scale";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 2.0;
     float ui_step = 0.01;
 > = 0.5;
 uniform float cloudYFade <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Shape";
+    string ui_label = "Y-Fade";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 0.5;
     float ui_step = 0.01;
 > = 0.15;
 uniform float cloudCover <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Shape";
+    string ui_label = "Coverage";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 2.0;
     float ui_step = 0.01;
 > = 1.0;
 uniform float cloudThreshold <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Shape";
+    string ui_label = "Threshold";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 0.5;
     float ui_step = 0.001;
 > = 0.001;
 uniform float cloudJitter <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Shape";
+    string ui_label = "Jitter";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 10.0;
     float ui_step = 0.01;
 > = 1.0;
+
 uniform float cloudExtinction <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Lighting";
+    bool ui_category_closed = true;
+    string ui_label = "Extinction";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 2.0;
 uniform float cloudAmbientAmount <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Ambient Amount";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 1.0;
     float ui_step = 0.01;
 > = 0.2;
 uniform float cloudAbsorption <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Absorption";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 0.75;
 uniform float cloudForwardScatter <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Forward Scatter";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 1.0;
     float ui_step = 0.01;
 > = 0.5;
 uniform float cloudLightStepFactor <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Light Step Factor";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 1.0;
     float ui_step = 0.01;
 > = 0.01;
 uniform float cloudContrast <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Contrast";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 1.0;
 uniform float cloudLuminanceMultiplier <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Luminance Multiplier";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 0.25;
 uniform float cloudSunLightPower <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Sun Light Power";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 0.15;
 uniform float cloudMoonLightPower <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Moon Light Power";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 0.3;
 uniform float3 MoonColor <
-    string ui_category = "Advanced Global Settings";
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Moon Color";
     string ui_type = "color";
 > = float3(1.0, 1.0, 1.0); // default white
-
 uniform float MoonlightBoost <
-    string ui_category = "Advanced Global Settings";
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Moonlight Boost";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 5.0;
     float ui_step = 0.01;
 > = 1.0;
 uniform float cloudSkyLightPower <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Sky Light Power";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 8.0;
     float ui_step = 0.01;
 > = 1.0;
+
 uniform float cloudDenoise <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Post-Processing";
+    bool ui_category_closed = true;
+    string ui_label = "Denoise";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 1.0;
     float ui_step = 0.005;
 > = 0.25;
 uniform float cloudDepthEdgeFar <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Post-Processing";
+    string ui_label = "Depth Edge Far";
     string ui_type = "drag";
     float ui_min = 1.0;
     float ui_max = 10000.0;
     float ui_step = 1.0;
 > = 100.0;
 uniform float cloudDepthEdgeThreshold <
-    string ui_category = "Advanced Global Settings";
-    bool hidden = !ADVANCED;
+    string ui_category = "Post-Processing";
+    string ui_label = "Depth Edge Threshold";
     string ui_type = "drag";
     float ui_min = 1.0;
     float ui_max = 100.0;
@@ -518,7 +536,8 @@ uniform float cloudDepthEdgeThreshold <
 
 uniform float auroraScale <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    bool ui_category_closed = true;
+    string ui_label = "Scale";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 16.0;
@@ -526,7 +545,7 @@ uniform float auroraScale <
 > = 8.25;
 uniform float auroraHeightStretch <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    string ui_label = "Height Stretch";
     string ui_type = "drag";
     float ui_min = 0.01;
     float ui_max = 10.0;
@@ -534,7 +553,7 @@ uniform float auroraHeightStretch <
 > = 4.0;
 uniform float3 auroraPositionCurlScale <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    string ui_label = "Position Curl Scale";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 2.0;
@@ -542,7 +561,7 @@ uniform float3 auroraPositionCurlScale <
 > = 0.5;
 uniform float3 auroraPositionCurl <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    string ui_label = "Position Curl";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 2.0;
@@ -550,7 +569,7 @@ uniform float3 auroraPositionCurl <
 > = float3(0.05, 0.5, 0.09);
 uniform float auroraCurlScale <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    string ui_label = "Curl Scale";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 2.0;
@@ -558,21 +577,15 @@ uniform float auroraCurlScale <
 > = 0.08;
 uniform float auroraCurl <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    string ui_label = "Curl";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 4.0;
     float ui_step = 0.01;
 > = 0.19;
-uniform int auroraVolumeSamples <
-    string ui_category = "Global Settings";
-    string ui_type = "slider";
-    int ui_min = 8;
-    int ui_max = 128;
-> = 64;
 uniform float auroraBottomHeightOffset <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    string ui_label = "Bottom Height Offset";
     string ui_type = "drag";
     float ui_min = 0.00;
     float ui_max = 10000.0;
@@ -580,7 +593,7 @@ uniform float auroraBottomHeightOffset <
 > = 450.0;
 uniform float auroraTopHeightOffset <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    string ui_label = "Top Height Offset";
     string ui_type = "drag";
     float ui_min = 0.00;
     float ui_max = 10000.0;
@@ -588,7 +601,7 @@ uniform float auroraTopHeightOffset <
 > = 1750.0;
 uniform float auroraHeight <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    string ui_label = "Height";
     string ui_type = "drag";
     float ui_min = 0.00;
     float ui_max = 10000.0;
@@ -596,6 +609,7 @@ uniform float auroraHeight <
 > = 500.0;
 uniform float auroraTimeScale <
     string ui_category = "Aurora Settings";
+    string ui_label = "Time Scale";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 20.0;
@@ -603,6 +617,7 @@ uniform float auroraTimeScale <
 > = 1.0;
 uniform float auroraPower <
     string ui_category = "Aurora Settings";
+    string ui_label = "Power";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 100.0;
@@ -610,6 +625,7 @@ uniform float auroraPower <
 > = 45.0;
 uniform float auroraBrightness <
     string ui_category = "Aurora Settings";
+    string ui_label = "Brightness";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 100.0;
@@ -617,6 +633,7 @@ uniform float auroraBrightness <
 > = 0.6;
 uniform float auroraDensityMultiplier <
     string ui_category = "Aurora Settings";
+    string ui_label = "Density Multiplier";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 100.0;
@@ -624,28 +641,28 @@ uniform float auroraDensityMultiplier <
 > = 2.55;
 uniform float4 auroraBaseColor <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    string ui_label = "Base Color";
     string ui_type = "color";
     float ui_min = 0.00;
     float ui_max = 10.0;
 > = float4(0.0, 0.66, 0.24, 0.31);
 uniform float4 auroraMidColor <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    string ui_label = "Mid Color";
     string ui_type = "color";
     float ui_min = 0.00;
     float ui_max = 10.0;
 > = float4(0.1, 0.3, 0.73, 0.0);
 uniform float4 auroraTopColor <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    string ui_label = "Top Color";
     string ui_type = "color";
     float ui_min = 0.00;
     float ui_max = 10.0;
 > = float4(1.0, 0.0, 0.35, 0.12);
 uniform float2 auroraBlendPoints <
     string ui_category = "Aurora Settings";
-    bool hidden = !ADVANCED;
+    string ui_label = "Blend Points";
     string ui_type = "drag";
     float ui_min = 0.00;
     float ui_max = 1.0;
