@@ -1,0 +1,410 @@
+#include "cloudLayer.h.hlsl"
+
+// Cloud settings
+#define largeStepSize 60.0 // 60.0
+#define smallStepSize 10.0 // 10.0
+#define shadowMultiplier 0.16 // 0.16
+#define cloudDistance 50000 // 50000
+#define cloudBottom 1500 // 1500
+#define cloudTop 5000 // 5000
+#define cloudExtinctionCoefficient 0.05
+
+#define atmosphereRadius 400000.0
+#define maxSteps 100
+
+// Image settings
+#define imageResolution 4000 // one-sided resolution of the atlas
+#define imageGridResolution 200 // one-sided resolution of each atlas chunk
+#define imageRows 20 // how many atlas chunks there are per side
+#define imagePadding 4 // how much padding in pixels to reduce edge artifacts
+
+// This setting just filters on the z axis, not really enough improvement to be worth it.
+//#define HIGH_QUALITY_SAMPLING
+
+// Dear BeamNG Developer(s)
+// If you're seeing this, well, I'm glad. I was hoping some of you would
+// take a peek. I've been working on this for quite a while now, and
+// even had to write a separate specialized application to generate the
+// noise sheet (clouds.png). If you ever need to reach out, or want to
+// work together on getting this in the base game, or even if it's just to
+// pick my brain, you can reach me on Discord, my user is chipboard
+//
+// ~ Chipboard
+
+// Note: When combining noise layers in Paint.Net, combine the RGB before you mask A
+
+// TODO: Figure out why clouds break on West Coast USA...
+
+//-----------------------------------------------------------------------------
+// Structures
+//-----------------------------------------------------------------------------
+
+struct Intersection
+{
+    float3 normal;
+    float3 position;
+    float distance;
+    bool valid;
+};
+
+//-----------------------------------------------------------------------------
+// Utility Functions
+//-----------------------------------------------------------------------------
+
+Intersection raySphereIntersection(in float3 ro, in float3 rd, in float4 sphere)
+{
+	Intersection intersection;
+    intersection.valid = false;
+    intersection.position = float3(0, 0, 0);
+    intersection.normal = float3(0, 1, 0);
+    
+    ro -= sphere.xyz;
+    ro /= sphere.w;
+    
+    float A = dot(rd, rd);
+    float B = 2.0 * dot(rd, ro);
+    float C = dot(ro, ro) - 0.25;
+    float discriminant = B * B - 4.0 * A * C;
+    
+    if (discriminant < 0.0)
+        return intersection;
+
+    float t = (-sqrt(discriminant) - B) / A * 0.5;
+
+    if (t < 0.0)
+        t = (sqrt(discriminant) - B) / A * 0.5;
+    
+    if (t >= 0.0)
+    {
+        intersection.valid = true;
+    	float3 p = float3(ro + rd * t);
+        intersection.normal = normalize(p);
+        p *= sphere.w;
+        p += sphere.xyz;
+        intersection.position = p;
+        intersection.distance = length(p - ro);
+    }
+    
+    return intersection;
+}
+
+float3 getProjectedShellPoint(in float3 pt, in float3 center)
+{
+    return 0.5 * atmosphereRadius * normalize(pt - center) + center;
+}
+
+float remap(float value, float original_min, float original_max, float new_min, float new_max)
+{
+    return new_min + (((value - original_min) / (original_max - original_min)) * (new_max - new_min));
+}
+
+float remapClamped(in float value, in float oldMin, in float oldMax, in float newMin, in float newMax)
+{
+    return clamp(newMin + (((value - oldMin) / (oldMax - oldMin)) * (newMax - newMin)), newMin, newMax);
+}
+
+float heightBiasCoverage(float coverage, float height)
+{
+    return pow(coverage, clamp(remap(height, 0.7, 0.8, 1.0, 0.8), 0.8, 1.0));
+}
+
+float getRelativeHeight(in float3 pt, in float3 projectedPt, in float thickness)
+{
+    return clamp(length(pt - projectedPt) / thickness, 0.0, 1.0);
+}
+
+float henyeyGreenstein(float cos_angle, float eccentricity)
+{
+    return ((1.0 - eccentricity * eccentricity) / pow((1.0 + eccentricity * eccentricity - 2.0 * eccentricity * cos_angle), 3.0 / 2.0)) / 4.0 * PI;
+}
+
+float radialBlend(float distance, float radius)
+{
+    return smoothstep(radius - 0.05, radius + 0.05, distance);
+}
+
+float getNoise(float3 value, float3 dotDir = float3(12.9898, 78.233, 37.719))
+{
+    float3 smallValue = sin(value);
+    float random = dot(smallValue, dotDir);
+    random = frac(sin(random) * 143758.5453);
+    return random;
+}
+
+float3 getNoise3D(float3 value)
+{
+	return float3(
+		getNoise(value, float3(12.989, 78.233, 37.719)),
+		getNoise(value, float3(39.346, 11.135, 83.155)),
+		getNoise(value, float3(73.156, 52.235, 09.151))
+	);
+}
+
+//-----------------------------------------------------------------------------
+// Sampling Functions
+//-----------------------------------------------------------------------------
+
+float4 texture2D_3D(float3 p)
+{
+    // Calculate the grid position (cell) and the offset within the cell
+    float2 cellPosMid = float2(floor(p.z % imageRows), floor(p.z / imageRows)) * imageGridResolution;
+
+    float2 samplePos = float2(
+        remap(p.x, 0, imageGridResolution, imagePadding, imageGridResolution - imagePadding),
+        remap(p.y, 0, imageGridResolution, imagePadding, imageGridResolution - imagePadding)
+        );
+
+    float2 sampleUVMid = (cellPosMid + samplePos) / imageResolution;
+    float4 textureMid = normalHeightMap.SampleLevel(cloudSampler, sampleUVMid, 0);
+    
+#ifdef HIGH_QUALITY_SAMPLING
+    float2 cellPosTop = float2(floor((p.z + 1) % imageRows), floor((p.z + 1) / imageRows)) * imageGridResolution;
+    float2 cellPosBottom = float2(floor((p.z - 1) % imageRows), floor((p.z - 1) / imageRows)) * imageGridResolution;
+
+    // Calculate the texture coordinates within the 2D texture
+    float2 sampleUVTop = (cellPosTop + samplePos) / imageResolution;
+    float2 sampleUVBottom = (cellPosBottom + samplePos) / imageResolution;
+
+    float4 textureTop = normalHeightMap.SampleLevel(cloudSampler, sampleUVTop, 0);
+    float4 textureBottom = normalHeightMap.SampleLevel(cloudSampler, sampleUVBottom, 0);
+
+    return lerp(textureMid, lerp(textureBottom, textureTop, frac(p.z)), 0.5);
+#else
+        return textureMid;
+#endif
+}
+
+float cloudLayerDensity(float relativeHeight, float cloudType)
+{
+    relativeHeight = clamp(relativeHeight, 0, 1);
+    
+    float cumulus = max(0.0, remap(relativeHeight, 0.0, 0.2, 0.0, 1.0) * remap(relativeHeight, 0.7, 0.9, 1.0, 0.0));
+    float stratocumulus = max(0.0, remap(relativeHeight, 0.0, 0.2, 0.0, 1.0) * remap(relativeHeight, 0.2, 0.7, 1.0, 0.0)); 
+    float stratus = max(0.0, remap(relativeHeight, 0.0, 0.1, 0.0, 1.0) * remap(relativeHeight, 0.2, 0.3, 1.0, 0.0)); 
+
+    float d1 = lerp(stratus, stratocumulus, clamp(cloudType * 2.0, 0.0, 1.0));
+    float d2 = lerp(stratocumulus, cumulus, clamp((cloudType - 0.5) * 2.0, 0.0, 1.0));
+    return lerp(d1, d2, cloudType);
+}
+
+float sampleCloudHull(in float3 p, in float relativeHeight, float3 earthCenter, in float2 texOffset0, in float2 texOffset1, in float coverage)
+{
+    float3 projected = getProjectedShellPoint(p, earthCenter) * 0.0005;
+
+#ifdef HIGH_QUALITY_SAMPLING
+    projected.z += texOffset1.y + texOffset0.x * 0.001;
+#endif
+
+    float3 coord0 = abs(float3(p.xy * 0.014 + texOffset0, p.z * 0.014));
+    //float3 coord3 = abs(float3(p.xy * 0.007 + texOffset0 + texOffset1, p.z * 0.007));
+
+    float weatherDetail = texture2D_3D(projected).a; // alpha adds weather variation
+    float cloudShape = texture2D_3D(coord0).r; // red defines cloud shape
+
+    // Get cloud type from weather detail
+    float layerDensity = cloudLayerDensity(relativeHeight, weatherDetail);
+
+    float density = layerDensity * remapClamped(cloudShape, 1.0 - coverage, 1.0, 0.0, 1.0);
+
+    if (density < 0.0001)
+        return 0.0;
+
+    coverage = heightBiasCoverage(relativeHeight, min(0.85, weatherDetail));
+
+    float erosion = cloudShape;
+    erosion = remapClamped(erosion, coverage, 1.0, 0.0, 1.0);
+    density = remapClamped(density, erosion, 1.0, 0.0, 1.0);
+
+    return density;
+}
+
+float sampleCloudDetail(in float3 p, in float origDensity, in float relativeHeight, in float2 texOffset1, in float2 texOffset2)
+{
+    float3 coord1 = abs(float3(p.xy * 0.057 - texOffset1, p.z * 0.057));
+    float3 coord2 = abs(float3(p.xy * 0.069 + texOffset2, p.z * 0.069));
+
+    float cloudDetail = texture2D_3D(coord1).g + texture2D_3D(coord2).b; // green and blue channels are scrolling detail
+    //cloudDetail *= 0.5;
+
+    float erosion = lerp(cloudDetail, 1.0 - cloudDetail, clamp(relativeHeight * 10.0, 0.0, 1.0));
+    return remapClamped(origDensity, 1.0 * erosion, 1.0, 0.0, 1.0);
+}
+
+//-----------------------------------------------------------------------------
+// Marching Functions
+//-----------------------------------------------------------------------------
+
+// Calculates distance needed to march to plane of specified height
+float IPlane(float3 ro, float3 rd, float height)
+{
+    const float3 normal = float3(0, 0, -1);
+    float dist = 0.0;
+    float dotP = dot(rd, normal);
+
+    if(dotP == 0.0)
+        return dist;
+    
+    float distToHit = dot(float3(0, 0, height) - ro, normal) / dotP;
+
+    if(distToHit < 0.0)
+        return dist;
+    
+    dist = distToHit;
+    return dist;
+}
+
+float getTaperFactor(float height, float coverage)
+{
+    float distancefromZero = abs(remap(height, cloudBottom, cloudTop, -1.0, 1.0));
+    return saturate((1.0 - distancefromZero) * 3.44 * coverage);
+}
+
+float4 clouds(float3 camPos, float3 rayDir, float3 lightDir, float coverage, float2 texOffset0, float2 texOffset1, float2 texOffset2)
+{
+    // Trace the atmosphere boundaries
+    float3 earthCenter = camPos;
+    earthCenter.z = -atmosphereRadius * 0.5;
+    float4 atmosphereSphereInner = float4(earthCenter, atmosphereRadius);
+    float atmosphereThickness = 0.5 * atmosphereRadius * 0.02;
+    float4 atmosphereSphereOuter = float4(earthCenter, atmosphereRadius * 1.02);
+    Intersection atmosphereIntersectionInner = raySphereIntersection(camPos, rayDir, atmosphereSphereInner);
+    Intersection atmosphereIntersectionOuter = raySphereIntersection(camPos, rayDir, atmosphereSphereOuter);
+
+    //float3 noisePos = ray;
+    //noisePos.xy += texOffset0;
+    
+    //float noise = getNoise(noisePos) * smallStepSize;
+    //ray += rayDir * noise;
+
+    float daylightFactor = saturate(dot(lightDir, float3(0, 0, 1)) * 20);
+    float sunDot = max(0.0, dot(rayDir, lightDir));
+
+    // Henyey-GreenStein
+    const float silverIntensity = 1.0;
+    const float silverSpread = 0.8;
+    const float eccentricity = 0.7;
+    float hg = 1.0 + max(henyeyGreenstein(sunDot, eccentricity), silverIntensity * henyeyGreenstein(sunDot, 0.99 - silverSpread));
+
+    // Stepping variables
+    float accumDensity = 0.0;
+    float transmittance = 1.0;
+    float stepSize = 0.05 * atmosphereThickness;
+
+    float3 samples[6] = {
+        lightDir + float3(0, 0.6, 0),
+        lightDir + float3(0, 0.5, 0.05),
+        lightDir + float3(0.1, 0.75, 0),
+        lightDir + float3(0.2, 2.5, 0.3),
+        lightDir + float3(0, 6, 0),
+        lightDir + float3(-0.1, 1, -0.2)    
+    };
+
+    bool noHits = true;
+    int misses = 0;
+    int steps = 0;
+
+    for(float t = atmosphereIntersectionInner.distance; t < atmosphereIntersectionOuter.distance; t += stepSize)
+    {
+        float3 currentPos = camPos + (t * rayDir);
+
+        float3 currentProj = getProjectedShellPoint(currentPos, earthCenter);
+        float relativeHeight = getRelativeHeight(currentPos, currentProj, atmosphereThickness);
+        float density = sampleCloudHull(currentPos, relativeHeight, earthCenter, texOffset0, texOffset1, coverage);
+        
+        if(density > 0)
+        {
+            misses = 0;
+            if(noHits)
+            {
+                // Step back and do high-res sampling
+                t -= stepSize;
+                stepSize *= 0.3;
+                noHits = false;
+                continue;
+            }
+
+            //return float4(density, density, density, 1.0);
+
+            float originalDensity = density;
+            density = sampleCloudDetail(currentPos, originalDensity, relativeHeight, texOffset1, texOffset2);
+
+            if (density < 0.0001)
+                continue;
+
+            float densityAlongLight = 0.0;
+
+            // Sample light propogation for Beer's law in a cone towards the light
+            for (int s = 0; s < 6; s++)
+            {
+                float3 lightSamplePos = currentPos + (3.0 * stepSize * samples[s]);
+                float3 lightSampleProjection = getProjectedShellPoint(lightSamplePos, earthCenter);
+                float lightSampleHeight = getRelativeHeight(lightSamplePos, lightSampleProjection, atmosphereThickness);
+                float lightSampleDensity = sampleCloudHull(lightSamplePos, lightSampleHeight, earthCenter, texOffset0, texOffset1, coverage);
+
+                if (lightSampleDensity > 0.0)
+                {
+                    lightSampleDensity = sampleCloudDetail(currentPos, lightSampleDensity, lightSampleHeight, texOffset1, texOffset2);
+                    densityAlongLight += lightSampleDensity;
+                }
+            }
+
+            float beersLaw = exp(-densityAlongLight);
+            float beersModulated = max(beersLaw, 0.7 * exp(-0.25 * densityAlongLight));
+
+            beersLaw = lerp(beersLaw, beersModulated, -sunDot * 0.5 + 0.5);
+            float inScatter = 0.09 + pow(originalDensity, remapClamped(relativeHeight, 0.3, 0.85, 0.5, 2.0));
+            inScatter *= pow(remapClamped(relativeHeight, 0.07, 0.34, 0.1, 1.0), 0.8);
+            transmittance = lerp(transmittance, inScatter * hg * beersLaw , (1.0 - accumDensity));
+
+            accumDensity += density;
+
+            if(accumDensity > 0.99)
+            {
+                accumDensity = 1.0;
+                break;
+            }
+        } else if (!noHits) {
+            misses++;
+            if (misses >= 6)
+            {
+                noHits = true;
+                stepSize /= 0.3;
+            }
+        }
+        
+        if (++steps > maxSteps)
+            break;
+    }
+
+    //accumDensity *= smoothstep(0, 1, min(1, remap(rayDir.z, 0, 0.1, 0, 1)));
+
+    float4 cloudColor;
+    if(lightDir.z >= 0.0) {
+        cloudColor.rgb = sunColor * (cloudExposure * max(0.0, transmittance) + 0.08 * ambientColor * exp(-transmittance));
+    } else {
+        cloudColor.rgb = sunColor * (cloudExposure * max(0.0, transmittance) + 0.08 * (float3(0.3, 0.6, 4.0) * 0.05 * pow(rayDir.z, 0.03125)) * exp(-transmittance));
+    }
+
+    cloudColor.rgb = lerp(ambientColor, cloudColor.rgb, accumDensity);
+    cloudColor.a = accumDensity;
+
+    return cloudColor;
+}
+
+//-----------------------------------------------------------------------------
+// Entry
+//-----------------------------------------------------------------------------
+
+float4 main(ConnectData IN) : SV_Target
+{
+    float3 lightDir = normalize(IN.lightDir);
+    float3 rayPos = eyePosWorld;
+    float3 rayDir = -IN.viewDir;
+
+    //Keep some offsets
+    IN.texOffset0 += float2(1234,-1321);
+    IN.texOffset1 += float2(-1234,1155);
+    IN.texOffset2 += float2(1457,-1663);
+
+    return clouds(rayPos, rayDir, lightDir, IN.cloudCoverage, IN.texOffset0 * 113, IN.texOffset1 * 100, IN.texOffset2 * 115);
+}
