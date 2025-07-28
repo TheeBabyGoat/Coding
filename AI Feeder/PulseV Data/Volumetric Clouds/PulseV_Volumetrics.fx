@@ -1,3 +1,19 @@
+// ============================================================================
+//  PulseV Volumetric Clouds Shader
+//  Version: 1.0.0
+//  Author: Matthew Burrows (anti-matt-er)
+//  License: MIT (Open Source) 
+// ============================================================================
+
+// ============================================================================
+//  
+//  
+//#define RSDEV // Uncomment when developing
+//  
+//
+// ============================================================================
+
+
 #include "ReShade.fxh"
 #include "PulseV/noise.fxh"
 
@@ -412,6 +428,23 @@ uniform float cloudSkyLightPower <
     float ui_step = 0.01;
 > = 1.0;
 
+uniform float silverLiningIntensity <
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Silver Lining Intensity";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 10.0;
+    float ui_step = 0.01;
+> = 1.0;
+
+uniform float silverLiningSpread <
+    string ui_category = "Cloud Lighting";
+    string ui_label = "Silver Lining Spread";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 1.0;
+    float ui_step = 0.01;
+> = 0.1;
 uniform float cloudDenoise <
     string ui_category = "Post-Processing";
     bool ui_category_closed = true;
@@ -1608,6 +1641,18 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
             float3 skyContribution = sky * skyLightBase * layer.skyLightPower * (skyTransmittance + cloudAmbientAmount * layer.ambientAmount);
        
             float3 contribution = sunContribution + moonContribution + skyContribution;
+            float silverLining = 0.0;
+            if (doDayLighting)
+            {
+                float dotProduct = dot(ray.direction, sunDirection);
+                silverLining += pow(1.0 - abs(dotProduct), silverLiningSpread) * silverLiningIntensity;
+            }
+            if (doNightLighting)
+            {
+                float dotProduct = dot(ray.direction, moonDirection);
+                silverLining += pow(1.0 - abs(dotProduct), silverLiningSpread) * silverLiningIntensity;
+            }
+            contribution += silverLining;
 
             float segmentExtinction = exp(-density * stepSize * cloudExtinction * layer.extinction * 0.08);
 
@@ -2167,3 +2212,4 @@ technique PulseV_VolumetricClouds_DEBUGDEPTHEDGE <
         PixelShader = PS_DebugDepthEdge;
     }
 }
+
