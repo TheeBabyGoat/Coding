@@ -1,65 +1,3 @@
-// ============================================================================
-//  PulseV Volumetric Clouds Shader
-//  Version: 1.0.0
-//  Author: Matthew Burrows (anti-matt-er)
-//  License: MIT (Open Source) 
-// ============================================================================
-//
-//  DESCRIPTION:
-//  --------------------------------------------------------------------------
-//  The PulseV Volumetric Clouds shader is a next-generation, real-time 
-//  atmospheric rendering solution tailored specifically for PulseV. 
-//  Built on modern rendering principles, it delivers photorealistic 
-//  volumetric cloudscapes with dynamic lighting, multi-layer simulation, 
-//  and seamless integration with weather-driven systems.
-//
-//  This shader provides robust tools for artists and developers to achieve 
-//  cinematic-quality skies in open-world environments. It supports adjustable 
-//  parameters for density, coverage, scale, lighting multipliers, noise 
-//  evolution, and volumetric detail—giving you full creative control over 
-//  the mood and tone of your scene.
-//
-//  FEATURES:
-//  --------------------------------------------------------------------------
-//  • True volumetric rendering of multi-layer cloud formations.
-//  • Dynamic integration with PulseV's weather systems for real-time transitions.
-//  • Adjustable density, height, coverage, and lighting parameters.
-//  • Noise-based procedural detail for natural variation.
-//  • Scalable performance settings for multiple hardware tiers.
-//  • Artist-friendly parameter exposure for rapid iteration.
-//
-//  TECHNICAL DETAILS:
-//  --------------------------------------------------------------------------
-//  This shader employs a physically-inspired volumetric lighting model 
-//  paired with optimized ray-marching techniques for real-time performance. 
-//  Multi-octave 3D noise ensures naturalistic structure, while temporal 
-//  evolution simulates drifting and morphing cloud masses. 
-//
-//  USAGE:
-//  --------------------------------------------------------------------------
-//  1. Integrate this shader into your graphics pipeline.
-//  2. Adjust the provided parameters in the UI or via scripting hooks (You need to source methods of doing this).
-//  the shader is open source, so you can modify it to suit your needs however you still need to know how to modify GTA.
-//  3. Sync with your weather presets for context-aware atmospheric effects.
-//
-//  NOTES:
-//  --------------------------------------------------------------------------
-//  • Optimized for GTA V modding via Reshades rendering pipeline.
-//  • Exposed parameters in the ReShade UI for easy tuning.
-//  • Designed for both cinematics and gameplay scenarios.
-//
-// ============================================================================
-//
-
-
-// ============================================================================
-//  
-//  
-//#define RSDEV // Uncomment when developing
-//  
-//
-// ============================================================================
-
 
 #include "ReShade.fxh"
 #include "PulseV/noise.fxh"
@@ -181,72 +119,32 @@ static const float2 AuroraNoiseTexel = 1.0 / float2(AURORA_NOISE_W, AURORA_NOISE
 //                      UNIFORMS SUPPLIED BY PULSEV API
 // ============================================================================
 
-uniform bool inputEnabled <
-    string source = "enabled";
->;
-uniform float4 inputViewMatrix1 <
-    string source = "view_matrix__r1";
->;
-uniform float4 inputViewMatrix2 <
-    string source = "view_matrix__r2";
->;
-uniform float4 inputViewMatrix3 <
-    string source = "view_matrix__r3";
->;
-uniform float4 inputViewMatrix4 <
-    string source = "view_matrix__r4";
->;
-uniform float4 inputInverseViewMatrix1 <
-    string source = "inverse_view_matrix__r1";
->;
-uniform float4 inputInverseViewMatrix2 <
-    string source = "inverse_view_matrix__r2";
->;
-uniform float4 inputInverseViewMatrix3 <
-    string source = "inverse_view_matrix__r3";
->;
-uniform float4 inputInverseViewMatrix4 <
-    string source = "inverse_view_matrix__r4";
->;
-uniform float4 inputInverseProjectionMatrix1 <
-    string source = "inverse_projection_matrix__r1";
->;
-uniform float4 inputInverseProjectionMatrix2 <
-    string source = "inverse_projection_matrix__r2";
->;
-uniform float4 inputInverseProjectionMatrix3 <
-    string source = "inverse_projection_matrix__r3";
->;
-uniform float4 inputInverseProjectionMatrix4 <
-    string source = "inverse_projection_matrix__r4";
->;
-uniform float inputNearClip <
-    string source = "near_clip";
->;
-uniform float inputFarClip <
-    string source = "far_clip";
->;
-uniform bool inputDepthReversed <
-    string source = "depth_reversed";
->;
-uniform float3 inputWindDirection <
-    string source = "wind_direction";
->;
-uniform int inputWeatherFrom <
-    string source = "from_weather_type";
->;
-uniform int inputWeatherTo <
-    string source = "to_weather_type";
->;
-uniform float inputWeatherTransition <
-    string source = "weather_transition";
->;
-uniform float inputAuroraVisibility <
-    string source = "aurora_visibility";
->;
-uniform float inputTimeOfDay <
-    string source = "time_of_day";
->;
+uniform bool inputEnabled <string source = "enabled"; >;
+uniform float4 inputViewMatrix1 <string source = "view_matrix__r1"; >;
+uniform float4 inputViewMatrix2 <string source = "view_matrix__r2"; >;
+uniform float4 inputViewMatrix3 <string source = "view_matrix__r3"; >;
+uniform float4 inputViewMatrix4 < string source = "view_matrix__r4"; >;
+uniform float4 inputInverseViewMatrix1 <string source = "inverse_view_matrix__r1"; >;
+uniform float4 inputInverseViewMatrix2 <string source = "inverse_view_matrix__r2"; >;
+uniform float4 inputInverseViewMatrix3 <string source = "inverse_view_matrix__r3"; >;
+uniform float4 inputInverseViewMatrix4 <string source = "inverse_view_matrix__r4"; >;
+uniform float4 inputInverseProjectionMatrix1 <string source = "inverse_projection_matrix__r1"; >;
+uniform float4 inputInverseProjectionMatrix2 <string source = "inverse_projection_matrix__r2"; >;
+uniform float4 inputInverseProjectionMatrix3 <string source = "inverse_projection_matrix__r3"; >;
+uniform float4 inputInverseProjectionMatrix4 <string source = "inverse_projection_matrix__r4"; >;
+uniform float4 inputProjectionMatrix1 < string source = "projection_matrix__r1"; >;
+uniform float4 inputProjectionMatrix2 < string source = "projection_matrix__r2"; >;
+uniform float4 inputProjectionMatrix3 < string source = "projection_matrix__r3"; >;
+uniform float4 inputProjectionMatrix4 < string source = "projection_matrix__r4"; >;
+uniform float inputNearClip <string source = "near_clip"; >;
+uniform float inputFarClip <string source = "far_clip"; >;
+uniform bool inputDepthReversed <string source = "depth_reversed"; >;
+uniform float3 inputWindDirection <string source = "wind_direction"; >;
+uniform int inputWeatherFrom <string source = "from_weather_type"; >;
+uniform int inputWeatherTo <string source = "to_weather_type"; >;
+uniform float inputWeatherTransition <string source = "weather_transition"; >;
+uniform float inputAuroraVisibility <string source = "aurora_visibility"; >;
+uniform float inputTimeOfDay <string source = "time_of_day"; >;
 
 // ============================================================================ 
 //                              RESHADE UNIFORMS
@@ -265,10 +163,17 @@ uniform float timer <
 
 uniform int qualityPreset <
     string ui_category = "Global Settings";
-    string ui_label = "Quality Preset";
+    string ui_label = "Cloud Quality Preset";
     string ui_type = "combo";
     string ui_items = "Low\0Medium\0High\0Ultra\0Extreme\0";
 > = 1;
+uniform int auroraQualityPreset <
+    string ui_category = "Global Settings";
+    string ui_label = "Aurora Quality Preset";
+    string ui_type = "combo";
+    string ui_items = "Low\0Medium\0High\0Ultra\0Extreme\0";
+> = 1;
+
 
 // ============================================================================ 
 //                      UI UNIFORMS (Global Settings)
@@ -667,7 +572,7 @@ uniform float2 auroraBlendPoints <
     float ui_min = 0.00;
     float ui_max = 1.0;
 > = float2(0.682, 0.781);
-
+uniform float depthFill < ui_type = "slider";ui_min = 0.0f;ui_max = 1.0f;> = 1.0f;
 // ============================================================================ 
 //                      UI UNIFORMS (Weather Settings)
 // ============================================================================
@@ -841,6 +746,29 @@ sampler BlueNoiseSampler
 
 // ============================================================================ 
 //                      SHADER CONSTANTS & STRUCTURES
+texture RenderTargetFullMask
+{
+    Width = BUFFER_WIDTH;
+    Height = BUFFER_HEIGHT;
+    Format = R8;
+};
+sampler2D RTSamplerFullMask
+{
+    Texture = RenderTargetFullMask;
+};
+
+texture RenderTargetFullMaskGrow
+{
+    Width = BUFFER_WIDTH;
+    Height = BUFFER_HEIGHT;
+    Format = R8;
+};
+sampler2D RTSamplerFullMaskGrow
+{
+    Texture = RenderTargetFullMaskGrow;
+};
+
+// NVE_ADDITIONS_ANCHOR
 // ============================================================================
 
 struct Ray
@@ -879,8 +807,54 @@ float4x4 inverseProjectionMatrix()
     );
 }
 
+float4x4 Projection()
+{
+    return float4x4(
+        inputProjectionMatrix1,
+        inputProjectionMatrix2,
+        inputProjectionMatrix3,
+        inputProjectionMatrix4
+    );
+}
+
 // ============================================================================ 
 //                          HELPER FUNCTIONS
+float GetLinearizedDepth(float2 texcoord, float addMult)
+{
+    float nearPlane = inputNearClip;
+    float farPlane = inputFarClip;
+    // Depth is reversed
+    float depth = (1.0 - tex2Dlod(ReShade::DepthBuffer, float4(texcoord, 0, 0)).x) * 1.0f;
+    depth = nearPlane * farPlane / (farPlane + depth * (nearPlane - farPlane));
+    if (depth > 6850)
+        depth = 99999;
+    return depth;
+}
+
+float4 DepthToViewPos(float depth, float2 texCoord)
+{
+    float x = texCoord.x * 2 - 1;
+    x *= -1;
+    float y = (texCoord.y) * 2 - 1;
+
+    // FIXED: Use our Projection() helper instead of undefined "Projection"
+    float2 screenSpaceRay = float2(
+        x / Projection()[0].x,
+        y / Projection()[1].y
+    );
+
+    float4 pos = float4(screenSpaceRay * depth, depth, 1.0);
+    return pos;
+}
+
+float3 DepthToWorldPos(float depth, float2 texCoord)
+{
+    float4 pos = DepthToViewPos(depth, texCoord);
+    pos = mul(pos, inverseViewMatrix());
+    return pos.xyz;
+}
+
+// NVE_ADDITIONS_ANCHOR_2
 // ============================================================================
 
 float3 worldDirection(float2 uv)
@@ -1403,6 +1377,24 @@ float3 saturation(float3 color, float saturation)
     return lerp(luma.xxx, color, saturation);
 }
 
+int getAuroraQualityPresetSamples()
+{
+    switch (auroraQualityPreset)
+    {
+        case 0:
+            return 64; // Low
+        case 1:
+            return 256; // Medium
+        case 2:
+            return 256; // High
+        case 3:
+            return 1024; // Ultra
+        case 4:
+            return 2048; // Extreme
+    }
+    return 64; // Fallback
+}
+
 float4 renderAurora(float2 uv)
 {
     const float renderDistance = 10000.0;
@@ -1447,13 +1439,15 @@ float4 renderAurora(float2 uv)
     float maxDistance = min(renderDistance, exit);
 
     float marchDistance = maxDistance - minDistance;
-    float invSamples = 1.0 / float(auroraVolumeSamples);
+    int samples = getAuroraQualityPresetSamples();
+    float invSamples = 1.0 / float(samples);
     float stepSize = marchDistance * invSamples;
 
     float3 pos = ray.origin + ray.direction * (minDistance + jitter * stepSize);
     float4 color = 0.0;
-    
-    for (int i = 0; i < auroraVolumeSamples; i++)
+
+    for (int i = 0; i < samples; i++)
+
     {
         float3 distortedPos = auroraPosition(pos);
         bool hit = distortedPos.y > bottom && distortedPos.y < top;
@@ -1727,6 +1721,19 @@ void CS_GenerateAuroraNoise(uint2 threadID : SV_GroupThreadID, uint2 groupID : S
     }
 }
 
+static const float4 gaussKernel3x3[9] =
+{
+    float4(-1.0, -1.0, 0.0, 1.0 / 16.0),
+  float4(-1.0, 0.0, 0.0, 2.0 / 16.0),
+  float4(-1.0, +1.0, 0.0, 1.0 / 16.0),
+  float4(0.0, -1.0, 0.0, 2.0 / 16.0),
+  float4(0.0, 0.0, 0.0, 4.0 / 16.0),
+  float4(0.0, +1.0, 0.0, 2.0 / 16.0),
+  float4(+1.0, -1.0, 0.0, 1.0 / 16.0),
+  float4(+1.0, 0.0, 0.0, 2.0 / 16.0),
+  float4(+1.0, +1.0, 0.0, 1.0 / 16.0)
+};
+
 // ============================================================================ 
 //                      DENOISE FUNCTIONS
 // ============================================================================
@@ -1764,9 +1771,6 @@ float4 denoise(sampler2D tex, float2 uv, float2 size, float sigma, float strengt
     return color / divisor;
 }
 
-// ============================================================================ 
-//                      SHADER ENTRY POINTS
-// ============================================================================
 
 float4 PS_Aurora(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
@@ -1803,6 +1807,86 @@ int getQualityPresetSamples()
     }
 
     return 64;
+}
+
+// ============================================================================ 
+//                      SHADER ENTRY POINTS
+// NVE_ADDITIONS_ANCHOR_3
+
+// ============================================================================
+
+float4 PS_CloudsFillGap(float4 vpos : SV_Position, float2 uv : TexCoord) : SV_Target
+{
+    if (cloudCover <= 0.019)
+        return 0.0;
+
+    // Sample expanded edge mask (0 = no fill, 1 = full overdraw)
+    float mask = tex2D(RTSamplerFullMaskGrow, uv).x;
+
+    // NVE-style: linearly push outward based on depthFill
+    mask = saturate(mask + depthFill * 0.35);
+
+    // Early-out for pixels outside fill region
+    if (mask < 0.05)
+        return 0.0;
+
+    // Use fewer samples for fill (faster)
+    int fillSamples = max(64, getQualityPresetSamples() / 4);
+
+    // Raymarch clouds in expanded region
+    float4 clouds = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), fillSamples);
+    clouds.a *= mask;
+
+    return clouds;
+}
+
+float4 PS_EdgeMaskGrow(float4 vpos : SV_Position, float2 tex : TexCoord) : SV_Target
+{
+    float2 texel = 1.0 / float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+
+    float mask = tex2D(RTSamplerFullMask, tex.xy).x;
+
+    for (int i = 1; i <= 2; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            mask = max(mask, tex2D(RTSamplerFullMask, tex.xy + texel * gaussKernel3x3[j].xy * i).x);
+        }
+    }
+
+    return mask;
+}
+float4 PS_EdgeMask(float4 vpos : SV_Position, float2 tex : TexCoord) : SV_Target
+{
+    float2 texel = 1.0 / float2(BUFFER_WIDTH, BUFFER_HEIGHT);
+    float3 camPos = worldPosition();
+
+    float3 worldPos = DepthToWorldPos(GetLinearizedDepth(tex, 1.0), tex);
+    float depth = length(camPos - worldPos);
+
+    float depthTest = 0.0;
+    float fillDepth = depth;
+
+    for (int i = 0; i < 9; i++)
+    {
+        depthTest = length(camPos - DepthToWorldPos(GetLinearizedDepth(tex + texel * gaussKernel3x3[i].xy * 1.5, 1.0), tex)).x;
+        if (depthTest < depth)
+        {
+            depth = depthTest;
+        }
+    }
+
+   // Make depthFill directly control mask expansion (0 = tight, 1 = soft overdraw)
+    float baseTolerance = depth * 0.0001;
+    float variableTolerance = depth * lerp(0.0, 0.05, depthFill); // up to 5% of depth
+    float adaptiveTolerance = clamp(baseTolerance + variableTolerance, 0.05, 500.0);
+
+    if (abs(depth - fillDepth) >= adaptiveTolerance)
+    {
+        return float4(1, 0, 0, 1);
+    }
+
+    return float4(0, 0, 0, 0);
 }
 
 float4 PS_VolumetricCloudsLow(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
@@ -1853,32 +1937,14 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord : SV_Position, float2 uv
 
 float4 PS_VolumetricClouds(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
 {
-    if (!inputEnabled)
-    {
-        discard;
-    }
-    
-    float4 clouds = 0.0;
-    
     float4 back = tex2D(ReShade::BackBuffer, uv);
-    
+    float4 clouds = tex2D(CloudsIntermediateSampler, uv);
+
+    // Use UI mask as global modulator
     float mask = uiMask(uv);
-    
-    if (mask < 0.001)
-    {
-        return back;
-    }
-    
-    if (cloudDenoise > 0.0)
-    {
-        clouds = denoise(CloudsIntermediateSampler, uv, BUFFER_SCREEN_SIZE * RENDER_SCALE, 1.5, 1.5, cloudDenoise);
-    }
-    else
-    {
-        clouds = tex2D(CloudsIntermediateSampler, uv);
-    }
-    
-    return float4(lerp(back.rgb, clouds.rgb, clouds.a * uiMask(uv)), 1.0);
+
+    float alpha = saturate(clouds.a * mask);
+    return float4(lerp(back.rgb, clouds.rgb, alpha), 1.0);
 }
 
 float4 PS_Debug(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
@@ -1985,6 +2051,27 @@ technique PulseV_VolumetricClouds <
     string ui_tooltip = "Main volumetric clouds shader";
 >
 {
+    pass edge_mask
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_EdgeMask;
+        RenderTarget = RenderTargetFullMask;
+    }
+
+    pass edge_mask_grow
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_EdgeMaskGrow;
+        RenderTarget = RenderTargetFullMaskGrow;
+    }
+
+    pass clouds_fill_gap
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = PS_CloudsFillGap;
+        RenderTarget = CloudsIntermediateTexture;
+    }
+
     pass aurora
     {
         VertexShader = PostProcessVS;
