@@ -1,4 +1,3 @@
-
 #include "ReShade.fxh"
 #include "PulseV/noise.fxh"
 
@@ -900,130 +899,156 @@ LayerParameters getWeather(int weatherType, int layerIndex)
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(Clear)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(Clear)
+
             }
             break;
         case 1:
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(ExtraSunny)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(ExtraSunny)
+
             }
             break;
         case 2:
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(Clouds)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(Clouds)
+
             }
             break;
         case 3:
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(Overcast)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(Overcast)
+
             }
             break;
         case 4:
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(Rain)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(Rain)
+
             }
             break;
         case 5:
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(Clearing)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(Clearing)
+
             }
             break;
         case 6:
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(Thunder)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(Thunder)
+
             }
             break;
         case 7:
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(Smog)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(Smog)
+
             }
             break;
         case 8:
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(Foggy)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(Foggy)
+
             }
             break;
         case 9:
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(Snow)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(Snow)
+
             }
             break;
         case 10:
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(Blizzard)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(Blizzard)
+
             }
             break;
         case 11:
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(SnowLight)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(SnowLight)
+
             }
             break;
         case 12:
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(Halloween)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(Halloween)
+
             }
             break;
         case -1:
@@ -1031,10 +1056,12 @@ LayerParameters getWeather(int weatherType, int layerIndex)
             if (bottom)
             {
                 CLOUD_BOTTOM_LAYER(Overcast)
+
             }
             else
             {
                 CLOUD_TOP_LAYER(Overcast)
+
             }
             break;
     }
@@ -1447,7 +1474,6 @@ float4 renderAurora(float2 uv)
     float4 color = 0.0;
 
     for (int i = 0; i < samples; i++)
-
     {
         float3 distortedPos = auroraPosition(pos);
         bool hit = distortedPos.y > bottom && distortedPos.y < top;
