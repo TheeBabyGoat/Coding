@@ -205,9 +205,25 @@ uniform float cloudRenderDistance <
     float ui_max = 100000.0;
     float ui_step = 10.0;
 > = 10000.0;
+
+uniform int cloudQualityPreset <
+    string ui_category = "Global Settings";
+    string ui_label = "Cloud Quality";
+    string ui_type = "combo";
+    string ui_items = "Low\0Medium\0High\0Ultra\0Custom\0";
+> = 1;
+
+uniform int auroraQualityPreset <
+    string ui_category = "Global Settings";
+    string ui_label = "Aurora Quality";
+    string ui_type = "combo";
+    string ui_items = "Low\0Medium\0High\0Ultra\0Custom\0";
+> = 1;
+
 uniform int cloudVolumeSamples <
     string ui_category = "Global Settings";
     string ui_type = "slider";
+    bool hidden = cloudQualityPreset != 4;
     int ui_min = 10;
     int ui_max = 200;
 > = 64;
@@ -475,6 +491,7 @@ uniform float auroraCurl <
 uniform int auroraVolumeSamples <
     string ui_category = "Global Settings";
     string ui_type = "slider";
+    bool hidden = auroraQualityPreset != 4;
     int ui_min = 8;
     int ui_max = 128;
 > = 64;
@@ -1305,13 +1322,14 @@ float4 renderAurora(float2 uv)
     float maxDistance = min(renderDistance, exit);
 
     float marchDistance = maxDistance - minDistance;
-    float invSamples = 1.0 / float(auroraVolumeSamples);
+    const int samples = getAuroraSamples();
+    float invSamples = 1.0 / float(samples);
     float stepSize = marchDistance * invSamples;
 
     float3 pos = ray.origin + ray.direction * (minDistance + jitter * stepSize);
     float4 color = 0.0;
     
-    for (int i = 0; i < auroraVolumeSamples; i++)
+    for (int i = 0; i < samples; i++)
     {
         float3 distortedPos = auroraPosition(pos);
         bool hit = distortedPos.y > bottom && distortedPos.y < top;
@@ -1631,7 +1649,7 @@ float4 PS_VolumetricCloudsLow(float4 fragcoord : SV_Position, float2 uv : TexCoo
         discard;
     }
     
-    return renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples);
+    return renderClouds(uv, getWeatherParams(0), getWeatherParams(1), getCloudSamples());
 }
 
 float4 PS_VolumetricCloudsIntermediate(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Target
@@ -1651,7 +1669,7 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord : SV_Position, float2 uv
     
     if (!RENDER_LOW || edge > 0.0)
     {
-        clouds = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), cloudVolumeSamples);
+        clouds = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), getCloudSamples());
     }
     else
     {
