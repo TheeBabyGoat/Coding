@@ -560,30 +560,50 @@ uniform float cloudDepthEdgeThreshold <
     float ui_step = 0.1;
 > = 8.0;
 
-uniform float3 fogColor <
+uniform float fogBaseHeight <
     string ui_category = "Fog Settings";
-    bool ui_category_closed = true;
-    string ui_label = "Fog Color";
-    string ui_type = "color";
-> = float3(0.5, 0.6, 0.7);
-
-uniform float fogDensity <
-    string ui_category = "Fog Settings";
-    string ui_label = "Fog Density";
+    string ui_label = "Fog Base Height";
     string ui_type = "drag";
-    float ui_min = 0.0;
-    float ui_max = 2.0;
-    float ui_step = 0.01;
-> = 1.0;
+    float ui_min = -1000.0;
+    float ui_max = 1000.0;
+    float ui_step = 1.0;
+> = 0.0;
 
-uniform float fogFalloff <
+uniform float fogHeightFalloff <
     string ui_category = "Fog Settings";
-    string ui_label = "Fog Falloff";
+    string ui_label = "Fog Height Falloff";
     string ui_type = "drag";
     float ui_min = 0.0;
     float ui_max = 2.0;
     float ui_step = 0.01;
 > = 0.5;
+
+uniform float fogBaseDensity <
+    string ui_category = "Fog Settings";
+    string ui_label = "Fog Base Density";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 2.0;
+    float ui_step = 0.01;
+> = 0.1;
+
+uniform float fogUpperLayerDensity <
+    string ui_category = "Fog Settings";
+    string ui_label = "Fog Upper Layer Density";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 2.0;
+    float ui_step = 0.01;
+> = 0.05;
+
+uniform float fogUpperFalloff <
+    string ui_category = "Fog Settings";
+    string ui_label = "Fog Upper Falloff";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 2.0;
+    float ui_step = 0.01;
+> = 0.1;
 
 uniform float auroraScale <
     string ui_category = "Aurora Settings";
