@@ -1,22 +1,22 @@
-// ============================================================================
+============================================================================
 //  PulseV Volumetric Clouds Shader
 //  Version: 1.0.0
 //  Author: Matthew Burrows (anti-matt-er)
-//  License: MIT (Open Source) 
+//  License: MIT (Open Source)
 // ============================================================================
 //
 //  DESCRIPTION:
 //  --------------------------------------------------------------------------
-//  The PulseV Volumetric Clouds shader is a next-generation, real-time 
-//  atmospheric rendering solution tailored specifically for PulseV. 
-//  Built on modern rendering principles, it delivers photorealistic 
-//  volumetric cloudscapes with dynamic lighting, multi-layer simulation, 
+//  The PulseV Volumetric Clouds shader is a next-generation, real-time
+//  atmospheric rendering solution tailored specifically for PulseV.
+//  Built on modern rendering principles, it delivers photorealistic
+//  volumetric cloudscapes with dynamic lighting, multi-layer simulation,
 //  and seamless integration with weather-driven systems.
 //
-//  This shader provides robust tools for artists and developers to achieve 
-//  cinematic-quality skies in open-world environments. It supports adjustable 
-//  parameters for density, coverage, scale, lighting multipliers, noise 
-//  evolution, and volumetric detail—giving you full creative control over 
+//  This shader provides robust tools for artists and developers to achieve
+//  cinematic-quality skies in open-world environments. It supports adjustable
+//  parameters for density, coverage, scale, lighting multipliers, noise
+//  evolution, and volumetric detail—giving you full creative control over
 //  the mood and tone of your scene.
 //
 //  FEATURES:
@@ -30,10 +30,10 @@
 //
 //  TECHNICAL DETAILS:
 //  --------------------------------------------------------------------------
-//  This shader employs a physically-inspired volumetric lighting model 
-//  paired with optimized ray-marching techniques for real-time performance. 
-//  Multi-octave 3D noise ensures naturalistic structure, while temporal 
-//  evolution simulates drifting and morphing cloud masses. 
+//  This shader employs a physically-inspired volumetric lighting model
+//  paired with optimized ray-marching techniques for real-time performance.
+//  Multi-octave 3D noise ensures naturalistic structure, while temporal
+//  evolution simulates drifting and morphing cloud masses.
 //
 //  USAGE:
 //  --------------------------------------------------------------------------
@@ -53,10 +53,10 @@
 
 
 // ============================================================================
-//  
-//  
+//
+//
 //#define RSDEV // Uncomment when developing
-//  
+//
 //
 // ============================================================================
 
@@ -66,10 +66,10 @@
 
 #ifdef RSDEV
 // ============================================================================
-//  
-//  
+//
+//
 // Reshade VS Syntax Bypass
-//  
+//
 //
 // ============================================================================
 
@@ -105,7 +105,7 @@ void tex2Dstore(storage2D a, uint2 b, float4 c)
 #include "rdr1.fxh"
 #endif
 
-// ============================================================================ 
+// ============================================================================
 //                          CONSTANTS & DEFINITIONS
 // ============================================================================
 
@@ -203,7 +203,7 @@ float ComputeSunAngleFalloff(float3 rayDir, float3 sunDir)
     return pow(t, 2.0);
 }
 
-// ============================================================================ 
+// ============================================================================
 //                      UNIFORMS SUPPLIED BY PULSEV API
 // ============================================================================
 
@@ -274,7 +274,7 @@ uniform float inputTimeOfDay <
     string source = "time_of_day";
 >;
 
-// ============================================================================ 
+// ============================================================================
 //                              RESHADE UNIFORMS
 // ============================================================================
 
@@ -285,7 +285,7 @@ uniform float timer <
     string source = "timer";
 >;
 
-// ============================================================================ 
+// ============================================================================
 //                      UI UNIFORMS (Preset Settings)
 // ============================================================================
 
@@ -296,7 +296,7 @@ uniform int qualityPreset <
     string ui_items = "Low\0Medium\0High\0Ultra\0Extreme\0";
 > = 1;
 
-// ============================================================================ 
+// ============================================================================
 //                      UI UNIFORMS (Global Settings)
 // ============================================================================
 
@@ -337,7 +337,7 @@ uniform int auroraVolumeSamples <
     int ui_max = 128;
 > = 64;
 
-// ============================================================================ 
+// ============================================================================
 //                      UI UNIFORMS (Advanced Global Settings)
 // ============================================================================
 
@@ -560,6 +560,31 @@ uniform float cloudDepthEdgeThreshold <
     float ui_step = 0.1;
 > = 8.0;
 
+uniform float3 fogColor <
+    string ui_category = "Fog Settings";
+    bool ui_category_closed = true;
+    string ui_label = "Fog Color";
+    string ui_type = "color";
+> = float3(0.5, 0.6, 0.7);
+
+uniform float fogDensity <
+    string ui_category = "Fog Settings";
+    string ui_label = "Fog Density";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 2.0;
+    float ui_step = 0.01;
+> = 1.0;
+
+uniform float fogFalloff <
+    string ui_category = "Fog Settings";
+    string ui_label = "Fog Falloff";
+    string ui_type = "drag";
+    float ui_min = 0.0;
+    float ui_max = 2.0;
+    float ui_step = 0.01;
+> = 0.5;
+
 uniform float auroraScale <
     string ui_category = "Aurora Settings";
     bool ui_category_closed = true;
@@ -694,13 +719,13 @@ uniform float2 auroraBlendPoints <
     float ui_max = 1.0;
 > = float2(0.682, 0.781);
 
-// ============================================================================ 
+// ============================================================================
 //                      UI UNIFORMS (Weather Settings)
 // ============================================================================
 
 #include "weathers.fxh"
 
-// ============================================================================ 
+// ============================================================================
 //                           TEXTURES & SAMPLERS
 // ============================================================================
 
@@ -865,7 +890,7 @@ sampler BlueNoiseSampler
     AddressV = REPEAT;
 };
 
-// ============================================================================ 
+// ============================================================================
 //                      SHADER CONSTANTS & STRUCTURES
 // ============================================================================
 
@@ -905,7 +930,7 @@ float4x4 inverseProjectionMatrix()
     );
 }
 
-// ============================================================================ 
+// ============================================================================
 //                          HELPER FUNCTIONS
 // ============================================================================
 
@@ -935,7 +960,7 @@ Ray cameraRay(float2 uv)
     return ray;
 }
 
-// ============================================================================ 
+// ============================================================================
 //                      LAYER PARAMETERS STRUCTURE
 // ============================================================================
 
@@ -943,9 +968,9 @@ LayerParameters getWeather(int weatherType, int layerIndex)
 {
     LayerParameters params;
     bool bottom = layerIndex == 0;
-    
+
     int weatherPreset = getWeatherPreset(weatherType);
-    
+
     switch (weatherPreset)
     {
         case 0:
@@ -1090,17 +1115,17 @@ LayerParameters getWeather(int weatherType, int layerIndex)
             }
             break;
     }
-    
+
     params.bottom += cloudHeightOffset;
     params.top += cloudHeightOffset;
-    
+
     return params;
 }
 
 LayerParameters mixLayerParams(LayerParameters fromParams, LayerParameters toParams, float ratio)
 {
     LayerParameters params;
-    
+
     params.scale = lerp(fromParams.scale, toParams.scale, ratio);
     params.detailScale = lerp(fromParams.detailScale, toParams.detailScale, ratio);
     params.stretch = lerp(fromParams.stretch, toParams.stretch, ratio);
@@ -1123,7 +1148,7 @@ LayerParameters mixLayerParams(LayerParameters fromParams, LayerParameters toPar
     params.bottomDensity = lerp(fromParams.bottomDensity, toParams.bottomDensity, ratio);
     params.middleDensity = lerp(fromParams.middleDensity, toParams.middleDensity, ratio);
     params.topDensity = lerp(fromParams.topDensity, toParams.topDensity, ratio);
-    
+
     return params;
 }
 
@@ -1137,7 +1162,7 @@ LayerParameters getWeatherParams(int layerIndex)
     {
         return getWeather(inputWeatherTo, layerIndex);
     }
-    
+
     return mixLayerParams(getWeather(inputWeatherFrom, layerIndex), getWeather(inputWeatherTo, layerIndex), inputWeatherTransition);
 };
 
@@ -1146,11 +1171,11 @@ float3 cloudExtents(float inBottom, float inTop)
     float bottom = max(inBottom, 0);
     float height = max(inTop - bottom, CLOUD_MIN_HEIGHT);
     float top = bottom + height;
-    
+
     return float3(bottom, top, height);
 }
 
-// ============================================================================ 
+// ============================================================================
 //                              NOISE FUNCTIONS
 // ============================================================================
 
@@ -1171,9 +1196,9 @@ float cloudNoise(float3 pos, float3 wind, LayerParameters layer)
     float detailNoise = dot(detailNoisexyz.xyz, detailNoisexyz.xyz) * 0.45;
     float noise = baseNoise * detailNoise;
     float softness = layer.softness * -0.25;
-    
+
     noise = remap(noise, softness, 1.0 - softness);
-    
+
     return noise;
 }
 
@@ -1182,7 +1207,7 @@ float cloudDensity(float3 pos, LayerParameters layer, float altitude, float alti
     float time = timer * TIME_SCALE * cloudTimescale;
     float3 wind = cloudWind * time * WIND_SCALE;
     float cloud = cloudNoise(pos * BASE_NOISE_SCALE * cloudScale * layer.scale, wind, layer);
-    
+
     cloud = smoothstep(0.0, sqrt(layer.smoothness) * 2.0, sqrt(cloudCover * layer.cover * altitudeDensity) + cloud * smoothstep(-0.25, 0.25, altitude) - 1.0);
     return cloud;
 }
@@ -1190,7 +1215,7 @@ float cloudDensity(float3 pos, LayerParameters layer, float altitude, float alti
 float uiMask(float2 uv)
 {
     float ui = tex2Dlod(ReShade::BackBuffer, float4(uv, 0.0, 0.0)).a;
-    
+
     return 1.0 - saturate((1.0 - ui) * 10.0);
 }
 
@@ -1207,19 +1232,19 @@ float cloudLightMarch(float3 pos, LayerParameters layer, float3 lightDirection, 
     float transmittance = 1.0;
     float density = 0.0;
     float3 currentPos = pos;
-    
+
     for (int i = 0; i < CLOUD_LIGHT_SAMPLES; ++i)
     {
         currentPos += lightDirection * stepSize;
         density += cloudDensity(currentPos, layer, altitude, altitudeDensity) * stepSize;
     }
-    
+
     transmittance = exp(-density * absorption * layer.absorption * 10.0);
-    
+
     return transmittance;
 }
 
-// ============================================================================ 
+// ============================================================================
 //                      DEPTH FUNCTIONS
 // ============================================================================
 
@@ -1231,12 +1256,12 @@ float depthToLinear(float depth, float near, float far)
 float rawDepth(float2 uv)
 {
     float depth = tex2D(ReShade::DepthBuffer, uv).r;
-    
+
     if (inputDepthReversed)
     {
         depth = 1.0 - depth;
     }
-    
+
     return depth;
 }
 
@@ -1251,7 +1276,7 @@ float3 depthPreview(float depth)
     const float near = inputNearClip;
     const float range = far - near;
     const float invRange = 1.0 / range;
-    
+
     return saturate(depth * invRange * 10.0);
 }
 
@@ -1275,14 +1300,14 @@ float depthEdge(float2 uv, float width)
 {
     float3 pole = float3(-1.0, 0.0, 1.0) * RENDER_WIDTH * width;
     float dpos = 0.0;
-    
+
     const float kernel[9] =
     {
         0.0625, 0.125, 0.0625,
         0.125, 0.25, 0.125,
         0.0625, 0.125, 0.0625
     };
-    
+
     float4 samples[9];
     samples[0] = depthNormal(uv + BUFFER_PIXEL_SIZE * pole.xx);
     samples[1] = depthNormal(uv + BUFFER_PIXEL_SIZE * pole.yx);
@@ -1296,21 +1321,21 @@ float depthEdge(float2 uv, float width)
 
     float depthDiff = 0.0;
     float normalDiff = 0.0;
-    
+
     for (int i = 0; i < 9; i++)
     {
         if (i == 4)
         {
             continue;
         }
-        
+
         depthDiff += abs(samples[4].a - samples[i].a) * kernel[i];
         normalDiff += max(0.0, 1.0 - dot(samples[4].rgb, samples[i].rgb)) * kernel[i];
     }
-    
+
     dpos = depthDiff + normalDiff;
     dpos = max(dpos - cloudDepthEdgeThreshold, 0.0);
-    
+
     return saturate(dpos);
 }
 
@@ -1320,36 +1345,36 @@ float softDepthEdge(float2 uv)
     {
         return depthEdge(uv, 1.0);
     }
-    
+
     float result = depthEdge(uv, 0.25);
     for (int i = 0; i < GAUSSIAN_SAMPLE_COUNT; ++i)
     {
         float2 offset = GAUSSIAN_DIRECTIONS[i] * BUFFER_PIXEL_SIZE;
         result += depthEdge(uv + offset, 1.0) * GAUSSIAN_WEIGHT;
     }
-    
+
     return saturate(result);
 }
 
-// ============================================================================ 
+// ============================================================================
 //                      BLUE NOISE FUNCTIONS
 // ============================================================================
 
 float blueNoise(float2 uv)
 {
     uv = uv / 1024.0 / BUFFER_PIXEL_SIZE;
-    
+
     return tex2D(BlueNoiseSampler, uv).x * 2.0 - 1.0;
 }
 
-// ============================================================================ 
+// ============================================================================
 //                      NIGHT & DAY FUNCTIONS
 // ============================================================================
 
 float nightTimeAmount()
 {
     float time = inputTimeOfDay;
-    
+
     if (time <= NIGHT_DAWN_END)
     {
         return saturate(1.0 - smoothstep(NIGHT_DAWN_START, NIGHT_DAWN_END, time));
@@ -1363,7 +1388,7 @@ float nightTimeAmount()
 float dayTimeAmount()
 {
     float time = inputTimeOfDay;
-    
+
     if (time <= DAY_DAWN_END)
     {
         return saturate(smoothstep(DAY_DAWN_START, DAY_DAWN_END, time));
@@ -1374,7 +1399,7 @@ float dayTimeAmount()
     }
 }
 
-// ============================================================================ 
+// ============================================================================
 //                      AROURA FUNCTIONS
 // ============================================================================
 
@@ -1401,7 +1426,7 @@ float3 auroraPosition(float3 position)
     float time = frac(timer * TIME_SCALE * auroraTimeScale * 5.0);
     float curl = tex3Dlod(CurlNoiseSampler, float4(position * BASE_NOISE_SCALE * auroraPositionCurlScale - time, 0.0)).r * 2.0 - 1.0;
     float3 distortion = curl * auroraPositionCurl * 1000.0;
-    
+
     return position + distortion;
 }
 
@@ -1410,22 +1435,22 @@ float auroraDensity(float3 position, float height)
     float time = frac(timer * TIME_SCALE * auroraTimeScale * 10.0);
     float3 samplePos = position * auroraScale * BASE_NOISE_SCALE;
     samplePos.y *= 0.25 * auroraHeightStretch;
-    
+
     float curl = tex3Dlod(CurlNoiseSampler, float4(samplePos * auroraCurlScale + time, 0.0)).r * 2.0 - 1.0;
     float distortion = curl * auroraCurl * 0.1;
     float2 warpedPos = samplePos.xz + distortion + time * 2.5;
 
     float auroraNoise = tex2Dlod(AuroraNoiseSampler, float4(warpedPos, 0.0, 0.0)).r;
-    
+
     float density = saturate(lerp(auroraNoise * 1.5, auroraNoise * 0.9, height));
-    
+
     return pow(density, auroraPower) * auroraDensityMultiplier;
 }
 
 float3 saturation(float3 color, float saturation)
 {
     float luma = dot(color, float3(0.2126, 0.7152, 0.0722));
-    
+
     return lerp(luma.xxx, color, saturation);
 }
 
@@ -1434,41 +1459,41 @@ float4 renderAurora(float2 uv)
     const float renderDistance = 10000.0;
     const float jitter = blueNoise(uv);
     const float depth = rawDepth(uv);
-    
+
     if (depth < 1.0)
     {
         return 0.0;
     }
-    
+
     Ray ray = cameraRay(uv);
-    
+
     float viewFade = saturate(dot(ray.direction, float3(0.0, 1.0, 0.0)));
     float distFade = smoothstep(0.0, 0.25, viewFade) * (1.0 - smoothstep(0.5, 0.9, viewFade));
-    
+
     if (false)
     {
         return float4(distFade.xxx, 1.0);
     }
-    
+
     if (distFade <= 0.0)
     {
         return 0.0;
     }
-    
+
     float bottom = lerp(auroraBottomHeightOffset, auroraTopHeightOffset, viewFade);
     float top = bottom + auroraHeight;
-    
+
     float enter = (bottom - ray.origin.y) / ray.direction.y;
     float exit = (bottom + auroraHeight - ray.origin.y) / ray.direction.y;
     float fullExit = exit;
-    
+
     if (enter > exit)
     {
         enter = 0.0;
         exit = renderDistance;
         fullExit = renderDistance;
     }
-    
+
     float minDistance = max(0.0, enter);
     float maxDistance = min(renderDistance, exit);
 
@@ -1478,33 +1503,80 @@ float4 renderAurora(float2 uv)
 
     float3 pos = ray.origin + ray.direction * (minDistance + jitter * stepSize);
     float4 color = 0.0;
-    
+
     for (int i = 0; i < auroraVolumeSamples; i++)
     {
         float3 distortedPos = auroraPosition(pos);
         bool hit = distortedPos.y > bottom && distortedPos.y < top;
-        
+
         if (hit)
         {
             float altitude = clamp(distortedPos.y - bottom, 0.0, auroraHeight) / auroraHeight;
             float density = auroraDensity(distortedPos, altitude) * distFade;
-            
+
             color += density * auroraColour(altitude);
         }
 
         pos += ray.direction * stepSize;
     }
-    
+
     color *= invSamples;
     color.a = saturate(color.a * 4.0);
     color.rgb = max(normalize(color.rgb), saturation(color.rgb, lerp(2.0, 3.5, remap(max(1.0, length(color.rgb)), 1.0, 3.0)))) * auroraBrightness;
-    
+
     return color;
 }
 
-// ============================================================================ 
+// ============================================================================
+//                      NVE ATMOSPHERIC SCATTERING
+// ============================================================================
+
+#define earthRadius 6371.0
+#define atmosphereRadius 6471.0
+
+
+float HenyeyGreenstein(float cos_angle, float g)
+{
+    float g2 = g * g;
+    return (1.0 - g2) / (4.0 * PI * pow(1.0 + g2 - 2.0 * g * cos_angle, 1.5));
+}
+
+float3 get_sun_light(float3 ray_dir, float3 sun_dir)
+{
+    float cos_angle = dot(ray_dir, sun_dir);
+    float3 sun_light = HenyeyGreenstein(cos_angle, 0.76) * 20.0;
+    sun_light += HenyeyGreenstein(cos_angle, -0.76) * 0.2;
+    return sun_light;
+}
+
+float3 get_sky_color(float3 ray_dir, float3 sun_dir)
+{
+    float3 sky_color = float3(0.0, 0.0, 0.0);
+    float cos_angle = dot(ray_dir, sun_dir);
+    sky_color += get_sun_light(ray_dir, sun_dir);
+    sky_color += float3(0.0, 0.0, 0.1) * (1.0 - cos_angle);
+    return sky_color;
+}
+
+// ============================================================================
 //                      MAIN RENDER FUNCTION
 // ============================================================================
+
+float3 ApplyHorizonFog(float3 finalColor, Ray ray, float marchDistance)
+{
+    // Horizon-based blending
+    float horizonBlend = smoothstep(0.0, 0.2, abs(ray.direction.y));
+    horizonBlend = 1.0 - horizonBlend;
+
+    // Distance-based blending
+    float distanceBlend = saturate(marchDistance * (0.0001 * (1.0 - fogFalloff)));
+
+    // Combine blend factors
+    float fogBlend = horizonBlend * distanceBlend * fogDensity;
+
+    // Apply fog
+    return lerp(finalColor, fogColor, fogBlend);
+}
 
 float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topLayer, int samples)
 {
@@ -1524,24 +1596,24 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     const float nightAmount = nightTimeAmount();
     const bool doDayLighting = dayAmount > 0.0;
     const bool doNightLighting = nightAmount > 0.0;
-    
+
     Ray ray = cameraRay(uv);
     float3 sunDirection = getSunDirection();
     float3 moonDirection = getMoonDirection();
-    
+
     float3 sky = getSkyColor(ray.direction, dayAmount * (depth < range ? 0.0 : 1.0), nightAmount);
 
     float enter = (height - ray.origin.y) / ray.direction.y;
     float exit = (height + thickness - ray.origin.y) / ray.direction.y;
     float fullExit = exit;
-    
+
     if (enter > exit)
     {
         enter = 0.0;
         exit = far;
         fullExit = cloudRenderDistance;
     }
-    
+
     float minDistance = max(0.0, enter);
     float maxDistance = min(far, exit);
 
@@ -1561,10 +1633,10 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float3 sunLightBase = doDayLighting ? (cloudSunLightPower * sunPhase).xxx : float3(0.0, 0.0, 0.0);
     float3 moonLightBase = doNightLighting ? (cloudMoonLightPower * moonPhase).xxx : float3(0.0, 0.0, 0.0);
     float3 skyLightBase = float3(cloudSkyLightPower, cloudSkyLightPower, cloudSkyLightPower);
-    
+
     float auroraVisibility = auroraAmount();
     float4 aurora;
-    
+
     if (auroraVisibility > 0.0)
     {
         aurora = tex2Dlod(AuroraSampler, float4(uv, 0.0, 0.0)) * (1.0 - saturate(smoothstep(0.95, 1.0, moonCosTheta)));
@@ -1574,14 +1646,14 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     for (int i = 0; i < samples; i++)
     {
         float dist = length(pos - ray.origin);
-        
+
         if (dist >= marchDistance || transmittance < 0.1)
         {
             break;
         }
 
         LayerParameters layer;
-        
+
         if (pos.y > bottomLayer.top)
         {
             layer = topLayer;
@@ -1590,7 +1662,7 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
         {
             layer = bottomLayer;
         }
-        
+
         float layerAltitude = remap(pos.y, layer.bottom, layer.top);
         float3 altitudeDensity = (
     layerAltitude < 0.5 ?
@@ -1599,7 +1671,7 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
 );
 
         float altitudeLighting = pow(min(1.0 / altitudeDensity, 1.0), 1.5);
-        
+
         float fade = smoothstep(0.0, cloudYFade, layerAltitude) * smoothstep(0.0, cloudYFade, 1.0 - layerAltitude);
         float density = cloudDensity(pos, layer, layerAltitude, altitudeDensity) * fade;
 
@@ -1611,7 +1683,7 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
         //============================================================================//
         //                        COMPUTE DISTANCE BASED FALLOFF SUNLIGH              //
         //============================================================================//
-        
+
             float sunFalloff = ComputeSunFalloff(dist);
             float sunAngleFalloff = ComputeSunAngleFalloff(ray.direction, sunDirection);
 
@@ -1620,7 +1692,7 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
 
             float3 moonContribution = nightAmount * moonBaseColor * MoonColor * MoonlightBoost * moonLightBase * layer.moonLightPower * altitudeLighting * (moonTransmittance + cloudAmbientAmount * layer.ambientAmount);
             float3 skyContribution = sky * skyLightBase * layer.skyLightPower * (skyTransmittance + cloudAmbientAmount * layer.ambientAmount);
-       
+
             float3 contribution = sunContribution + moonContribution + skyContribution;
 
             float segmentExtinction = exp(-density * stepSize * cloudExtinction * layer.extinction * 0.08);
@@ -1638,12 +1710,14 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
     float3 cloudColor = 1.0 - exp(-accumulatedLight * cloudLuminanceMultiplier);
     float3 finalColor = cloudColor + sky * transmittance;
     float blend = smoothstep(0.0, 1.0, minDistance / far);
-    
+
     finalColor = saturate(lerp(finalColor, finalColor + sky, blend));
     float alpha = saturate(1.0 - transmittance);
-    
+
     finalColor = lerp(sky, finalColor, saturate(alpha * cloudContrast));
-    
+
+    finalColor = ApplyHorizonFog(finalColor, ray, marchDistance);
+
     float4 clouds = float4(finalColor, saturate(alpha * 2.0));
     float4 output = clouds;
 
@@ -1654,11 +1728,11 @@ float4 renderClouds(float2 uv, LayerParameters bottomLayer, LayerParameters topL
             output = float4(lerp(saturate(back + aurora.rgb * aurora.a), clouds.rgb, clouds.a), max(clouds.a, aurora.a));
         }
     }
-    
+
     return output;
 }
 
-// ============================================================================ 
+// ============================================================================
 //                      DEBUG SUN FUNCTIONS
 // ============================================================================
 
@@ -1680,7 +1754,7 @@ float debugDrawSun(float3 rayDirection, float3 sunDirection)
 bool isRectInUv(float2 uv, float2 position, float2 size)
 {
     float2 bounds = position + size;
-    
+
     return (uv.x >= position.x && uv.x <= bounds.x && uv.y >= position.y && uv.y <= bounds.y);
 }
 
@@ -1697,28 +1771,28 @@ float4 filterTexture(float4 color, int channel)
 float4 drawTextureRect2D(sampler2D tex, float2 uv, float2 position, float2 size, int channel = -1)
 {
     float4 color = 0.0;
-    
+
     if (isRectInUv(uv, position, size))
     {
         color = filterTexture(tex2D(tex, getTextureRect(uv, position, size)), channel);
     }
-    
+
     return color;
 }
 
 float4 drawTextureRect3D(sampler3D tex, float2 uv, float2 position, float2 size, int channel = -1, float z = 0.5)
 {
     float4 color = 0.0;
-    
+
     if (isRectInUv(uv, position, size))
     {
         color = filterTexture(tex3D(tex, float3(getTextureRect(uv, position, size), z)), channel);
     }
-    
+
     return color;
 }
 
-// ============================================================================ 
+// ============================================================================
 //                      PROCEDURAL NOISE FUNCTIONS
 // ============================================================================
 
@@ -1761,7 +1835,7 @@ void CS_GenerateAuroraNoise(uint2 threadID : SV_GroupThreadID, uint2 groupID : S
     }
 }
 
-// ============================================================================ 
+// ============================================================================
 //                      DENOISE FUNCTIONS
 // ============================================================================
 
@@ -1776,11 +1850,11 @@ float4 denoise(sampler2D tex, float2 uv, float2 size, float sigma, float strengt
     float divisor = 0.0;
     float4 color = float4(0.0, 0.0, 0.0, 0.0);
     float4 centerSample = tex2D(tex, uv);
-    
+
     for (float x = -radius; x <= radius && x < 64; x++)
     {
         float offset = sqrt(radiusSquared - x * x);
-        
+
         for (float y = -offset; y <= offset && y < 64; y++)
         {
             float2 coord = float2(x, y);
@@ -1789,16 +1863,16 @@ float4 denoise(sampler2D tex, float2 uv, float2 size, float sigma, float strengt
             float4 step = tex2D(tex, uv + coord / size);
             float4 deltaCenter = step - centerSample;
             float factor = exp(-dot(deltaCenter, deltaCenter) * thresholdExponent) * thresholdMultiplier * blur;
-                                 
+
             color += factor * step;
             divisor += factor;
         }
     }
-    
+
     return color / divisor;
 }
 
-// ============================================================================ 
+// ============================================================================
 //                      SHADER ENTRY POINTS
 // ============================================================================
 
@@ -1808,15 +1882,15 @@ float4 PS_Aurora(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Targ
     {
         discard;
     }
-    
+
     float visibility = auroraAmount();
     float4 output = 0.0;
-    
+
     if (visibility > 0.0)
     {
         output = renderAurora(uv) * visibility;
     }
-    
+
     return output;
 }
 
@@ -1845,7 +1919,7 @@ float4 PS_VolumetricCloudsLow(float4 fragcoord : SV_Position, float2 uv : TexCoo
     {
         discard;
     }
-    
+
     return renderClouds(uv, getWeatherParams(0), getWeatherParams(1), getQualityPresetSamples());
 }
 
@@ -1855,15 +1929,15 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord : SV_Position, float2 uv
     {
         discard;
     }
-    
+
     float4 clouds = 0.0;
     float edge = 0.0;
-    
+
     if (RENDER_LOW)
     {
         edge = softDepthEdge(uv);
     }
-    
+
     if (!RENDER_LOW || edge > 0.0)
     {
         clouds = renderClouds(uv, getWeatherParams(0), getWeatherParams(1), getQualityPresetSamples());
@@ -1871,7 +1945,7 @@ float4 PS_VolumetricCloudsIntermediate(float4 fragcoord : SV_Position, float2 uv
     else
     {
         float4 cheap_clouds = tex2D(CloudsLowResSampler, uv);
-        
+
         if (edge > 0.0)
         {
             clouds = lerp(cheap_clouds, clouds, edge);
@@ -1891,18 +1965,18 @@ float4 PS_VolumetricClouds(float4 fragcoord : SV_Position, float2 uv : TexCoord)
     {
         discard;
     }
-    
+
     float4 clouds = 0.0;
-    
+
     float4 back = tex2D(ReShade::BackBuffer, uv);
-    
+
     float mask = uiMask(uv);
-    
+
     if (mask < 0.001)
     {
         return back;
     }
-    
+
     if (cloudDenoise > 0.0)
     {
         clouds = denoise(CloudsIntermediateSampler, uv, BUFFER_SCREEN_SIZE * RENDER_SCALE, 1.5, 1.5, cloudDenoise);
@@ -1911,7 +1985,7 @@ float4 PS_VolumetricClouds(float4 fragcoord : SV_Position, float2 uv : TexCoord)
     {
         clouds = tex2D(CloudsIntermediateSampler, uv);
     }
-    
+
     return float4(lerp(back.rgb, clouds.rgb, clouds.a * uiMask(uv)), 1.0);
 }
 
@@ -1919,9 +1993,9 @@ float4 PS_Debug(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Targe
 {
 #define UVT (1.0 / 48.0) // Units in UV screen width space
     float2 uvtSquare = float2(UVT, UVT * BUFFER_ASPECT_RATIO);
-    
+
     float4 screen = tex2D(ReShade::BackBuffer, uv);
-    
+
     float2 noisePreviewSize = uvtSquare * 4;
     float2 noisePreviewOffset = noisePreviewSize + uvtSquare;
     float4 noise1 = drawTextureRect3D(NoiseSampler, uv, 1.0 - float2(1, 1) * noisePreviewOffset, noisePreviewSize, 0);
@@ -1932,16 +2006,16 @@ float4 PS_Debug(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Targe
     float4 noise6 = drawTextureRect3D(CurlNoiseSampler, uv, 1.0 - float2(6, 1) * noisePreviewOffset, noisePreviewSize, 1);
     float4 noise7 = drawTextureRect2D(AuroraNoiseSampler, uv, 1.0 - float2(7, 1) * noisePreviewOffset, noisePreviewSize, 0);
     float4 noises = lerp(lerp(lerp(lerp(lerp(lerp(noise7, noise6, noise6.a), noise5, noise5.a), noise4, noise4.a), noise3, noise3.a), noise2, noise2.a), noise1, noise1.a);
-    
+
     float2 depthPreviewSize = UVT * 8;
     float4 depthTex = drawTextureRect2D(ReShade::DepthBuffer, uv, 1.0 - uvtSquare - float2(0, noisePreviewSize.y + uvtSquare.y) - depthPreviewSize, depthPreviewSize, 0);
     float depth = inputDepthReversed ? 1.0 - depthTex.r : depthTex.r;
     depthTex.rgb = depthPreview(depthToLinear(1.0 - depth.r, inputNearClip, inputFarClip)).xxx;
-    
+
     float3 worldPos = worldPosition();
     float4 worldPosPreview = 0.0;
     float2 worldPosPosition = 1.0 - uvtSquare - float2(0, uvtSquare.y * 2.0) - depthPreviewSize - float2(UVT * 2.0, 0);
-    
+
     if (isRectInUv(uv, worldPosPosition - float2(UVT * 2.0, 0), uvtSquare))
     {
         worldPosPreview = float4(frac(worldPos.xxx), 1.0);
@@ -1954,13 +2028,13 @@ float4 PS_Debug(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Targe
     {
         worldPosPreview = float4(frac(worldPos.zzz), 1.0);
     }
-    
+
     float4 previews = lerp(lerp(noises, depth, depthTex.a), worldPosPreview, worldPosPreview.a);
-    
+
     float sun = debugDrawSun(cameraRay(uv).direction, getSunDirection());
-    
+
     float4 final = lerp(float4(sun, sun, 0.0, sun), previews, previews.a);
-    
+
     return float4(lerp(screen.rgb, final.rgb, final.a), 1.0);
 }
 
@@ -1970,7 +2044,7 @@ float4 PS_DebugSky(float4 fragcoord : SV_Position, float2 uv : TexCoord) : SV_Ta
     {
         return float4(uv.x > 0.5 ? dayTimeAmount().xxx : nightTimeAmount().xxx, 1.0);
     }
-    
+
     return uv.x < 0.5 ? float4(getSkyColor(worldDirection(uv), 1.0, nightTimeAmount()), 1.0) : tex2D(ReShade::BackBuffer, uv);
 }
 
@@ -1979,7 +2053,7 @@ float4 PS_DebugDepthEdge(float4 fragcoord : SV_Position, float2 uv : TexCoord) :
     return float4(softDepthEdge(uv).xxx, 0.0);
 }
 
-// ============================================================================ 
+// ============================================================================
 //                      RESHADE INJECTION TECHNIQUES
 // ============================================================================
 
