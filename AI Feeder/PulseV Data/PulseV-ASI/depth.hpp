@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2021 Patrick Mours
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 
 #pragma once
 
@@ -30,6 +34,7 @@ enum class aspect_ratio_heuristic : unsigned int
 	match_custom_resolution_exactly
 };
 
+static bool s_show_depth_overlay = false;
 static bool s_disable_intz = false;
 // Enable or disable the creation of backup copies at clear operations on the selected depth-stencil
 static unsigned int s_preserve_depth_buffers = 0;
@@ -481,6 +486,44 @@ static void update_effect_runtime(effect_runtime *runtime)
 			std::strcmp(source, "bufready_depth") == 0)
 			runtime->set_uniform_value_bool(variable, data.selected_shader_resource != 0);
 		});
+}
+
+static void on_overlay(reshade::api::effect_runtime* runtime)
+{
+	if (runtime->is_key_pressed(0x79)) // VK_F10
+		s_show_depth_overlay = !s_show_depth_overlay;
+
+	if (!s_show_depth_overlay)
+		return;
+
+	auto& data = runtime->get_private_data<generic_depth_data>();
+
+	ImGui::SetNextWindowPos(ImVec2(10, 10));
+	ImGui::SetNextWindowBgAlpha(0.5f);
+	ImGui::Begin("Depth Info", &s_show_depth_overlay, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
+
+	if (data.selected_depth_stencil == 0)
+	{
+		ImGui::TextUnformatted("No active depth stencil selected.");
+	}
+	else
+	{
+		reshade::api::device* device = runtime->get_device();
+		const auto desc = device->get_resource_desc(data.selected_depth_stencil);
+
+		char buffer[512];
+		sprintf_s(buffer, "Active Depth Surface (F10 to toggle):\n  Pointer: %p\n  Dimensions: %ux%u\n  Format: %u\n  Samples: %u\n  Using Backup Texture: %s",
+			(void*)data.selected_depth_stencil.handle,
+			desc.texture.width,
+			desc.texture.height,
+			static_cast<uint32_t>(desc.texture.format),
+			desc.texture.samples,
+			data.using_backup_texture ? "Yes" : "No");
+
+		ImGui::TextUnformatted(buffer);
+	}
+
+	ImGui::End();
 }
 
 static void on_init_device(device *device)
@@ -1195,6 +1238,7 @@ extern void register_depth_switcher()
 	reshade::register_event<reshade::addon_event::reshade_finish_effects>(on_finish_render_effects);
 	// Need to set texture binding again after reloading
 	reshade::register_event<reshade::addon_event::reshade_reloaded_effects>(update_effect_runtime);
+	reshade::register_event<reshade::addon_event::reshade_overlay>(on_overlay);
 }
 
 extern void unregister_depth_switcher()
@@ -1229,4 +1273,5 @@ extern void unregister_depth_switcher()
 	reshade::unregister_event<reshade::addon_event::reshade_begin_effects>(on_begin_render_effects);
 	reshade::unregister_event<reshade::addon_event::reshade_finish_effects>(on_finish_render_effects);
 	reshade::unregister_event<reshade::addon_event::reshade_reloaded_effects>(update_effect_runtime);
+	reshade::unregister_event<reshade::addon_event::reshade_overlay>(on_overlay);
 }
