@@ -1,7 +1,3 @@
-/*
- * Copyright (C) 2021 Patrick Mours
- * SPDX-License-Identifier: BSD-3-Clause
- */
 
 #pragma once
 
@@ -947,12 +943,6 @@ static void on_begin_render_effects(effect_runtime *runtime, command_list *cmd_l
 
 	for (auto &[resource, info] : current_depth_stencil_resources)
 	{
-		bool candidate_1 = info.last_counters.total_stats.drawcalls == 1 && info.last_counters.total_stats.vertices == 6;
-		bool candidate_2 = info.last_counters.total_stats.drawcalls == 2 && info.last_counters.total_stats.vertices == 12;
-
-		if (!candidate_1 && !candidate_2)
-			continue; // GTA V Heuristic
-
 		if (info.last_used_in_frame < device_data->frame_index || device_data->frame_index <= (info.first_used_in_frame + 1))
 			continue; // Skip resources not used this frame or those that only just appeared for the first time
 
