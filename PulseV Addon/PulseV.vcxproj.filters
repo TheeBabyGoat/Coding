@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="headers">
+      <UniqueIdentifier>{3bacf81a-38b1-46c0-80ff-291c19bccb41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{d09fa07d-c777-4387-95b1-86b402c3ab1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{135b8ff7-7c10-4c58-91b8-5287ff534c23}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\addon.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\data_reader.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\game_data_source.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\gtav_source.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\rdr1_source.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\reshade_data.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\timecycle.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deps\tinyxml2\tinyxml2.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="headers\addon.hpp">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\data_reader.hpp">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\depth.hpp">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\game_data_source.hpp">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\gtav_source.hpp">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\gtav_timecycle.hpp">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\rdr1_source.hpp">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\rdr1_timecycle.hpp">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\reshade_data.hpp">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\resource.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\timecycle.hpp">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\types.hpp">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\util.hpp">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="resource1.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+</Project>
