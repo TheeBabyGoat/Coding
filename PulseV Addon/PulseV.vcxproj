@@ -44,6 +44,21 @@
     <ClCompile Include="source\reshade_data.cpp" />
     <ClCompile Include="source\timecycle.cpp" />
   </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release-GTAV|x64'">
+    <ClCompile Include="source\depth_heatmap.cpp" />
+    <ClCompile Include="source\depth_shadow.cpp" />
+    <ClCompile Include="source\dxgi_hook.cpp" />
+    <ClCompile Include="source\gbuffer_export.cpp" />
+    <ClCompile Include="source\gta5_depth_hook.cpp" />
+    <ClCompile Include="source\hook.cpp" />
+    <ClCompile Include="source\iat_hook.cpp" />
+    <ClCompile Include="source\logging.cpp" />
+    <ClCompile Include="source\overlay.cpp" />
+    <ClCompile Include="source\render_target_scanner.cpp" />
+    <ClCompile Include="source\water_mask.cpp" />
+    <ClCompile Include="source\water_mask_overlay.cpp" />
+    <ClCompile Include="source\depth_export.cpp" />
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\addon.hpp" />
     <ClInclude Include="headers\data_reader.hpp" />
@@ -59,6 +74,19 @@
     <ClInclude Include="headers\types.hpp" />
     <ClInclude Include="headers\util.hpp" />
     <ClInclude Include="resource1.h" />
+    <ClInclude Include="headers\d3d11_hooks.h" />
+    <ClInclude Include="headers\depth_heatmap.h" />
+    <ClInclude Include="headers\depth_shadow.h" />
+    <ClInclude Include="headers\gbuffer_export.h" />
+    <ClInclude Include="headers\gta5_depth_hook.h" />
+    <ClInclude Include="headers\hook.h" />
+    <ClInclude Include="headers\iat_hook.h" />
+    <ClInclude Include="headers\logging.h" />
+    <ClInclude Include="headers\overlay.h" />
+    <ClInclude Include="headers\pulsev_log_once.h" />
+    <ClInclude Include="headers\render_target_scanner.h" />
+    <ClInclude Include="headers\water_mask.h" />
+    <ClInclude Include="headers\water_mask_overlay.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />
@@ -115,7 +143,7 @@
     <TargetExt>.asi</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-GTAV|x64'">
-    <TargetName>PulseV</TargetName>
+    <TargetName>PulseV_Ultimate</TargetName>
     <TargetExt>.asi</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-RDR1|x64'">
@@ -271,7 +299,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PreprocessorDefinitions>RFX_GAME_GTAV;WIN32_LEAN_AND_MEAN;NOMINMAX;ImTextureID=ImU64;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Crush\source\repos\Addon In Progress\src\headers;..\deps\eigen;..\deps\tinyxml2;..\deps\imgui;..\deps\reshade\include;..\deps\scripthookv;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)headers;..\deps\eigen;..\deps\tinyxml2;..\deps\imgui;..\deps\reshade\include;..\deps\scripthookv;..\deps\minhook\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -280,8 +308,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>${ProjectDir)..\deps\scripthookv\scripthookv\lib\ScriptHookV.lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(ProjectDir)..\deps\scripthookv\scripthookv\lib\ScriptHookV.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>${ProjectDir)..\deps\scripthookv\scripthookv\lib\ScriptHookV.lib;$(ProjectDir)..\deps\minhook\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(ProjectDir)..\deps\scripthookv\scripthookv\lib\ScriptHookV.lib;libMinHook.x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
