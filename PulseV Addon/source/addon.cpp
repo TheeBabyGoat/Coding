@@ -11,6 +11,13 @@
 #include <string>
 #include <algorithm>
 #include <atomic>
+#include <string_view>
+
+#if defined RFX_GAME_GTAV
+#include "d3d11_hooks.h"
+#include "minhook.h"
+#include "logging.h"
+#endif
 
  // Standard library includes for saving/loading presets
 #include <filesystem>
@@ -1139,6 +1146,33 @@ static DWORD WINAPI PulseV_BootstrapThread(LPVOID param)
     return 0;
 }
 
+#if defined RFX_GAME_GTAV
+static void WaitForModuleOrTimeout(std::wstring_view mod_name, DWORD timeout_ms)
+{
+    const DWORD start = GetTickCount64();
+    for (;;)
+    {
+        if (GetModuleHandleW(mod_name.data()) != nullptr)
+            break;
+        if ((GetTickCount64() - start) >= timeout_ms)
+            break;
+        Sleep(50);
+    }
+}
+
+// Worker thread for DevRV hooks
+static DWORD WINAPI DevRV_BootstrapThread(LPVOID /*unused*/) {
+    // Give ReShade (d3d12.dll) a brief head start so its proxy d3d11 loads first.
+    WaitForModuleOrTimeout(L"d3d12.dll", 4000);
+    while (!GetModuleHandleW(L"d3d11.dll")) {
+        Sleep(50);
+    }
+    MH_Initialize();
+    hooks::install_present_hook();
+    return 0;
+}
+#endif
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
 {
     switch (fdwReason)
@@ -1147,19 +1181,28 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
         // Do not receive thread attach/detach notifications.
         DisableThreadLibraryCalls(hModule);
 
-        // Kick off the ReShade registration in a separate thread so we do not
-        // do any heavy work while the loader lock is held, and so we can
-        // gracefully handle the case where ReShade is injected after this
-        // module (e.g. when built and loaded as an ASI).
+        // Kick off the ReShade registration in a separate thread
         {
             const HANDLE hThread = CreateThread(nullptr, 0, &PulseV_BootstrapThread, hModule, 0, nullptr);
             if (hThread != nullptr)
                 CloseHandle(hThread);
         }
+
+#if defined RFX_GAME_GTAV
+        // Launch DevRV hooking thread
+        {
+            const HANDLE hThread = CreateThread(nullptr, 0, &DevRV_BootstrapThread, nullptr, 0, nullptr);
+            if (hThread) CloseHandle(hThread);
+        }
+#endif
         break;
 
     case DLL_PROCESS_DETACH:
         PulseV_ShutdownReShadeAddon(hModule);
+#if defined RFX_GAME_GTAV
+        hooks::uninstall_all();
+        MH_Uninitialize();
+#endif
         break;
     }
 
